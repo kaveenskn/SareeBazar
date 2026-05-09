@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 const FRAME_COUNT = 144;
 
 function currentFrame(index: number) {
-  return `/Dark_frames/Dark_${index.toString().padStart(3, "0")}.png`;
+  return `/LightFrames/Indian_woman_model_transforms_saree_202605091520_${index.toString().padStart(3, "0")}.png`;
 }
 
 export default function ScrollCanvas() {
@@ -14,6 +14,7 @@ export default function ScrollCanvas() {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
+    setLoaded(false);
     // Preload all frames
     const preloadedImages: HTMLImageElement[] = [];
     let loadedCount = 0;
@@ -123,10 +124,10 @@ export default function ScrollCanvas() {
   }, [loaded, images]);
 
   return (
-    <div className="fixed top-[68px] left-0 w-full h-[calc(100vh-68px)] z-0 bg-black pointer-events-none">
+    <div className="fixed top-[68px] left-0 w-full h-[calc(100vh-68px)] z-0 pointer-events-none bg-black">
       {!loaded && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-peacock-accent bg-black z-20">
-          <div className="w-12 h-12 border-4 border-peacock-accent/30 border-t-peacock-accent rounded-full animate-spin mb-4" />
+        <div className="absolute inset-0 flex flex-col items-center justify-center z-20 text-peacock-accent bg-black">
+          <div className="w-12 h-12 border-4 rounded-full animate-spin mb-4 border-peacock-accent/30 border-t-peacock-accent" />
           <div className="text-xl font-light tracking-widest animate-pulse">
             LOADING EXPERIENCE...
           </div>
@@ -134,10 +135,11 @@ export default function ScrollCanvas() {
       )}
       <canvas
         ref={canvasRef}
-        className="block w-full h-full object-cover"
+        className="block w-full h-full object-cover transition-opacity duration-300"
+        style={{ opacity: loaded ? 1 : 0 }}
       />
       {/* Dimmed overlay for better text contrast */}
-      <div className="absolute inset-0 bg-black/10 z-10" />
+      <div className="absolute inset-0 z-10 bg-black/0" />
     </div>
   );
 }

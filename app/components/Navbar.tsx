@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { Search, Heart, Moon, ShoppingBag, Menu, X } from "lucide-react";
+import { Search, Heart, ShoppingBag, Menu, X } from "lucide-react";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -27,7 +27,7 @@ export default function Navbar() {
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 backdrop-blur-md bg-black/60 border-b border-white/10 ${
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 backdrop-blur-md bg-black/60 border-white/10 border-b ${
           scrolled ? "py-3 shadow-lg" : "py-4"
         }`}
       >
@@ -44,7 +44,7 @@ export default function Navbar() {
               <Link
                 key={link.label}
                 href={link.href}
-                className="text-[11px] font-semibold tracking-[0.15em] transition-colors hover:text-[#B88E52] text-white/80"
+                className="text-[11px] font-semibold tracking-[0.15em] transition-colors text-white/80 hover:text-[#B88E52]"
               >
                 {link.label}
               </Link>
@@ -58,9 +58,6 @@ export default function Navbar() {
             </button>
             <button className="text-white/80 hover:text-[#B88E52] transition-colors hidden sm:block">
               <Heart size={18} strokeWidth={1.5} />
-            </button>
-            <button className="text-white/80 hover:text-[#B88E52] transition-colors rounded-full border border-white/20 p-1.5 hidden sm:block">
-              <Moon size={16} strokeWidth={1.5} />
             </button>
             <button
               className="flex items-center space-x-2 px-5 py-2.5 rounded-full text-white text-[13px] font-medium transition-transform hover:scale-105"
@@ -80,7 +77,7 @@ export default function Navbar() {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="lg:hidden absolute top-full left-0 right-0 bg-black/90 backdrop-blur-md border-t border-white/10 py-4 px-6 shadow-lg flex flex-col space-y-4">
+          <div className="lg:hidden absolute top-full left-0 right-0 backdrop-blur-md py-4 px-6 shadow-lg flex flex-col space-y-4 border-t bg-black/90 border-white/10">
             {navLinks.map((link) => (
               <Link
                 key={link.label}

@@ -8,7 +8,7 @@ export const metadata = {
 
 export default function Home() {
   return (
-    <main className="bg-black min-h-screen relative font-sans selection:bg-peacock-500 selection:text-white">
+    <main className="min-h-screen relative font-sans selection:bg-peacock-500 selection:text-white">
       <ScrollCanvas />
       <ContentOverlay />
     </main>
