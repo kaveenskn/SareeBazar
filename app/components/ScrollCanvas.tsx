@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 const FRAME_COUNT = 144;
 
 function currentFrame(index: number) {
-  return `/LightFrames/Indian_woman_model_transforms_saree_202605091520_${index.toString().padStart(3, "0")}.png`;
+  return `/New_frames/Imported_Media_202605092037_${index.toString().padStart(3, "0")}.png`;
 }
 
 export default function ScrollCanvas() {
@@ -124,9 +124,9 @@ export default function ScrollCanvas() {
   }, [loaded, images]);
 
   return (
-    <div className="fixed top-[68px] left-0 w-full h-[calc(100vh-68px)] z-0 pointer-events-none bg-black">
+    <div className="fixed top-[68px] left-0 w-full h-[calc(100vh-68px)] z-0 pointer-events-none bg-white">
       {!loaded && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center z-20 text-peacock-accent bg-black">
+        <div className="absolute inset-0 flex flex-col items-center justify-center z-20 text-peacock-accent bg-white">
           <div className="w-12 h-12 border-4 rounded-full animate-spin mb-4 border-peacock-accent/30 border-t-peacock-accent" />
           <div className="text-xl font-light tracking-widest animate-pulse">
             LOADING EXPERIENCE...

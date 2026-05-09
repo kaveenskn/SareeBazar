@@ -27,15 +27,15 @@ export default function Navbar() {
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 backdrop-blur-md bg-black/60 border-white/10 border-b ${
-          scrolled ? "py-3 shadow-lg" : "py-4"
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 backdrop-blur-md bg-white/80 border-black/10 border-b ${
+          scrolled ? "py-3 shadow-sm" : "py-4"
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 md:px-8 flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="text-3xl font-serif tracking-wide flex items-center">
             <span style={{ color: "#B88E52" }}>Saree</span>
-            <span className="text-white">Bazar</span>
+            <span className="text-gray-900">Bazar</span>
           </Link>
 
           {/* Desktop Nav */}
@@ -44,7 +44,7 @@ export default function Navbar() {
               <Link
                 key={link.label}
                 href={link.href}
-                className="text-[11px] font-semibold tracking-[0.15em] transition-colors text-white/80 hover:text-[#B88E52]"
+                className="text-[11px] font-semibold tracking-[0.15em] transition-colors text-gray-700 hover:text-[#B88E52]"
               >
                 {link.label}
               </Link>
@@ -53,10 +53,10 @@ export default function Navbar() {
 
           {/* Right Actions */}
           <div className="flex items-center space-x-4">
-            <button className="text-white/80 hover:text-[#B88E52] transition-colors">
+            <button className="text-gray-700 hover:text-[#B88E52] transition-colors">
               <Search size={18} strokeWidth={1.5} />
             </button>
-            <button className="text-white/80 hover:text-[#B88E52] transition-colors hidden sm:block">
+            <button className="text-gray-700 hover:text-[#B88E52] transition-colors hidden sm:block">
               <Heart size={18} strokeWidth={1.5} />
             </button>
             <button
@@ -67,7 +67,7 @@ export default function Navbar() {
               <span className="hidden sm:inline">Cart</span>
             </button>
             <button
-              className="lg:hidden text-white/80"
+              className="lg:hidden text-gray-700"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
               {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -77,12 +77,12 @@ export default function Navbar() {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="lg:hidden absolute top-full left-0 right-0 backdrop-blur-md py-4 px-6 shadow-lg flex flex-col space-y-4 border-t bg-black/90 border-white/10">
+          <div className="lg:hidden absolute top-full left-0 right-0 backdrop-blur-md py-4 px-6 shadow-lg flex flex-col space-y-4 border-t bg-white/95 border-black/10">
             {navLinks.map((link) => (
               <Link
                 key={link.label}
                 href={link.href}
-                className="text-[11px] font-semibold tracking-[0.15em] text-white/80 hover:text-[#B88E52]"
+                className="text-[11px] font-semibold tracking-[0.15em] text-gray-700 hover:text-[#B88E52]"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 {link.label}
