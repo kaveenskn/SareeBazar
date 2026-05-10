@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 const FRAME_COUNT = 144;
 
 function currentFrame(index: number) {
-  return `/New_frames/Imported_Media_202605092037_${index.toString().padStart(3, "0")}.png`;
+  return `/final_frames/final_${index.toString().padStart(3, "0")}.png`;
 }
 
 export default function ScrollCanvas() {
