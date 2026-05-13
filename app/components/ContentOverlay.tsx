@@ -6,6 +6,7 @@ import { Collections } from "./Collections";
 import { About } from "./About";
 
 import { VisitUs } from "./VisitUs";
+import Footer from "./Footer";
 
 export default function ContentOverlay() {
   return (
@@ -15,6 +16,7 @@ export default function ContentOverlay() {
       <Collections />
       <About />
       <VisitUs />
+      <Footer />
     </div>
   );
 }

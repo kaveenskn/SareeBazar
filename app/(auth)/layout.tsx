@@ -2,7 +2,7 @@ import AuthImageSlider from "../components/AuthImageSlider";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4 sm:p-8">
+    <div className="flex min-h-full items-center justify-center bg-gray-50 p-4 sm:p-8">
       <div className="w-full max-w-[1000px] flex flex-col lg:flex-row rounded-[24px] bg-white shadow-2xl overflow-hidden min-h-[650px]">
         
         {/* Left Side: Image Slider (Inset card style) */}
