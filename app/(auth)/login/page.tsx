@@ -7,7 +7,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { toast } from 'react-hot-toast';
-import { signIn } from 'next-auth/react';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -31,32 +30,23 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
     try {
-      const result = await signIn('credentials', {
-        redirect: false,
-        email: data.email,
-        password: data.password,
-      });
-
-      if (result?.error) {
-        toast.error(result.error);
-        setIsLoading(false);
-        return;
-      }
-
-      toast.success('Logged in successfully!');
+      // Simulate network request
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      
+      toast.success('Validation passed. (Pure UI Mode)');
+      // Simulate redirect
       router.push('/profile');
-      router.refresh(); // Refresh to update session state in UI
     } catch (error: any) {
       toast.error('An unexpected error occurred');
+    } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-64px)] items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-peacock-100/30">
-      <div className="w-full max-w-md space-y-8 bg-white p-8 rounded-2xl shadow-xl">
+    <div className="w-full space-y-8 bg-white p-8 sm:p-10 rounded-2xl shadow-xl border border-gray-100">
         <div className="text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-peacock-900">
+          <h2 className="text-3xl font-bold tracking-tight text-primary-900">
             Welcome back
           </h2>
           <p className="mt-2 text-sm text-gray-600">
@@ -72,7 +62,7 @@ export default function LoginPage() {
                 id="email"
                 type="email"
                 autoComplete="email"
-                className={`relative block w-full rounded-lg border-0 py-3 px-4 text-gray-900 ring-1 ring-inset ${errors.email ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-peacock-500 sm:text-sm sm:leading-6`}
+                className={`relative block w-full rounded-lg border-0 py-3 px-4 text-gray-900 ring-1 ring-inset ${errors.email ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-primary-500 sm:text-sm sm:leading-6`}
                 placeholder="Email address"
                 {...register('email')}
               />
@@ -87,7 +77,7 @@ export default function LoginPage() {
                 id="password"
                 type="password"
                 autoComplete="current-password"
-                className={`relative block w-full rounded-lg border-0 py-3 px-4 text-gray-900 ring-1 ring-inset ${errors.password ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-peacock-500 sm:text-sm sm:leading-6`}
+                className={`relative block w-full rounded-lg border-0 py-3 px-4 text-gray-900 ring-1 ring-inset ${errors.password ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-primary-500 sm:text-sm sm:leading-6`}
                 placeholder="Password"
                 {...register('password')}
               />
@@ -99,7 +89,7 @@ export default function LoginPage() {
 
           <div className="flex items-center justify-between">
             <div className="text-sm">
-              <Link href="/forgot-password" className="font-semibold text-peacock-500 hover:text-peacock-700 transition-colors">
+              <Link href="/forgot-password" className="font-semibold text-primary-500 hover:text-primary-700 transition-colors">
                 Forgot your password?
               </Link>
             </div>
@@ -109,7 +99,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="flex w-full justify-center rounded-lg bg-peacock-500 px-3 py-3 text-sm font-semibold leading-6 text-white hover:bg-peacock-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-peacock-500 disabled:opacity-70 disabled:cursor-not-allowed transition-colors"
+              className="flex w-full justify-center rounded-lg bg-primary-500 px-3 py-3 text-sm font-semibold leading-6 text-white hover:bg-primary-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 disabled:opacity-70 disabled:cursor-not-allowed transition-colors"
             >
               {isLoading ? 'Signing in...' : 'Sign in'}
             </button>
@@ -117,12 +107,11 @@ export default function LoginPage() {
           
           <div className="text-center text-sm">
             <span className="text-gray-600">Don't have an account? </span>
-            <Link href="/register" className="font-semibold text-peacock-500 hover:text-peacock-700 transition-colors">
+            <Link href="/register" className="font-semibold text-primary-500 hover:text-primary-700 transition-colors">
               Sign up
             </Link>
           </div>
         </form>
       </div>
-    </div>
   );
 }

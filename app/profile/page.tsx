@@ -1,8 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useSession, signOut } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -23,97 +21,40 @@ const profileSchema = z.object({
 type ProfileFormValues = z.infer<typeof profileSchema>;
 
 export default function ProfilePage() {
-  const { data: session, status, update } = useSession();
-  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [isFetching, setIsFetching] = useState(true);
 
   const {
     register,
     handleSubmit,
-    reset,
     formState: { errors },
   } = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
-  });
-
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login');
-    }
-  }, [status, router]);
-
-  useEffect(() => {
-    async function fetchProfile() {
-      if (status === 'authenticated') {
-        try {
-          const res = await fetch('/api/user/profile');
-          if (res.ok) {
-            const data = await res.json();
-            reset({
-              name: data.user.name || '',
-              phone: data.user.phone || '',
-              address: {
-                street: data.user.address?.street || '',
-                city: data.user.address?.city || '',
-                state: data.user.address?.state || '',
-                zipCode: data.user.address?.zipCode || '',
-                country: data.user.address?.country || '',
-              }
-            });
-          }
-        } catch (error) {
-          console.error('Error fetching profile:', error);
-        } finally {
-          setIsFetching(false);
-        }
+    defaultValues: {
+      name: '',
+      phone: '',
+      address: {
+        street: '',
+        city: '',
+        state: '',
+        zipCode: '',
+        country: '',
       }
     }
-
-    fetchProfile();
-  }, [status, reset]);
+  });
 
   const onSubmit = async (data: ProfileFormValues) => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/user/profile', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-
-      const responseData = await response.json();
-
-      if (!response.ok) {
-        throw new Error(responseData.message || 'Failed to update profile');
-      }
-
-      // Update NextAuth session if name changed
-      if (session?.user?.name !== data.name) {
-        await update({ name: data.name });
-      }
-
-      toast.success('Profile updated successfully!');
+      // Simulate network request
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      
+      toast.success('Profile updated successfully! (Pure UI Mode)');
     } catch (error: any) {
-      toast.error(error.message);
+      toast.error('An unexpected error occurred');
     } finally {
       setIsLoading(false);
     }
   };
-
-  if (status === 'loading' || isFetching) {
-    return (
-      <div className="flex min-h-[calc(100vh-64px)] items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-peacock-500"></div>
-      </div>
-    );
-  }
-
-  if (!session) {
-    return null;
-  }
 
   return (
     <div className="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
@@ -126,12 +67,7 @@ export default function ProfilePage() {
                 Manage your account details and addresses
               </p>
             </div>
-            <button
-              onClick={() => signOut({ callbackUrl: '/' })}
-              className="px-4 py-2 bg-white text-peacock-700 font-semibold rounded-lg shadow hover:bg-peacock-50 transition-colors"
-            >
-              Log out
-            </button>
+            {/* Logout button removed for UI prototype */}
           </div>
         </div>
         
@@ -167,11 +103,10 @@ export default function ProfilePage() {
                   <input
                     type="email"
                     id="email"
-                    value={session.user?.email || ''}
-                    disabled
-                    className="block w-full rounded-md border-0 py-2 px-3 text-gray-500 bg-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm sm:leading-6 cursor-not-allowed"
+                    defaultValue=""
+                    className="block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-peacock-500 sm:text-sm sm:leading-6"
                   />
-                  <p className="mt-1 text-xs text-gray-500">Email cannot be changed</p>
+                  <p className="mt-1 text-xs text-gray-500">Email cannot be changed in prototype</p>
                 </div>
               </div>
 

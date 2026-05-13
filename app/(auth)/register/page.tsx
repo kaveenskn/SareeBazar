@@ -35,38 +35,22 @@ export default function RegisterPage() {
   const onSubmit = async (data: RegisterFormValues) => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: data.name,
-          email: data.email,
-          password: data.password,
-        }),
-      });
-
-      const responseData = await response.json();
-
-      if (!response.ok) {
-        throw new Error(responseData.message || 'Registration failed');
-      }
-
-      toast.success('Registration successful! Please login.');
+      // Simulate network request
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      
+      toast.success('Registration validation passed. (Pure UI Mode)');
       router.push('/login');
     } catch (error: any) {
-      toast.error(error.message);
+      toast.error('An unexpected error occurred');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-64px)] items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-peacock-100/30">
-      <div className="w-full max-w-md space-y-8 bg-white p-8 rounded-2xl shadow-xl">
+    <div className="w-full space-y-8 bg-white p-8 sm:p-10 rounded-2xl shadow-xl border border-gray-100">
         <div className="text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-peacock-900">
+          <h2 className="text-3xl font-bold tracking-tight text-primary-900">
             Create an account
           </h2>
           <p className="mt-2 text-sm text-gray-600">
@@ -82,7 +66,7 @@ export default function RegisterPage() {
                 id="name"
                 type="text"
                 autoComplete="name"
-                className={`relative block w-full rounded-lg border-0 py-3 px-4 text-gray-900 ring-1 ring-inset ${errors.name ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-peacock-500 sm:text-sm sm:leading-6`}
+                className={`relative block w-full rounded-lg border-0 py-3 px-4 text-gray-900 ring-1 ring-inset ${errors.name ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-primary-500 sm:text-sm sm:leading-6`}
                 placeholder="Full Name"
                 {...register('name')}
               />
@@ -97,7 +81,7 @@ export default function RegisterPage() {
                 id="email"
                 type="email"
                 autoComplete="email"
-                className={`relative block w-full rounded-lg border-0 py-3 px-4 text-gray-900 ring-1 ring-inset ${errors.email ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-peacock-500 sm:text-sm sm:leading-6`}
+                className={`relative block w-full rounded-lg border-0 py-3 px-4 text-gray-900 ring-1 ring-inset ${errors.email ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-primary-500 sm:text-sm sm:leading-6`}
                 placeholder="Email address"
                 {...register('email')}
               />
@@ -112,7 +96,7 @@ export default function RegisterPage() {
                 id="password"
                 type="password"
                 autoComplete="new-password"
-                className={`relative block w-full rounded-lg border-0 py-3 px-4 text-gray-900 ring-1 ring-inset ${errors.password ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-peacock-500 sm:text-sm sm:leading-6`}
+                className={`relative block w-full rounded-lg border-0 py-3 px-4 text-gray-900 ring-1 ring-inset ${errors.password ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-primary-500 sm:text-sm sm:leading-6`}
                 placeholder="Password"
                 {...register('password')}
               />
@@ -127,7 +111,7 @@ export default function RegisterPage() {
                 id="confirmPassword"
                 type="password"
                 autoComplete="new-password"
-                className={`relative block w-full rounded-lg border-0 py-3 px-4 text-gray-900 ring-1 ring-inset ${errors.confirmPassword ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-peacock-500 sm:text-sm sm:leading-6`}
+                className={`relative block w-full rounded-lg border-0 py-3 px-4 text-gray-900 ring-1 ring-inset ${errors.confirmPassword ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-primary-500 sm:text-sm sm:leading-6`}
                 placeholder="Confirm Password"
                 {...register('confirmPassword')}
               />
@@ -141,7 +125,7 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="flex w-full justify-center rounded-lg bg-peacock-500 px-3 py-3 text-sm font-semibold leading-6 text-white hover:bg-peacock-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-peacock-500 disabled:opacity-70 disabled:cursor-not-allowed transition-colors"
+              className="flex w-full justify-center rounded-lg bg-primary-500 px-3 py-3 text-sm font-semibold leading-6 text-white hover:bg-primary-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 disabled:opacity-70 disabled:cursor-not-allowed transition-colors"
             >
               {isLoading ? 'Registering...' : 'Register'}
             </button>
@@ -149,12 +133,11 @@ export default function RegisterPage() {
           
           <div className="text-center text-sm">
             <span className="text-gray-600">Already have an account? </span>
-            <Link href="/login" className="font-semibold text-peacock-500 hover:text-peacock-700 transition-colors">
+            <Link href="/login" className="font-semibold text-primary-500 hover:text-primary-700 transition-colors">
               Log in
             </Link>
           </div>
         </form>
       </div>
-    </div>
   );
 }
