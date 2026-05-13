@@ -177,36 +177,10 @@ export default function CollectionsPage() {
 
   return (
     <main className="min-h-screen bg-[#FBF9F7] pt-[70px]">
-      {/* ─── Breadcrumb ─── */}
-      <div className="max-w-7xl mx-auto px-6 md:px-8 py-4">
-        <nav className="flex items-center gap-2 text-xs text-gray-500">
-          <Link
-            href="/"
-            className="hover:text-[#B88E52] transition-colors"
-          >
-            Home
-          </Link>
-          <span className="text-gray-300">›</span>
-          <Link
-            href="/collections"
-            className="text-[#B88E52] font-medium"
-          >
-            Collections
-          </Link>
-          <span className="text-gray-300">›</span>
-          <span className="text-gray-700 font-medium">Sarees</span>
-        </nav>
-      </div>
-
-      {/* ─── Page Title ─── */}
-      <div className="max-w-7xl mx-auto px-6 md:px-8 mb-6">
-        <h1 className="text-4xl md:text-5xl font-serif font-bold text-[#8B1A1A]">
-          Saree Collections
-        </h1>
-      </div>
+      
 
       {/* ─── Hero Banner ─── */}
-      <div className="max-w-7xl mx-auto px-6 md:px-8 mb-10">
+      <div className="max-w-7xl mx-auto px-6 md:px-8 mb-10 mt-6">
         <div className="relative rounded-2xl overflow-hidden h-[260px] md:h-[340px]">
           <Image
             src="/images/collections/hero-banner.png"
