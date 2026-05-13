@@ -2,7 +2,7 @@ import { Section } from "./Section";
 
 export function Hero() {
   return (
-    <Section align="left" heightClass="h-[200vh]" isFirst={true} topClass="top-[35%]">
+    <Section align="left" heightClass="h-[300vh]" isFirst={true} topClass="top-[35%]">
       <div className="max-w-xl">
         <h1 className="text-6xl md:text-8xl font-bold tracking-tighter mb-6 bg-gradient-to-r from-[#A1005B] to-[#A1005B] bg-clip-text text-transparent drop-shadow-md">
           Saree Bazar

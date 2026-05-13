@@ -86,20 +86,18 @@ export default function ScrollCanvas() {
     }
 
     const handleScroll = () => {
-      const scrollTop = document.documentElement.scrollTop;
-      const maxScrollTop = document.documentElement.scrollHeight - window.innerHeight;
+      const scrollTop = window.scrollY;
+      const scrollRange = window.innerHeight * 1.5; // Animation completes at 150vh
 
-      if (maxScrollTop <= 0) return;
-
-      const scrollFraction = Math.max(0, Math.min(1, scrollTop / maxScrollTop));
+      const scrollFraction = Math.max(0, Math.min(1, scrollTop / scrollRange));
       const frameIndex = Math.min(
         FRAME_COUNT - 1,
-        Math.floor(scrollFraction * FRAME_COUNT)
+        Math.floor(scrollFraction * (FRAME_COUNT - 1))
       );
       targetFrameIndex = frameIndex;
     };
 
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll(); // initial state
 
     const update = () => {
@@ -124,22 +122,24 @@ export default function ScrollCanvas() {
   }, [loaded, images]);
 
   return (
-    <div className="fixed top-[68px] left-0 w-full h-[calc(100vh-68px)] z-0 pointer-events-none bg-white">
-      {!loaded && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center z-20 text-peacock-accent bg-white">
-          <div className="w-12 h-12 border-4 rounded-full animate-spin mb-4 border-peacock-accent/30 border-t-peacock-accent" />
-          <div className="text-xl font-light tracking-widest animate-pulse">
-            LOADING EXPERIENCE...
+    <div className="absolute top-[68px] left-0 w-full h-[300vh] z-0 pointer-events-none bg-white">
+      <div className="sticky top-[68px] w-full h-[calc(100vh-68px)]">
+        {!loaded && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center z-20 text-peacock-accent bg-white">
+            <div className="w-12 h-12 border-4 rounded-full animate-spin mb-4 border-peacock-accent/30 border-t-peacock-accent" />
+            <div className="text-xl font-light tracking-widest animate-pulse">
+              LOADING EXPERIENCE...
+            </div>
           </div>
-        </div>
-      )}
-      <canvas
-        ref={canvasRef}
-        className="block w-full h-full object-cover transition-opacity duration-300"
-        style={{ opacity: loaded ? 1 : 0 }}
-      />
-      {/* Dimmed overlay for better text contrast */}
-      <div className="absolute inset-0 z-10 bg-black/0" />
+        )}
+        <canvas
+          ref={canvasRef}
+          className="block w-full h-full object-cover transition-opacity duration-300"
+          style={{ opacity: loaded ? 1 : 0 }}
+        />
+        {/* Dimmed overlay for better text contrast */}
+        <div className="absolute inset-0 z-10 bg-black/5" />
+      </div>
     </div>
   );
 }
