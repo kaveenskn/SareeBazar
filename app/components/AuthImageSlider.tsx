@@ -2,11 +2,14 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 
 const IMAGES = [
-  "/images/signup_login_image/25d1a34f38017a11f8ccc5961641933a.jpg",
-  "/images/signup_login_image/black-red-color-jacquard-women-saree-3007.png",
-  "/images/signup_login_image/images.jpg",
+  "/images/signup_login_image/Img1.png",
+  "/images/signup_login_image/Img2.jpg",
+  "/images/signup_login_image/Img3.png",
+  "/images/signup_login_image/Img4.png",
 ];
 
 export default function AuthImageSlider() {
@@ -15,13 +18,13 @@ export default function AuthImageSlider() {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % IMAGES.length);
-    }, 5000); // Change image every 5 seconds
+    }, 3000); // Changed to 3 seconds as requested
 
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <div className="relative w-full h-full overflow-hidden bg-primary-900">
+    <div className="relative w-full h-full overflow-hidden">
       {/* Background Images */}
       {IMAGES.map((src, index) => (
         <div
@@ -37,30 +40,41 @@ export default function AuthImageSlider() {
             className="object-cover"
             priority={index === 0}
           />
-          {/* Overlay to darken image slightly for better text readability */}
-          <div className="absolute inset-0 bg-black/40"></div>
+          {/* Subtle dark gradient overlay for text readability */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/40"></div>
         </div>
       ))}
 
-      {/* Decorative Branding / Text */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8 z-10">
-        <h2 className="text-4xl md:text-5xl font-serif text-white mb-4 tracking-wider drop-shadow-md">
+      {/* Top Controls */}
+      <div className="absolute top-6 left-6 right-6 flex justify-between items-start z-10">
+        <div className="text-white font-serif text-2xl font-bold tracking-wide drop-shadow-md">
           <span className="text-[#B88E52]">Saree</span>Bazar
+        </div>
+        <Link 
+          href="/" 
+          className="flex items-center space-x-2 bg-white/20 hover:bg-white/30 backdrop-blur-md px-4 py-2 rounded-full text-white text-xs font-medium transition-colors"
+        >
+          <span>Back to website</span>
+          <ArrowRight size={14} />
+        </Link>
+      </div>
+
+      {/* Bottom Content aligned to reference image */}
+      <div className="absolute bottom-12 left-0 right-0 flex flex-col items-center justify-center z-10 px-8 text-center">
+        <h2 className="text-3xl md:text-4xl font-medium text-white mb-8 leading-tight drop-shadow-lg">
+          Capturing Moments,<br/>Creating Memories
         </h2>
-        <p className="text-white/90 text-lg md:text-xl font-light max-w-md mx-auto drop-shadow">
-          Discover the finest collection of premium sarees for every occasion.
-        </p>
         
         {/* Slider Indicators */}
-        <div className="absolute bottom-10 flex space-x-3">
+        <div className="flex space-x-2">
           {IMAGES.map((_, index) => (
             <button
               key={index}
               onClick={() => setCurrentIndex(index)}
-              className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
+              className={`h-1 rounded-full transition-all duration-300 ${
                 index === currentIndex 
-                  ? "bg-[#B88E52] w-8" 
-                  : "bg-white/50 hover:bg-white/80"
+                  ? "bg-white w-8" 
+                  : "bg-white/40 hover:bg-white/60 w-6"
               }`}
               aria-label={`Go to slide ${index + 1}`}
             />

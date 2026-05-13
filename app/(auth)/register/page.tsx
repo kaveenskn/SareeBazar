@@ -48,94 +48,138 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="w-full space-y-8 bg-white p-8 sm:p-10 rounded-2xl shadow-xl border border-gray-100">
-        <div className="text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-primary-900">
+    <div className="w-full max-w-[440px] mx-auto space-y-8">
+        <div>
+          <h2 className="text-[32px] font-semibold text-gray-900 tracking-tight mb-2">
             Create an account
           </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Join Saree Bazar to discover premium collections
+          <p className="text-[15px] text-gray-500">
+            Already have an account? <Link href="/login" className="font-medium text-primary-600 hover:text-primary-700 underline underline-offset-4 decoration-primary-600/30">Log in</Link>
           </p>
         </div>
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
-          <div className="space-y-4 rounded-md shadow-sm">
-            <div>
-              <label htmlFor="name" className="sr-only">Full Name</label>
+        <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex-1">
+              <label htmlFor="firstName" className="sr-only">First Name</label>
               <input
-                id="name"
+                id="firstName"
                 type="text"
-                autoComplete="name"
-                className={`relative block w-full rounded-lg border-0 py-3 px-4 text-gray-900 ring-1 ring-inset ${errors.name ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-primary-500 sm:text-sm sm:leading-6`}
-                placeholder="Full Name"
+                autoComplete="given-name"
+                className={`block w-full rounded-xl border-0 bg-gray-100/80 px-4 py-4 text-[15px] text-gray-900 placeholder:text-gray-500 focus:bg-white focus:ring-2 focus:ring-inset focus:ring-primary-500 transition-all ${errors.name ? 'ring-2 ring-inset ring-red-500' : ''}`}
+                placeholder="First name"
                 {...register('name')}
               />
-              {errors.name && (
-                <p className="mt-1 text-sm text-red-500">{errors.name.message}</p>
-              )}
             </div>
-            
-            <div>
-              <label htmlFor="email" className="sr-only">Email address</label>
+            <div className="flex-1">
+              <label htmlFor="lastName" className="sr-only">Last Name</label>
               <input
-                id="email"
-                type="email"
-                autoComplete="email"
-                className={`relative block w-full rounded-lg border-0 py-3 px-4 text-gray-900 ring-1 ring-inset ${errors.email ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-primary-500 sm:text-sm sm:leading-6`}
-                placeholder="Email address"
-                {...register('email')}
+                id="lastName"
+                type="text"
+                autoComplete="family-name"
+                className={`block w-full rounded-xl border-0 bg-gray-100/80 px-4 py-4 text-[15px] text-gray-900 placeholder:text-gray-500 focus:bg-white focus:ring-2 focus:ring-inset focus:ring-primary-500 transition-all`}
+                placeholder="Last name"
               />
-              {errors.email && (
-                <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>
-              )}
             </div>
+          </div>
+          {errors.name && (
+            <p className="mt-1.5 text-xs text-red-500">{errors.name.message}</p>
+          )}
+          
+          <div>
+            <label htmlFor="email" className="sr-only">Email</label>
+            <input
+              id="email"
+              type="email"
+              autoComplete="email"
+              className={`block w-full rounded-xl border-0 bg-gray-100/80 px-4 py-4 text-[15px] text-gray-900 placeholder:text-gray-500 focus:bg-white focus:ring-2 focus:ring-inset focus:ring-primary-500 transition-all ${errors.email ? 'ring-2 ring-inset ring-red-500' : ''}`}
+              placeholder="Email"
+              {...register('email')}
+            />
+            {errors.email && (
+              <p className="mt-1.5 text-xs text-red-500">{errors.email.message}</p>
+            )}
+          </div>
 
-            <div>
-              <label htmlFor="password" className="sr-only">Password</label>
+          <div>
+            <label htmlFor="password" className="sr-only">Password</label>
+            <div className="relative">
               <input
                 id="password"
                 type="password"
                 autoComplete="new-password"
-                className={`relative block w-full rounded-lg border-0 py-3 px-4 text-gray-900 ring-1 ring-inset ${errors.password ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-primary-500 sm:text-sm sm:leading-6`}
-                placeholder="Password"
+                className={`block w-full rounded-xl border-0 bg-gray-100/80 px-4 py-4 text-[15px] text-gray-900 placeholder:text-gray-500 focus:bg-white focus:ring-2 focus:ring-inset focus:ring-primary-500 transition-all ${errors.password ? 'ring-2 ring-inset ring-red-500' : ''}`}
+                placeholder="Enter your password"
                 {...register('password')}
               />
-              {errors.password && (
-                <p className="mt-1 text-sm text-red-500">{errors.password.message}</p>
-              )}
+              <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
+                <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+              </div>
             </div>
-
-            <div>
-              <label htmlFor="confirmPassword" className="sr-only">Confirm Password</label>
-              <input
-                id="confirmPassword"
-                type="password"
-                autoComplete="new-password"
-                className={`relative block w-full rounded-lg border-0 py-3 px-4 text-gray-900 ring-1 ring-inset ${errors.confirmPassword ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-primary-500 sm:text-sm sm:leading-6`}
-                placeholder="Confirm Password"
-                {...register('confirmPassword')}
-              />
-              {errors.confirmPassword && (
-                <p className="mt-1 text-sm text-red-500">{errors.confirmPassword.message}</p>
-              )}
-            </div>
+            {errors.password && (
+              <p className="mt-1.5 text-xs text-red-500">{errors.password.message}</p>
+            )}
           </div>
 
-          <div>
+          <div className="flex items-center pt-1">
+            <input
+              id="terms"
+              name="terms"
+              type="checkbox"
+              required
+              className="h-4 w-4 rounded border-gray-300 text-primary-500 focus:ring-primary-500"
+            />
+            <label htmlFor="terms" className="ml-2.5 block text-[13px] text-gray-600">
+              I agree to the <a href="#" className="underline decoration-gray-300 underline-offset-2 hover:text-primary-600 transition-colors">Terms & Conditions</a>
+            </label>
+          </div>
+
+          <div className="pt-2">
             <button
               type="submit"
               disabled={isLoading}
-              className="flex w-full justify-center rounded-lg bg-primary-500 px-3 py-3 text-sm font-semibold leading-6 text-white hover:bg-primary-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 disabled:opacity-70 disabled:cursor-not-allowed transition-colors"
+              className="flex w-full justify-center rounded-xl bg-primary-500 px-4 py-4 text-[15px] font-semibold text-white hover:bg-primary-600 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              {isLoading ? 'Registering...' : 'Register'}
+              {isLoading ? 'Creating account...' : 'Create account'}
             </button>
           </div>
           
-          <div className="text-center text-sm">
-            <span className="text-gray-600">Already have an account? </span>
-            <Link href="/login" className="font-semibold text-primary-500 hover:text-primary-700 transition-colors">
-              Log in
-            </Link>
+          <div className="pt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-200" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="bg-white px-4 text-gray-500 text-[13px]">Or register with</span>
+              </div>
+            </div>
+
+            <div className="mt-6 grid grid-cols-2 gap-2.5">
+              <button
+                type="button"
+                className="flex items-center justify-center gap-2 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-700 hover:bg-gray-50 transition-all"
+              >
+                <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615Z" fill="#4285F4"/>
+                  <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18Z" fill="#34A853"/>
+                  <path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332Z" fill="#FBBC05"/>
+                  <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58Z" fill="#EA4335"/>
+                </svg>
+                Google
+              </button>
+              <button
+                type="button"
+                className="flex items-center justify-center gap-2 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-700 hover:bg-gray-50 transition-all"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" className="text-gray-900">
+                  <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+                </svg>
+                Apple
+              </button>
+            </div>
           </div>
         </form>
       </div>
