@@ -10,6 +10,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --color-primary: #a1005b;
   --color-peacock-100: #f8f3eb;
   --color-peacock-300: #dfc7a5;
   --color-peacock-500: #B88E52;

@@ -12,149 +12,13 @@ import {
   X,
 } from "lucide-react";
 
-/* ─── Data ─── */
-interface Product {
-  id: number;
-  name: string;
-  image: string;
-  price: number;
-  originalPrice?: number;
-  rating: number;
-  reviews: number;
-  category: string;
-  badge?: string;
-  isWishlisted?: boolean;
-}
-
-const products: Product[] = [
-  {
-    id: 1,
-    name: "Kanjivaram Silk Saree",
-    image: "/images/collections/kanjivaram-silk.png",
-    price: 245,
-    originalPrice: 390,
-    rating: 5,
-    reviews: 42,
-    category: "Silk Sarees",
-    badge: "New",
-  },
-  {
-    id: 2,
-    name: "Bridal Red Banarasi",
-    image: "/images/collections/bridal-banarasi.png",
-    price: 520,
-    rating: 4.5,
-    reviews: 128,
-    category: "Bridal",
-  },
-  {
-    id: 3,
-    name: "Pastel Chanderi Cotton",
-    image: "/images/collections/chanderi-cotton.png",
-    price: 110,
-    originalPrice: 180,
-    rating: 4,
-    reviews: 88,
-    category: "Cotton Sarees",
-    badge: "-15%",
-  },
-  {
-    id: 4,
-    name: "Emerald Georgette",
-    image: "/images/collections/emerald-georgette.png",
-    price: 185,
-    rating: 4.5,
-    reviews: 89,
-    category: "Handloom",
-  },
-  {
-    id: 5,
-    name: "Tussar Silk Heritage",
-    image: "/images/collections/tussar-silk.png",
-    price: 320,
-    originalPrice: 450,
-    rating: 5,
-    reviews: 64,
-    category: "Silk Sarees",
-    badge: "Best Seller",
-  },
-  {
-    id: 6,
-    name: "Royal Banarasi Brocade",
-    image: "/images/collections/bridal-banarasi.png",
-    price: 680,
-    rating: 5,
-    reviews: 156,
-    category: "Bridal",
-  },
-  {
-    id: 7,
-    name: "Soft Cotton Handloom",
-    image: "/images/collections/chanderi-cotton.png",
-    price: 95,
-    originalPrice: 140,
-    rating: 4,
-    reviews: 73,
-    category: "Cotton Sarees",
-  },
-  {
-    id: 8,
-    name: "Pure Silk Kanjivaram",
-    image: "/images/collections/kanjivaram-silk.png",
-    price: 410,
-    rating: 4.5,
-    reviews: 102,
-    category: "Silk Sarees",
-  },
-  {
-    id: 9,
-    name: "Designer Georgette Party",
-    image: "/images/collections/emerald-georgette.png",
-    price: 210,
-    originalPrice: 290,
-    rating: 4,
-    reviews: 55,
-    category: "Daily Wear",
-    badge: "-28%",
-  },
-  {
-    id: 10,
-    name: "Golden Tussar Weave",
-    image: "/images/collections/tussar-silk.png",
-    price: 275,
-    rating: 4.5,
-    reviews: 47,
-    category: "Handloom",
-  },
-  {
-    id: 11,
-    name: "Festive Red Banarasi",
-    image: "/images/collections/bridal-banarasi.png",
-    price: 550,
-    originalPrice: 720,
-    rating: 5,
-    reviews: 91,
-    category: "Bridal",
-    badge: "Trending",
-  },
-  {
-    id: 12,
-    name: "Daily Comfort Cotton",
-    image: "/images/collections/chanderi-cotton.png",
-    price: 75,
-    rating: 4,
-    reviews: 134,
-    category: "Daily Wear",
-  },
-];
-
-const filterCategories = [
-  { icon: "✦", label: "Silk Sarees" },
-  { icon: "❋", label: "Cotton Sarees" },
-  { icon: "◈", label: "Handloom" },
-  { icon: "✿", label: "Bridal" },
-  { icon: "☀", label: "Daily Wear" },
-];
+/* ─── Mock Data (swap with API calls for backend) ─── */
+import {
+  products,
+  filterCategories,
+  heroBanners,
+} from "@/mockdata/collections";
+import type { Product } from "@/mockdata/collections";
 
 const ITEMS_PER_PAGE = 8;
 
@@ -313,36 +177,10 @@ export default function CollectionsPage() {
 
   return (
     <main className="min-h-screen bg-[#FBF9F7] pt-[70px]">
-      {/* ─── Breadcrumb ─── */}
-      <div className="max-w-7xl mx-auto px-6 md:px-8 py-4">
-        <nav className="flex items-center gap-2 text-xs text-gray-500">
-          <Link
-            href="/"
-            className="hover:text-[#B88E52] transition-colors"
-          >
-            Home
-          </Link>
-          <span className="text-gray-300">›</span>
-          <Link
-            href="/collections"
-            className="text-[#B88E52] font-medium"
-          >
-            Collections
-          </Link>
-          <span className="text-gray-300">›</span>
-          <span className="text-gray-700 font-medium">Sarees</span>
-        </nav>
-      </div>
-
-      {/* ─── Page Title ─── */}
-      <div className="max-w-7xl mx-auto px-6 md:px-8 mb-6">
-        <h1 className="text-4xl md:text-5xl font-serif font-bold text-[#8B1A1A]">
-          Saree Collections
-        </h1>
-      </div>
+      
 
       {/* ─── Hero Banner ─── */}
-      <div className="max-w-7xl mx-auto px-6 md:px-8 mb-10">
+      <div className="max-w-7xl mx-auto px-6 md:px-8 mb-10 mt-6">
         <div className="relative rounded-2xl overflow-hidden h-[260px] md:h-[340px]">
           <Image
             src="/images/collections/hero-banner.png"
