@@ -33,13 +33,15 @@ export function Section({
   if (align === "right") alignmentClass = "items-end text-right";
 
   return (
-    <section ref={ref} className={`${heightClass} flex flex-col justify-start px-8 relative ${isFirst ? "bg-transparent" : "bg-white"} ${className}`}>
-      <motion.div 
-        style={{ opacity, y }}
-        className={`sticky ${topClass} flex flex-col w-full max-w-6xl mx-auto ${alignmentClass}`}
-      >
-        {children}
-      </motion.div>
+    <section ref={ref} className={`${heightClass} relative ${isFirst ? "bg-transparent" : "bg-white"} ${className}`}>
+      <div className="sticky top-[68px] w-full h-[calc(100vh-68px)] pointer-events-none px-8">
+        <motion.div 
+          style={{ opacity, y }}
+          className={`relative ${topClass} flex flex-col w-full max-w-6xl mx-auto ${alignmentClass} pointer-events-auto`}
+        >
+          {children}
+        </motion.div>
+      </div>
     </section>
   );
 }

@@ -2,10 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 
-const FRAME_COUNT = 144;
+const FRAME_COUNT = 150;
 
 function currentFrame(index: number) {
-  return `/final_frames/final_${index.toString().padStart(3, "0")}.png`;
+  return `/Heroscrollframes/Imported_Media_202605141416_${index.toString().padStart(3, "0")}.png`;
 }
 
 export default function ScrollCanvas() {
@@ -61,17 +61,19 @@ export default function ScrollCanvas() {
       const imgAspectRatio = img.width / img.height;
       let renderableHeight, renderableWidth, xStart, yStart;
 
-      // Maintain aspect ratio while covering the whole canvas (object-fit: cover)
+      // Use object-fit: cover logic, aligning to the top
       if (imgAspectRatio < canvasAspectRatio) {
+        // Canvas is wider than image. Scale width to fit, crop bottom.
         renderableWidth = canvas.width;
         renderableHeight = img.height * (renderableWidth / img.width);
         xStart = 0;
-        // Shift image up slightly (negative yStart) to adjust the head position
-        yStart = -50;
+        yStart = 0; // Keep the top part properly visible
       } else {
+        // Canvas is taller than image. Scale height to fit, crop sides.
         renderableHeight = canvas.height;
         renderableWidth = img.width * (renderableHeight / img.height);
         yStart = 0;
+        // Center horizontally
         xStart = (canvas.width - renderableWidth) / 2;
       }
 
@@ -87,7 +89,7 @@ export default function ScrollCanvas() {
 
     const handleScroll = () => {
       const scrollTop = window.scrollY;
-      const scrollRange = window.innerHeight * 1.5; // Animation completes at 150vh
+      const scrollRange = window.innerHeight * 2; // Animation finishes exactly as the canvas slides up
 
       const scrollFraction = Math.max(0, Math.min(1, scrollTop / scrollRange));
       const frameIndex = Math.min(
