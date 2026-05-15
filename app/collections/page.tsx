@@ -10,6 +10,12 @@ import {
   ChevronRight,
   SlidersHorizontal,
   X,
+  ShoppingCart,
+  Diamond,
+  Flower2,
+  Gem,
+  Sparkles,
+  Sun,
 } from "lucide-react";
 
 /* ─── Mock Data (swap with API calls for backend) ─── */
@@ -21,6 +27,24 @@ import {
 import type { Product } from "@/mockdata/collections";
 
 const ITEMS_PER_PAGE = 8;
+
+/* ─── Icon Mapper ─── */
+const getCategoryIcon = (label: string) => {
+  switch (label) {
+    case "Silk Sarees":
+      return <Diamond size={18} />;
+    case "Cotton Sarees":
+      return <Flower2 size={18} />;
+    case "Handloom":
+      return <Gem size={18} />;
+    case "Bridal":
+      return <Sparkles size={18} />;
+    case "Daily Wear":
+      return <Sun size={18} />;
+    default:
+      return <Gem size={18} />;
+  }
+};
 
 /* ─── Star Rating Component ─── */
 function StarRating({ rating, reviews }: { rating: number; reviews: number }) {
@@ -35,8 +59,8 @@ function StarRating({ rating, reviews }: { rating: number; reviews: number }) {
               star <= Math.floor(rating)
                 ? "fill-amber-400 text-amber-400"
                 : star - 0.5 <= rating
-                ? "fill-amber-400/50 text-amber-400"
-                : "text-gray-300"
+                  ? "fill-amber-400/50 text-amber-400"
+                  : "text-gray-300"
             }
           />
         ))}
@@ -84,10 +108,10 @@ function ProductCard({ product }: { product: Product }) {
               product.badge === "New"
                 ? "bg-emerald-500 text-white"
                 : product.badge === "Best Seller"
-                ? "bg-amber-500 text-white"
-                : product.badge === "Trending"
-                ? "bg-purple-500 text-white"
-                : "bg-red-500 text-white"
+                  ? "bg-amber-500 text-white"
+                  : product.badge === "Trending"
+                    ? "bg-purple-500 text-white"
+                    : "bg-red-500 text-white"
             }`}
           >
             {product.badge}
@@ -98,7 +122,7 @@ function ProductCard({ product }: { product: Product }) {
       {/* Info */}
       <div className="p-4">
         <StarRating rating={product.rating} reviews={product.reviews} />
-        <h3 className="mt-1.5 text-sm font-semibold text-gray-900 truncate">
+        <h3 className="mt-1.5 text-sm font-bold text-gray-900 truncate">
           {product.name}
         </h3>
         <div className="flex items-center gap-2 mt-1.5">
@@ -111,9 +135,20 @@ function ProductCard({ product }: { product: Product }) {
             </span>
           )}
         </div>
-        <button className="mt-3 w-full py-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all duration-300 bg-[#8B1A1A] text-white hover:bg-[#6B1010] active:scale-[0.98]">
-          Add to Cart
-        </button>
+        <div className="mt-3 flex items-center justify-between gap-2">
+          <button className="flex-1 py-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all duration-300 bg-[#8B1A1A] text-white hover:bg-[#6B1010] active:scale-[0.98]">
+            Shop Now
+          </button>
+          <button
+            className="p-2 aspect-square rounded-lg bg-red-50 hover:bg-red-100 text-[#8B1A1A] transition-colors shadow-sm"
+            onClick={(e) => {
+              e.preventDefault();
+              // Add to cart functionality
+            }}
+          >
+            <ShoppingCart size={18} />
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -130,7 +165,7 @@ export default function CollectionsPage() {
     setSelectedFilters((prev) =>
       prev.includes(category)
         ? prev.filter((f) => f !== category)
-        : [...prev, category]
+        : [...prev, category],
     );
     setCurrentPage(1);
   };
@@ -172,13 +207,11 @@ export default function CollectionsPage() {
   const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
   const paginatedProducts = filteredProducts.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
+    currentPage * ITEMS_PER_PAGE,
   );
 
   return (
     <main className="min-h-screen bg-[#FBF9F7] pt-[70px]">
-      
-
       {/* ─── Hero Banner ─── */}
       <div className="max-w-7xl mx-auto px-6 md:px-8 mb-10 mt-6">
         <div className="relative rounded-2xl overflow-hidden h-[260px] md:h-[340px]">
@@ -243,7 +276,9 @@ export default function CollectionsPage() {
                           : "text-gray-700 hover:bg-gray-50"
                       }`}
                     >
-                      <span className="text-base">{cat.icon}</span>
+                      <span className="text-base flex items-center justify-center w-5 h-5">
+                        {getCategoryIcon(cat.label)}
+                      </span>
                       {cat.label}
                     </button>
                   ))}
@@ -251,7 +286,9 @@ export default function CollectionsPage() {
 
                 <div className="mt-6 space-y-2">
                   <button
-                    onClick={() => setSelectedFilters(filterCategories.map(c => c.label))}
+                    onClick={() =>
+                      setSelectedFilters(filterCategories.map((c) => c.label))
+                    }
                     className="w-full py-2.5 rounded-xl text-xs font-bold tracking-wide bg-[#8B1A1A] text-white hover:bg-[#6B1010] transition-colors"
                   >
                     Apply Filters
@@ -296,7 +333,9 @@ export default function CollectionsPage() {
                           : "text-gray-700 hover:bg-gray-50"
                       }`}
                     >
-                      <span className="text-base">{cat.icon}</span>
+                      <span className="text-base flex items-center justify-center w-5 h-5">
+                        {getCategoryIcon(cat.label)}
+                      </span>
                       {cat.label}
                     </button>
                   ))}
@@ -377,9 +416,7 @@ export default function CollectionsPage() {
             {totalPages > 1 && (
               <div className="flex items-center justify-center gap-2 mt-10">
                 <button
-                  onClick={() =>
-                    setCurrentPage((p) => Math.max(1, p - 1))
-                  }
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
                   className="w-9 h-9 rounded-lg border border-gray-200 flex items-center justify-center text-gray-500 hover:border-[#B88E52] hover:text-[#B88E52] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                 >
@@ -399,7 +436,7 @@ export default function CollectionsPage() {
                     >
                       {page}
                     </button>
-                  )
+                  ),
                 )}
 
                 <button
