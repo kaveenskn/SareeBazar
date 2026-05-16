@@ -77,51 +77,51 @@ export function Offers() {
   };
 
   return (
-    <Section align="left" heightClass="h-[220vh]" topClass="top-1/4">
+    <Section align="center" heightClass="h-[140vh]" topClass="top-[calc(40%-200px)]">
       {/* Two-column layout */}
       <div className="w-full flex flex-col md:flex-row items-center gap-12 md:gap-16">
 
-        {/* LEFT — Text Content */}
-        <div className="flex-1 min-w-0">
-          {/* Tag pill */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#B88E52]/15 border border-[#B88E52]/30 mb-5">
-            <span className="w-2 h-2 rounded-full bg-[#B88E52] animate-pulse" />
-            <span className="text-sm font-semibold text-[#B88E52] tracking-widest uppercase">
-              Limited Time
-            </span>
-          </div>
+{/* LEFT — Text Content */}
+<div className="flex-1 min-w-0 flex flex-col items-center text-center">
+  {/* Tag pill */}
+  <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#B88E52]/15 border border-[#B88E52]/30 mb-5">
+    <span className="w-2 h-2 rounded-full bg-[#B88E52] animate-pulse" />
+    <span className="text-sm font-semibold text-[#B88E52] tracking-widest uppercase">
+      Limited Time
+    </span>
+  </div>
 
-          <h2 className="text-5xl md:text-6xl font-bold mb-6 text-gray-900 leading-tight drop-shadow-[0_2px_15px_rgba(255,255,255,0.9)]">
-            Exclusive{" "}
-            <span className="text-[#B88E52] relative">
-              Offers
-              <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-gradient-to-r from-[#B88E52] to-transparent rounded-full" />
-            </span>
-          </h2>
+  <h2 className="text-5xl md:text-6xl font-bold mb-6 text-gray-900 leading-tight drop-shadow-[0_2px_15px_rgba(255,255,255,0.9)]">
+    Exclusive{" "}
+    <span className="text-[#B88E52] relative">
+      Offers
+      <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-gradient-to-r from-[#B88E52] to-transparent rounded-full" />
+    </span>
+  </h2>
 
-          <p className="text-lg font-medium leading-relaxed mb-8 text-gray-700 max-w-md drop-shadow-[0_2px_15px_rgba(255,255,255,0.9)]">
-            Embrace the season&apos;s joy with up to{" "}
-            <span className="text-[#B88E52] font-bold">40% off</span> on our
-            premium silk and handcrafted collections. Elevate your wardrobe with
-            the magic of rich textures and vibrant hues.
-          </p>
+  <p className="text-lg font-medium leading-relaxed mb-8 text-gray-700 max-w-2xl drop-shadow-[0_2px_15px_rgba(255,255,255,0.9)]">
+    Embrace the season&apos;s joy with up to{" "}
+    <span className="text-[#B88E52] font-bold">40% off</span> on our
+    premium silk and handcrafted collections. Elevate your wardrobe with
+    the magic of rich textures and vibrant hues.
+  </p>
 
-          {/* Feature pills */}
-          <div className="flex flex-wrap gap-3 mb-10">
-            {["Free Shipping", "Easy Returns", "Authentic Weaves"].map((tag) => (
-              <span
-                key={tag}
-                className="px-4 py-1.5 rounded-full text-sm font-medium bg-white/70 border border-gray-200 text-gray-700 shadow-sm backdrop-blur-sm"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
+  {/* Feature pills */}
+  <div className="flex flex-wrap justify-center gap-3 mb-10">
+    {["Free Shipping", "Easy Returns", "Authentic Weaves"].map((tag) => (
+      <span
+        key={tag}
+        className="px-4 py-1.5 rounded-full text-sm font-medium bg-white/70 border border-gray-200 text-gray-700 shadow-sm backdrop-blur-sm"
+      >
+        {tag}
+      </span>
+    ))}
+  </div>
 
-          <button className="px-10 py-4 font-semibold tracking-wide rounded-full transition-all duration-300 transform hover:-translate-y-1 bg-[#B88E52] hover:bg-[#8C6B3D] text-white shadow-[0_8px_30px_rgb(184,142,82,0.35)] hover:shadow-[0_8px_30px_rgb(184,142,82,0.55)]">
-            Explore Offers
-          </button>
-        </div>
+  <button className="px-10 py-4 font-semibold tracking-wide rounded-full transition-all duration-300 transform hover:-translate-y-1 bg-[#B88E52] hover:bg-[#8C6B3D] text-white shadow-[0_8px_30px_rgb(184,142,82,0.35)] hover:shadow-[0_8px_30px_rgb(184,142,82,0.55)]">
+    Explore Offers
+  </button>
+</div>
 
         {/* RIGHT — Image Slider */}
         <div className="flex-shrink-0 w-full md:w-[340px] lg:w-[400px]">
@@ -183,11 +183,10 @@ export function Offers() {
                   aria-label={`Go to slide ${idx + 1}`}
                 >
                   <span
-                    className={`block rounded-full transition-all duration-300 ${
-                      idx === current
-                        ? "w-6 h-2 bg-white"
-                        : "w-2 h-2 bg-white/50"
-                    }`}
+                    className={`block rounded-full transition-all duration-300 ${idx === current
+                      ? "w-6 h-2 bg-white"
+                      : "w-2 h-2 bg-white/50"
+                      }`}
                   />
                 </button>
               ))}
@@ -205,27 +204,6 @@ export function Offers() {
             </div>
           </div>
 
-          {/* Thumbnail strip */}
-          <div className="flex gap-3 mt-4 justify-center">
-            {slides.map((slide, idx) => (
-              <button
-                key={idx}
-                onClick={() => handleDot(idx)}
-                className={`relative w-14 h-14 rounded-xl overflow-hidden transition-all duration-300 ${
-                  idx === current
-                    ? "ring-2 ring-[#B88E52] ring-offset-2 scale-110"
-                    : "opacity-60 hover:opacity-90"
-                }`}
-              >
-                <Image
-                  src={slide.src}
-                  alt={slide.label}
-                  fill
-                  className="object-cover"
-                />
-              </button>
-            ))}
-          </div>
         </div>
 
       </div>
