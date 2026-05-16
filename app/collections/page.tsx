@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import {
   Heart,
   Star,
@@ -10,6 +11,7 @@ import {
   ChevronRight,
   SlidersHorizontal,
   X,
+  Wand2,
 } from "lucide-react";
 
 /* ─── Mock Data (swap with API calls for backend) ─── */
@@ -49,9 +51,18 @@ function StarRating({ rating, reviews }: { rating: number; reviews: number }) {
 /* ─── Product Card ─── */
 function ProductCard({ product }: { product: Product }) {
   const [wishlisted, setWishlisted] = useState(product.isWishlisted || false);
+  const router = useRouter();
+
+  const handleTryOn = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    router.push(`/virtual-tryon?saree=${encodeURIComponent(product.image)}`);
+  };
 
   return (
-    <div className="group bg-white rounded-2xl overflow-hidden shadow-[0_2px_15px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-300 hover:-translate-y-1">
+    <div className="group bg-white rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1"
+      style={{ boxShadow: "0 2px 4px rgba(0,0,0,0.04), 0 6px 12px rgba(0,0,0,0.06), 0 20px 40px -8px rgba(0,0,0,0.10)" }}
+    >
       {/* Image Container */}
       <div className="relative aspect-[3/4] overflow-hidden bg-gray-50">
         <Image
@@ -93,6 +104,17 @@ function ProductCard({ product }: { product: Product }) {
             {product.badge}
           </div>
         )}
+
+        {/* Virtual Try-On Button — appears on hover */}
+        <button
+          onClick={handleTryOn}
+          title="Virtual Try-On"
+          className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3.5 py-2 rounded-full text-white text-[11px] font-semibold tracking-wide opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300 shadow-lg backdrop-blur-sm whitespace-nowrap"
+          style={{ backgroundColor: "#a1005b" }}
+        >
+          <Wand2 size={13} />
+          Virtual Try-On
+        </button>
       </div>
 
       {/* Info */}
@@ -176,7 +198,7 @@ export default function CollectionsPage() {
   );
 
   return (
-    <main className="min-h-screen bg-[#FBF9F7] pt-[70px]">
+    <main className="min-h-screen pt-[70px]">
       
 
       {/* ─── Hero Banner ─── */}

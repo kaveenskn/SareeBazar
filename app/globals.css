@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
+  --background: #fdf2f8;
   --foreground: #171717;
 }
 
@@ -27,7 +27,7 @@
 }
 
 html.light {
-  --background: #ffffff;
+  --background: #fdf2f8;
   --foreground: #171717;
 }
 
@@ -46,6 +46,7 @@ body {
   from {
     transform: translateX(-100%);
   }
+
   to {
     transform: translateX(0);
   }
