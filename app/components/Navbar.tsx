@@ -2,11 +2,15 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { Search, Heart, ShoppingBag, Menu, X } from "lucide-react";
+import { Search, Heart, ShoppingBag, Menu, X, User, LogOut, FileText, Settings } from "lucide-react";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+
+  // Toggle this constant to test logged in vs logged out UI
+  const isLoggedIn = false;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -19,16 +23,15 @@ export default function Navbar() {
   const navLinks = [
     { href: "#offers", label: "TODAY'S OFFER" },
     { href: "/collections", label: "COLLECTIONS" },
-    { href: "#virtual-tryon", label: "VIRTUAL TRY-ON" },
+    { href: "/virtual-tryon", label: "VIRTUAL TRY-ON" },
     { href: "#about", label: "ABOUT US" },
   ];
 
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 backdrop-blur-md bg-white/80 border-black/10 border-b ${
-          scrolled ? "py-3 shadow-sm" : "py-4"
-        }`}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 backdrop-blur-md bg-white/80 border-black/10 border-b ${scrolled ? "py-3 shadow-sm" : "py-4"
+          }`}
       >
         <div className="max-w-7xl mx-auto px-6 md:px-8 flex items-center justify-between">
           {/* Logo */}
@@ -58,6 +61,68 @@ export default function Navbar() {
             <button className="text-gray-700 hover:text-[#B88E52] transition-colors hidden sm:block">
               <Heart size={18} strokeWidth={1.5} />
             </button>
+
+            {/* Profile Dropdown Container */}
+            <div className="relative">
+              <button
+                onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                className="text-gray-700 hover:text-[#B88E52] transition-colors flex items-center"
+              >
+                <User size={18} strokeWidth={1.5} />
+              </button>
+
+              {/* Profile Dropdown Menu */}
+              {profileDropdownOpen && (
+                <div className="absolute right-[-10px] sm:right-[-80px] mt-4 w-[300px] bg-white rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] border border-gray-100 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                  {isLoggedIn ? (
+                    // Logged In State
+                    <div className="py-2">
+                      <div className="px-5 py-4 border-b border-gray-50 bg-gray-50/50">
+                        <p className="text-sm font-medium text-gray-900">John Doe</p>
+                        <p className="text-xs text-gray-500 mt-0.5">john.doe@example.com</p>
+                      </div>
+                      <div className="px-3 py-2">
+                        <Link href="/profile" className="flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-[#B88E52]/10 hover:text-[#B88E52] transition-colors" onClick={() => setProfileDropdownOpen(false)}>
+                          <User size={16} className="mr-3" />
+                          My Profile
+                        </Link>
+                        <Link href="/orders" className="flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-[#B88E52]/10 hover:text-[#B88E52] transition-colors" onClick={() => setProfileDropdownOpen(false)}>
+                          <ShoppingBag size={16} className="mr-3" />
+                          Orders
+                        </Link>
+                        <Link href="/wishlist" className="flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-[#B88E52]/10 hover:text-[#B88E52] transition-colors" onClick={() => setProfileDropdownOpen(false)}>
+                          <Heart size={16} className="mr-3" />
+                          Wishlist
+                        </Link>
+                      </div>
+                      <div className="border-t border-gray-50 px-3 py-2">
+                        <button className="flex w-full items-center px-3 py-2.5 text-sm text-red-600 rounded-lg hover:bg-red-50 transition-colors" onClick={() => { setProfileDropdownOpen(false); }}>
+                          <LogOut size={16} className="mr-3" />
+                          Logout
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    // Logged Out State
+                    <div className="p-5">
+                      <div className="mb-5">
+                        <h3 className="text-xl font-bold text-gray-900 whitespace-nowrap">Welcome to SareeBazar</h3>
+                        <p className="text-sm text-gray-500 mt-1">To access account and manage orders</p>
+                      </div>
+                      <div className="space-y-3">
+                        <Link href="/login" onClick={() => setProfileDropdownOpen(false)} className="flex w-full justify-center items-center px-4 py-2.5 rounded-lg text-white text-sm font-medium transition-transform hover:scale-[1.02]" style={{ backgroundColor: "#B88E52" }}>
+                          Login
+                        </Link>
+                        <Link href="/register" onClick={() => setProfileDropdownOpen(false)} className="flex w-full justify-center items-center px-4 py-2.5 rounded-lg text-[#B88E52] border border-[#B88E52] text-sm font-medium transition-colors hover:bg-[#B88E52]/5">
+                          Signup
+                        </Link>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
             <button
               className="flex items-center space-x-2 px-5 py-2.5 rounded-full text-white text-[13px] font-medium transition-transform hover:scale-105"
               style={{ backgroundColor: "#B88E52" }}
@@ -87,9 +152,29 @@ export default function Navbar() {
                 {link.label}
               </Link>
             ))}
+
+            {/* Mobile Auth Links */}
+            <div className="pt-4 mt-2 border-t border-gray-100 flex flex-col space-y-3">
+              {!isLoggedIn ? (
+                <>
+                  <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="text-[13px] font-semibold text-[#B88E52]">Login</Link>
+                  <Link href="/register" onClick={() => setMobileMenuOpen(false)} className="text-[13px] font-semibold text-gray-700">Create Account</Link>
+                </>
+              ) : (
+                <>
+                  <Link href="/profile" onClick={() => setMobileMenuOpen(false)} className="text-[13px] font-semibold text-gray-700">My Profile</Link>
+                  <button className="text-[13px] font-semibold text-red-600 text-left" onClick={() => setMobileMenuOpen(false)}>Logout</button>
+                </>
+              )}
+            </div>
           </div>
         )}
       </nav>
+
+      {/* Overlay to close dropdown when clicking outside */}
+      {profileDropdownOpen && (
+        <div className="fixed inset-0 z-40" onClick={() => setProfileDropdownOpen(false)}></div>
+      )}
     </>
   );
 }

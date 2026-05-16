@@ -2,7 +2,7 @@ import { Section } from "./Section";
 
 export function VisitUs() {
   return (
-    <div className="relative z-20 w-full h-screen flex flex-col items-center justify-center px-8">
+    <Section align="center" heightClass="h-screen" className="bg-white">
       <div className="max-w-3xl text-center flex flex-col items-center">
         <h2 className="text-5xl md:text-7xl font-bold mb-8 text-gray-900 drop-shadow-[0_2px_15px_rgba(255,255,255,1)]">
           Experience <span className="text-[#B88E52]">Saree Bazar</span>
@@ -14,6 +14,6 @@ export function VisitUs() {
           Book Appointment
         </button>
       </div>
-    </div>
+    </Section>
   );
 }
