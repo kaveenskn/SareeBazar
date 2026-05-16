@@ -323,10 +323,10 @@ function UploadCard({
             >
               {icon}
             </div>
-            <p className="text-sm font-semibold text-gray-800 mb-1">
+            <p className="text-2xl font-serif font-bold text-gray-900 mb-2">
               {label}
             </p>
-            <p className="text-xs text-gray-500 mb-4 px-2 leading-relaxed">
+            <p className="text-sm text-gray-500 mb-4 px-2 leading-relaxed">
               {description}
             </p>
             <p className="text-[11px] font-medium text-gray-400 mb-4 uppercase tracking-wider">
@@ -398,8 +398,8 @@ function ResultCard({ isReady, isProcessing, hasTriedOn, result, accentColor }: 
               </div>
             </div>
             <div className="text-center">
-              <p className="text-sm font-semibold text-gray-800 mb-1">AI is working its magic…</p>
-              <p className="text-xs text-gray-400">Draping the saree on your photo</p>
+              <p className="text-2xl font-serif font-bold text-gray-900 mb-2">AI is working its magic…</p>
+              <p className="text-sm text-gray-500">Draping the saree on your photo</p>
             </div>
             {/* Progress dots */}
             <div className="flex gap-1.5">
@@ -439,8 +439,8 @@ function ResultCard({ isReady, isProcessing, hasTriedOn, result, accentColor }: 
             >
               <Wand2 size={26} strokeWidth={1.2} style={{ color: isReady ? accentColor : "#d1d5db" }} />
             </div>
-            <p className="text-sm font-semibold text-gray-800 mb-1">AI Result</p>
-            <p className="text-xs text-gray-500 mb-5 px-2 leading-relaxed">
+            <p className="text-2xl font-serif font-bold text-gray-900 mb-2">AI Result</p>
+            <p className="text-sm text-gray-500 mb-5 px-2 leading-relaxed">
               See how the saree looks on you
             </p>
 

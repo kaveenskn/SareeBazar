@@ -234,7 +234,7 @@ export default function CollectionsPage() {
 
   return (
 
-    <main className="min-h-screen bg-[#FBF9F7] pt-[70px]">
+    <main className="min-h-screen bg-[#fbeff6] pt-[70px]">
 
       {/* ─── Hero Banner ─── */}
       <div className="max-w-7xl mx-auto px-6 md:px-8 mb-10 mt-6">

@@ -41,7 +41,7 @@ export default function Navbar() {
           <div className="px-5 md:px-7 flex items-center justify-between">
             {/* Logo */}
             <Link href="/" className="text-3xl font-serif tracking-wide flex items-center">
-              <span style={{ color: "#B88E52" }}>Saree</span>
+              <span className="text-primary">Saree</span>
               <span className="text-gray-900">Bazar</span>
             </Link>
 
@@ -51,7 +51,7 @@ export default function Navbar() {
                 <Link
                   key={link.label}
                   href={link.href}
-                  className="text-[11px] font-semibold tracking-[0.15em] transition-colors text-gray-700 hover:text-[#B88E52]"
+                  className="text-[11px] font-semibold tracking-[0.15em] transition-colors text-gray-700 hover:text-primary"
                 >
                   {link.label}
                 </Link>
@@ -60,10 +60,10 @@ export default function Navbar() {
 
             {/* Right Actions */}
             <div className="flex items-center space-x-4">
-              <button className="text-gray-700 hover:text-[#B88E52] transition-colors">
+              <button className="text-gray-700 hover:text-primary transition-colors">
                 <Search size={18} strokeWidth={1.5} />
               </button>
-              <button className="text-gray-700 hover:text-[#B88E52] transition-colors hidden sm:block">
+              <button className="text-gray-700 hover:text-primary transition-colors hidden sm:block">
                 <Heart size={18} strokeWidth={1.5} />
               </button>
 
@@ -71,7 +71,7 @@ export default function Navbar() {
               <div className="relative">
                 <button
                   onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                  className="text-gray-700 hover:text-[#B88E52] transition-colors flex items-center"
+                  className="text-gray-700 hover:text-primary transition-colors flex items-center"
                 >
                   <User size={18} strokeWidth={1.5} />
                 </button>
@@ -85,13 +85,13 @@ export default function Navbar() {
                           <p className="text-xs text-gray-500 mt-0.5">john.doe@example.com</p>
                         </div>
                         <div className="px-3 py-2">
-                          <Link href="/profile" className="flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-[#B88E52]/10 hover:text-[#B88E52] transition-colors" onClick={() => setProfileDropdownOpen(false)}>
+                          <Link href="/profile" className="flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors" onClick={() => setProfileDropdownOpen(false)}>
                             <User size={16} className="mr-3" />My Profile
                           </Link>
-                          <Link href="/orders" className="flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-[#B88E52]/10 hover:text-[#B88E52] transition-colors" onClick={() => setProfileDropdownOpen(false)}>
+                          <Link href="/orders" className="flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors" onClick={() => setProfileDropdownOpen(false)}>
                             <ShoppingBag size={16} className="mr-3" />Orders
                           </Link>
-                          <Link href="/wishlist" className="flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-[#B88E52]/10 hover:text-[#B88E52] transition-colors" onClick={() => setProfileDropdownOpen(false)}>
+                          <Link href="/wishlist" className="flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors" onClick={() => setProfileDropdownOpen(false)}>
                             <Heart size={16} className="mr-3" />Wishlist
                           </Link>
                         </div>
@@ -108,10 +108,10 @@ export default function Navbar() {
                           <p className="text-sm text-gray-500 mt-1">To access account and manage orders</p>
                         </div>
                         <div className="space-y-3">
-                          <Link href="/login" onClick={() => setProfileDropdownOpen(false)} className="flex w-full justify-center items-center px-4 py-2.5 rounded-lg text-white text-sm font-medium transition-transform hover:scale-[1.02]" style={{ backgroundColor: "#B88E52" }}>
+                          <Link href="/login" onClick={() => setProfileDropdownOpen(false)} className="flex w-full justify-center items-center px-4 py-2.5 rounded-lg text-white text-sm font-medium transition-transform hover:scale-[1.02] bg-primary">
                             Login
                           </Link>
-                          <Link href="/register" onClick={() => setProfileDropdownOpen(false)} className="flex w-full justify-center items-center px-4 py-2.5 rounded-lg text-[#B88E52] border border-[#B88E52] text-sm font-medium transition-colors hover:bg-[#B88E52]/5">
+                          <Link href="/register" onClick={() => setProfileDropdownOpen(false)} className="flex w-full justify-center items-center px-4 py-2.5 rounded-lg text-primary border border-primary text-sm font-medium transition-colors hover:bg-primary/5">
                             Signup
                           </Link>
                         </div>
@@ -122,8 +122,7 @@ export default function Navbar() {
               </div>
 
               <button
-                className="flex items-center space-x-2 px-5 py-2 rounded-full text-white text-[13px] font-medium transition-transform hover:scale-105"
-                style={{ backgroundColor: "#B88E52" }}
+                className="flex items-center space-x-2 px-5 py-2 rounded-full text-white text-[13px] font-medium transition-transform hover:scale-105 bg-primary"
               >
                 <ShoppingBag size={16} strokeWidth={1.5} />
                 <span className="hidden sm:inline">Cart</span>
@@ -144,7 +143,7 @@ export default function Navbar() {
                 <Link
                   key={link.label}
                   href={link.href}
-                  className="text-[11px] font-semibold tracking-[0.15em] text-gray-700 hover:text-[#B88E52]"
+                  className="text-[11px] font-semibold tracking-[0.15em] text-gray-700 hover:text-primary"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   {link.label}
@@ -153,7 +152,7 @@ export default function Navbar() {
               <div className="pt-3 mt-1 border-t border-gray-100 flex flex-col space-y-3">
                 {!isLoggedIn ? (
                   <>
-                    <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="text-[13px] font-semibold text-[#B88E52]">Login</Link>
+                    <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="text-[13px] font-semibold text-primary">Login</Link>
                     <Link href="/register" onClick={() => setMobileMenuOpen(false)} className="text-[13px] font-semibold text-gray-700">Create Account</Link>
                   </>
                 ) : (

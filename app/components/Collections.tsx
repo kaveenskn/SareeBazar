@@ -2,7 +2,7 @@ import { Section } from "./Section";
 
 export function Collections() {
   return (
-    <Section align="right" heightClass="h-[200vh]">
+    <Section align="right" heightClass="h-[200vh]" className="bg-[#fbeff6]">
       <div className="max-w-xl font-figtree">
         <h2 className="text-5xl md:text-7xl font-bold mb-6 text-gray-900 drop-shadow-[0_2px_15px_rgba(255,255,255,1)]">
           Curated <span className="text-[#B88E52]">Collections</span>
