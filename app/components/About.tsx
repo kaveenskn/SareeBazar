@@ -2,8 +2,8 @@ import { Section } from "./Section";
 
 export function About() {
   return (
-    <Section align="right" heightClass="h-[200vh]">
-      <div className="max-w-xl">
+    <Section align="center" heightClass="h-[200vh]" topClass="top-1/3">
+      <div className="max-w-2xl text-center">
         <h2 className="text-5xl md:text-7xl font-bold mb-8 text-gray-900 drop-shadow-[0_2px_15px_rgba(255,255,255,1)]">
           Our <span className="text-[#B88E52]">Heritage</span>
         </h2>
