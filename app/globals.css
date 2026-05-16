@@ -10,12 +10,14 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-figtree), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --font-mono: var(--font-geist-mono);
-  --color-peacock-100: #e0f2f1;
-  --color-peacock-300: #80cbc4;
-  --color-peacock-500: #00897b;
-  --color-peacock-700: #004d40;
-  --color-peacock-900: #00251a;
-  --color-peacock-accent: #00bfa5;
+  --font-figtree: var(--font-figtree);
+  --color-primary: #a1005b;
+  --color-peacock-100: #f8f3eb;
+  --color-peacock-300: #dfc7a5;
+  --color-peacock-500: #B88E52;
+  --color-peacock-700: #8c6734;
+  --color-peacock-900: #4f3818;
+  --color-peacock-accent: #d4a359;
 }
 
 @media (prefers-color-scheme: dark) {
