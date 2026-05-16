@@ -8,8 +8,9 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-figtree), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --font-mono: var(--font-geist-mono);
+  --font-figtree: var(--font-figtree);
   --color-primary: #a1005b;
   --color-peacock-100: #f8f3eb;
   --color-peacock-300: #dfc7a5;
