@@ -82,7 +82,7 @@ export function Offers() {
       <div className="w-full flex flex-col md:flex-row items-center gap-12 md:gap-16">
 
 {/* LEFT — Text Content */}
-<div className="flex-1 min-w-0 flex flex-col items-center text-center">
+<div className="flex-1 min-w-0 flex flex-col items-start text-left">
   {/* Tag pill */}
   <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#B88E52]/15 border border-[#B88E52]/30 mb-5">
     <span className="w-2 h-2 rounded-full bg-[#B88E52] animate-pulse" />
@@ -107,7 +107,7 @@ export function Offers() {
   </p>
 
   {/* Feature pills */}
-  <div className="flex flex-wrap justify-center gap-3 mb-10">
+  <div className="flex flex-wrap justify-start gap-3 mb-10">
     {["Free Shipping", "Easy Returns", "Authentic Weaves"].map((tag) => (
       <span
         key={tag}
@@ -124,8 +124,8 @@ export function Offers() {
 </div>
 
         {/* RIGHT — Image Slider */}
-        <div className="flex-shrink-0 w-full md:w-[340px] lg:w-[400px]">
-          <div className="relative w-full aspect-[3/4] rounded-3xl overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.20)]">
+        <div className="flex-shrink-0 w-full md:w-[450px] lg:w-[550px]">
+          <div className="relative w-full h-[500px] rounded-3xl overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.20)]">
 
             {/* Decorative corner accents */}
             <div className="absolute top-3 left-3 w-10 h-10 border-t-2 border-l-2 border-[#B88E52]/60 rounded-tl-xl z-10 pointer-events-none" />
