@@ -78,10 +78,10 @@ export default async function ProductPage({ params }: { params: { slug: string }
             
             {/* Brand & Name */}
             <h1 className="text-[24px] font-bold text-[#282c3f] leading-tight">
-              Saree Bazar
+              {product.name}
             </h1>
             <p className="text-[20px] text-[#535766] font-normal mt-1 leading-snug">
-              {product.name}
+              {product.category}
             </p>
 
             {/* Rating Box */}
