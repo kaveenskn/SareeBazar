@@ -33,7 +33,7 @@ export function Section({
   if (align === "right") alignmentClass = "items-end text-right";
 
   return (
-    <section ref={ref} className={`${heightClass} relative ${isFirst ? "bg-transparent" : "bg-white"} ${className}`}>
+    <section ref={ref} className={`${heightClass} relative ${isFirst ? "bg-transparent" : ""} ${className}`}>
       <div className="sticky top-[68px] w-full h-[calc(100vh-68px)] pointer-events-none px-8">
         <motion.div
           style={{ opacity, y }}
