@@ -2,7 +2,7 @@ import { Section } from "./Section";
 
 export function VisitUs() {
   return (
-    <Section align="center" heightClass="h-screen" className="">
+    <Section align="center" heightClass="h-screen" className="bg-white" topClass="top-[calc(40%-100px)]">
       <div className="max-w-3xl text-center flex flex-col items-center">
         <h2 className="text-5xl md:text-7xl font-bold mb-8 text-gray-900 drop-shadow-[0_2px_15px_rgba(255,255,255,1)]">
           Experience <span className="text-[#B88E52]">Saree Bazar</span>

@@ -43,7 +43,8 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} ${figtree.variable} ${playfair.variable} h-full antialiased light`}
     >
-      <body className="min-h-full flex flex-col text-black">
+
+      <body className="min-h-full flex flex-col bg-white text-black">
         <Providers>
           <NavbarWrapper />
           <div className="flex-1">
@@ -51,6 +52,7 @@ export default function RootLayout({
           </div>
           <FooterWrapper />
         </Providers>
+
       </body>
     </html>
   );
