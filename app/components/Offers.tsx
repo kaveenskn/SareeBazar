@@ -77,37 +77,37 @@ export function Offers() {
   };
 
   return (
-    <Section align="center" heightClass="h-[140vh]" topClass="top-[calc(40%-200px)]">
+    <Section align="center" heightClass="h-[160vh]" topClass="top-[calc(40%-140px)]">
       {/* Two-column layout */}
-      <div className="w-full flex flex-col md:flex-row items-center gap-12 md:gap-16">
+      <div className="w-full flex flex-col md:flex-row items-center justify-between gap-12 lg:gap-20">
 
 {/* LEFT — Text Content */}
-<div className="flex-1 min-w-0 flex flex-col items-start text-left">
+<div className="w-full md:w-[45%] lg:w-[40%] flex flex-col items-start text-left">
   {/* Tag pill */}
-  <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#B88E52]/15 border border-[#B88E52]/30 mb-5">
-    <span className="w-2 h-2 rounded-full bg-[#B88E52] animate-pulse" />
-    <span className="text-sm font-semibold text-[#B88E52] tracking-widest uppercase">
+  <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/15 border border-primary/30 mb-3">
+    <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+    <span className="text-sm font-semibold text-primary tracking-widest">
       Limited Time
     </span>
   </div>
 
-  <h2 className="text-5xl md:text-6xl font-bold mb-6 text-gray-900 leading-tight drop-shadow-[0_2px_15px_rgba(255,255,255,0.9)]">
+  <h2 className="text-5xl md:text-[4.5rem] lg:text-[5.5rem] font-serif font-bold mb-4 text-gray-900 leading-[1.05] tracking-tight drop-shadow-[0_2px_15px_rgba(255,255,255,0.9)]">
     Exclusive{" "}
-    <span className="text-[#B88E52] relative">
+    <span className="text-primary relative inline-block">
       Offers
-      <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-gradient-to-r from-[#B88E52] to-transparent rounded-full" />
+      <span className="absolute -bottom-2 left-0 w-full h-1 bg-gradient-to-r from-primary to-transparent rounded-full" />
     </span>
   </h2>
 
-  <p className="text-lg font-medium leading-relaxed mb-8 text-gray-700 max-w-2xl drop-shadow-[0_2px_15px_rgba(255,255,255,0.9)]">
+  <p className="text-base md:text-[17px] font-normal leading-relaxed mb-4 text-gray-700 max-w-xl drop-shadow-[0_2px_15px_rgba(255,255,255,0.9)]">
     Embrace the season&apos;s joy with up to{" "}
-    <span className="text-[#B88E52] font-bold">40% off</span> on our
+    <span className="text-primary font-bold">40% off</span> on our
     premium silk and handcrafted collections. Elevate your wardrobe with
     the magic of rich textures and vibrant hues.
   </p>
 
   {/* Feature pills */}
-  <div className="flex flex-wrap justify-start gap-3 mb-10">
+  <div className="flex flex-wrap justify-start gap-3 mb-6">
     {["Free Shipping", "Easy Returns", "Authentic Weaves"].map((tag) => (
       <span
         key={tag}
@@ -118,20 +118,14 @@ export function Offers() {
     ))}
   </div>
 
-  <button className="px-10 py-4 font-semibold tracking-wide rounded-full transition-all duration-300 transform hover:-translate-y-1 bg-[#B88E52] hover:bg-[#8C6B3D] text-white shadow-[0_8px_30px_rgb(184,142,82,0.35)] hover:shadow-[0_8px_30px_rgb(184,142,82,0.55)]">
+  <button className="px-8 py-3.5 text-[15px] font-semibold tracking-wide rounded-xl transition-all duration-300 transform hover:-translate-y-1 bg-primary hover:bg-primary/90 text-white shadow-[0_8px_30px_rgba(161,0,91,0.35)] hover:shadow-[0_8px_30px_rgba(161,0,91,0.55)]">
     Explore Offers
   </button>
 </div>
 
         {/* RIGHT — Image Slider */}
-        <div className="flex-shrink-0 w-full md:w-[450px] lg:w-[550px]">
-          <div className="relative w-full h-[500px] rounded-3xl overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.20)]">
-
-            {/* Decorative corner accents */}
-            <div className="absolute top-3 left-3 w-10 h-10 border-t-2 border-l-2 border-[#B88E52]/60 rounded-tl-xl z-10 pointer-events-none" />
-            <div className="absolute top-3 right-3 w-10 h-10 border-t-2 border-r-2 border-[#B88E52]/60 rounded-tr-xl z-10 pointer-events-none" />
-            <div className="absolute bottom-3 left-3 w-10 h-10 border-b-2 border-l-2 border-[#B88E52]/60 rounded-bl-xl z-10 pointer-events-none" />
-            <div className="absolute bottom-3 right-3 w-10 h-10 border-b-2 border-r-2 border-[#B88E52]/60 rounded-br-xl z-10 pointer-events-none" />
+        <div className="w-full md:w-[55%] lg:w-[60%] flex-shrink-0">
+          <div className="relative w-full aspect-[4/3] rounded-[2rem] overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.20)]">
 
             {/* Slides */}
             <AnimatePresence initial={false} custom={direction}>
@@ -196,7 +190,7 @@ export function Offers() {
             <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-white/20 z-20">
               <motion.div
                 key={`progress-${current}`}
-                className="h-full bg-[#B88E52]"
+                className="h-full bg-primary"
                 initial={{ width: "0%" }}
                 animate={{ width: "100%" }}
                 transition={{ duration: 3.5, ease: "linear" }}
