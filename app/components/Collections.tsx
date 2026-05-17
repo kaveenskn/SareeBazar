@@ -3,7 +3,7 @@ import { Section } from "./Section";
 export function Collections() {
   return (
     <Section align="right" heightClass="h-[200vh]">
-      <div className="max-w-xl font-figtree">
+      <div className="max-w-xl" style={{ fontFamily: "var(--font-figtree), sans-serif", fontWeight: 400 }}>
         <h2 className="text-5xl md:text-7xl font-bold mb-6 text-gray-900 drop-shadow-[0_2px_15px_rgba(255,255,255,1)]">
           Curated <span className="text-[#B88E52]">Collections</span>
         </h2>
