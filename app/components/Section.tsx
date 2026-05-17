@@ -3,18 +3,18 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 
-export function Section({ 
-  children, 
-  align = "center", 
-  heightClass = "h-[150vh]", 
-  isFirst = false, 
+export function Section({
+  children,
+  align = "center",
+  heightClass = "h-[150vh]",
+  isFirst = false,
   topClass = "top-1/3",
   className = ""
-}: { 
-  children: React.ReactNode, 
-  align?: "left" | "center" | "right", 
-  heightClass?: string, 
-  isFirst?: boolean, 
+}: {
+  children: React.ReactNode,
+  align?: "left" | "center" | "right",
+  heightClass?: string,
+  isFirst?: boolean,
   topClass?: string,
   className?: string
 }) {
@@ -33,9 +33,9 @@ export function Section({
   if (align === "right") alignmentClass = "items-end text-right";
 
   return (
-    <section ref={ref} className={`${heightClass} relative ${isFirst ? "bg-transparent" : "bg-white"} ${className}`}>
+    <section ref={ref} className={`${heightClass} relative ${isFirst ? "bg-transparent" : ""} ${className}`}>
       <div className="sticky top-[68px] w-full h-[calc(100vh-68px)] pointer-events-none px-8">
-        <motion.div 
+        <motion.div
           style={{ opacity, y }}
           className={`relative ${topClass} flex flex-col w-full max-w-6xl mx-auto ${alignmentClass} pointer-events-auto`}
         >

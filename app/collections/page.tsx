@@ -297,7 +297,7 @@ export default function CollectionsPage() {
 
   return (
     <main
-      className="min-h-screen bg-[#f5f5f6] pt-[70px]"
+      className="min-h-screen bg-[#f5f5f6] pt-[100px]"
       style={{ fontFamily: "var(--font-figtree), sans-serif", fontWeight: 400 }}
     >
       {/* ─── Search Bar ─── */}
@@ -315,7 +315,7 @@ export default function CollectionsPage() {
                 setSearchQuery(e.target.value);
                 setCurrentPage(1);
               }}
-              placeholder="Search for sarees, fabrics, colors..."
+              placeholder="Search for sarees, colors..."
               className="w-full pl-11 pr-10 py-2.5 rounded-[4px] border border-[#d4d5d9] bg-[#f5f5f6] text-[14px] text-[#282c3f] placeholder-[#94969f] focus:outline-none focus:border-[#ff3f6c] focus:bg-white transition-all"
             />
             {searchQuery && (
@@ -523,7 +523,6 @@ export default function CollectionsPage() {
                 </label>
               ))}
             </FilterSection>
-
 
             {/* Customer Ratings */}
             <FilterSection title="Customer Ratings" defaultOpen={false}>

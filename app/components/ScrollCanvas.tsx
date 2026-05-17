@@ -48,7 +48,7 @@ export default function ScrollCanvas() {
 
     const updateCanvasSize = () => {
       canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight - 68;
+      canvas.height = window.innerHeight;
       renderImage(Math.round(currentFrameIndex));
     };
 
@@ -124,10 +124,10 @@ export default function ScrollCanvas() {
   }, [loaded, images]);
 
   return (
-    <div className="absolute top-[68px] left-0 w-full h-[300vh] z-0 pointer-events-none bg-white">
-      <div className="sticky top-[68px] w-full h-[calc(100vh-68px)]">
+    <div className="absolute top-0 left-0 w-full h-[300vh] z-0 pointer-events-none">
+      <div className="sticky top-0 w-full h-screen">
         {!loaded && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center z-20 text-peacock-accent bg-white">
+          <div className="absolute inset-0 flex flex-col items-center justify-center z-20 text-peacock-accent" style={{ backgroundColor: "var(--background)" }}>
             <div className="w-12 h-12 border-4 rounded-full animate-spin mb-4 border-peacock-accent/30 border-t-peacock-accent" />
             <div className="text-xl font-light tracking-widest animate-pulse">
               LOADING EXPERIENCE...
