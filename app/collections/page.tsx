@@ -174,13 +174,13 @@ function ProductCard({ product }: { product: Product }) {
 
       {/* Info Section */}
       <div className="px-2.5 pt-3 pb-3">
-        {/* Brand / Category */}
-        <h3 className="text-[13px] font-bold text-[#282c3f] truncate leading-tight">
-          Saree Bazar
-        </h3>
         {/* Product Name */}
-        <p className="text-[13px] font-normal text-[#535766] truncate mt-0.5 leading-tight">
+        <h3 className="text-[14px] font-bold text-[#282c3f] truncate leading-tight">
           {product.name}
+        </h3>
+        {/* Category */}
+        <p className="text-[13px] font-normal text-[#535766] truncate mt-0.5 leading-tight">
+          {product.category}
         </p>
 
         {/* Price Row */}
