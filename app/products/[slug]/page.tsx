@@ -61,6 +61,8 @@ export default async function ProductPage({ params }: { params: { slug: string }
                   src={img}
                   alt={`${product.name} - Angle ${index + 1}`}
                   fill
+                  quality={100}
+                  unoptimized={true}
                   className="object-cover transition-transform duration-500 group-hover:scale-105"
                   sizes="(max-width: 768px) 100vw, 50vw"
                   priority={index < 2}
@@ -122,7 +124,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
                   <p className="text-[12px] text-[#535766]">Use our AI Virtual Try-On feature.</p>
                 </div>
               </div>
-              <Link href={`/virtual-tryon?saree=${encodeURIComponent(product.image)}`}>
+              <Link href={`/virtual-tryon?saree=${encodeURIComponent(gallery[0])}`}>
                 <button className="px-4 py-2 bg-[#282c3f] text-white text-[12px] font-bold uppercase rounded-[4px] hover:bg-black transition-colors">
                   Try Now
                 </button>

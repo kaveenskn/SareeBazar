@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -73,6 +73,38 @@ function ProductCard({ product }: { product: Product }) {
   const [hovered, setHovered] = useState(false);
   const router = useRouter();
 
+  // For image carousel
+  const images = product.images && product.images.length > 0 ? product.images : [product.image];
+  const [currentImageIdx, setCurrentImageIdx] = useState(0);
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (hovered && images.length > 1 && isAutoPlaying) {
+      interval = setInterval(() => {
+        setCurrentImageIdx((prev) => (prev + 1) % images.length);
+      }, 2000);
+    } else if (!hovered) {
+      setCurrentImageIdx(0); // reset when not hovered
+      setIsAutoPlaying(true); // resume autoplay for next hover
+    }
+    return () => clearInterval(interval);
+  }, [hovered, images.length, isAutoPlaying]);
+
+  const handleNextImage = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsAutoPlaying(false);
+    setCurrentImageIdx((prev) => (prev + 1) % images.length);
+  };
+
+  const handlePrevImage = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsAutoPlaying(false);
+    setCurrentImageIdx((prev) => (prev - 1 + images.length) % images.length);
+  };
+
   const discountPercent = product.originalPrice
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : 0;
@@ -87,12 +119,42 @@ function ProductCard({ product }: { product: Product }) {
       {/* Image */}
       <div className="relative aspect-[3/4] overflow-hidden bg-[#f5f5f6]">
         <Image
-          src={product.image}
+          src={images[currentImageIdx]}
           alt={product.name}
           fill
+          quality={100}
+          unoptimized={true}
           className="object-cover transition-transform duration-500 group-hover:scale-105"
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
         />
+
+        {/* Carousel manual controls */}
+        {hovered && images.length > 1 && (
+          <>
+            <button
+              onClick={handlePrevImage}
+              className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/30 backdrop-blur-md p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:bg-white/60 z-10 shadow-[0_4px_12px_rgba(0,0,0,0.1)] border border-white/40"
+            >
+              <ChevronLeft size={16} className="text-[#282c3f]" />
+            </button>
+            <button
+              onClick={handleNextImage}
+              className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/30 backdrop-blur-md p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:bg-white/60 z-10 shadow-[0_4px_12px_rgba(0,0,0,0.1)] border border-white/40"
+            >
+              <ChevronRight size={16} className="text-[#282c3f]" />
+            </button>
+            
+            {/* Carousel dots */}
+            <div className="absolute bottom-24 left-0 right-0 flex justify-center gap-1.5 z-10 transition-transform duration-300">
+              {images.map((_, idx) => (
+                <div 
+                  key={idx} 
+                  className={`h-1.5 rounded-full transition-all ${idx === currentImageIdx ? "w-3 bg-white" : "w-1.5 bg-white/50"}`} 
+                />
+              ))}
+            </div>
+          </>
+        )}
 
         {/* Badge */}
         {product.badge && (
@@ -162,7 +224,7 @@ function ProductCard({ product }: { product: Product }) {
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              router.push(`/virtual-tryon?saree=${encodeURIComponent(product.image)}`);
+              router.push(`/virtual-tryon?saree=${encodeURIComponent(images[currentImageIdx])}`);
             }}
             className="w-full flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-[#7c3aed] to-[#a855f7] text-white hover:from-[#6d28d9] hover:to-[#9333ea] transition-all duration-200"
           >
