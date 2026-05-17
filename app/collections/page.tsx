@@ -78,8 +78,9 @@ function ProductCard({ product }: { product: Product }) {
     : 0;
 
   return (
-    <div
-      className="group relative bg-white cursor-pointer"
+    <Link
+      href={`/products/${product.slug}`}
+      className="group relative bg-white cursor-pointer block"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
@@ -205,7 +206,7 @@ function ProductCard({ product }: { product: Product }) {
           <RatingBadge rating={product.rating} reviews={product.reviews} />
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
 
