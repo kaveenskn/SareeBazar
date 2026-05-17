@@ -166,8 +166,8 @@ function ProductCard({ product }: { product: Product }) {
             className="w-full flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-[#7c3aed] to-[#a855f7] text-white hover:from-[#6d28d9] hover:to-[#9333ea] transition-all duration-200"
           >
             <Bot size={14} className="animate-bounce-subtle" />
-            <span className="text-[11px] font-semibold uppercase tracking-wider">Virtual Try-On</span>
-            <span className="text-[10px] opacity-70">→</span>
+            <span className="text-[11px] font-semibold uppercase tracking-wider animate-pulse">Virtual Try-On</span>
+            <span className="text-[10px] opacity-70 ml-1">→</span>
           </button>
         </div>
       </div>
