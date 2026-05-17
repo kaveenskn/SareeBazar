@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
-import { Upload, Sparkles, RefreshCw, Download, ChevronRight, ImageIcon, User, Wand2 } from "lucide-react";
+import { useState, useRef, useCallback, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import { Sparkles, RefreshCw, Download, ChevronRight, ImageIcon, User, Wand2 } from "lucide-react";
 
 type UploadState = {
   file: File | null;
@@ -9,7 +10,8 @@ type UploadState = {
   isDragging: boolean;
 };
 
-export default function VirtualTryOnPage() {
+function VirtualTryOnContent() {
+  const searchParams = useSearchParams();
   const [saree, setSaree] = useState<UploadState>({ file: null, preview: null, isDragging: false });
   const [person, setPerson] = useState<UploadState>({ file: null, preview: null, isDragging: false });
   const [isProcessing, setIsProcessing] = useState(false);
@@ -18,6 +20,14 @@ export default function VirtualTryOnPage() {
 
   const sareeRef = useRef<HTMLInputElement>(null);
   const personRef = useRef<HTMLInputElement>(null);
+
+  // Pre-fill saree from collection query param
+  useEffect(() => {
+    const sareeUrl = searchParams.get("saree");
+    if (sareeUrl) {
+      setSaree({ file: null, preview: decodeURIComponent(sareeUrl), isDragging: false });
+    }
+  }, [searchParams]);
 
   const handleFile = useCallback(
     (setter: React.Dispatch<React.SetStateAction<UploadState>>, file: File) => {
@@ -47,12 +57,11 @@ export default function VirtualTryOnPage() {
   );
 
   const handleTryOn = () => {
-    if (!saree.file || !person.file) return;
+    if (!saree.preview || !person.preview) return;
     setIsProcessing(true);
     setHasTriedOn(false);
-    // Simulate AI processing
     setTimeout(() => {
-      setResult(person.preview); // In production: replace with real API call result
+      setResult(person.preview);
       setIsProcessing(false);
       setHasTriedOn(true);
     }, 3000);
@@ -65,12 +74,12 @@ export default function VirtualTryOnPage() {
     setHasTriedOn(false);
   };
 
-  const isReady = saree.file && person.file;
+  const isReady = !!saree.preview && !!person.preview;
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen">
       {/* Hero Banner */}
-      <section className="relative pt-28 pb-16 overflow-hidden">
+      <section className="relative pt-[100px] pb-16 overflow-hidden">
         {/* Decorative background blobs */}
         <div
           className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full opacity-[0.06] pointer-events-none"
@@ -95,24 +104,6 @@ export default function VirtualTryOnPage() {
           <p className="text-gray-500 text-base md:text-lg max-w-xl mx-auto leading-relaxed">
             Upload a saree and your photo — our AI drapes it on you instantly. See how it looks before you buy.
           </p>
-
-          {/* Steps */}
-          <div className="flex items-center justify-center gap-2 mt-8 text-xs font-medium text-gray-400 flex-wrap">
-            <span className="flex items-center gap-1.5">
-              <span className="w-5 h-5 rounded-full text-white flex items-center justify-center text-[10px] font-bold" style={{ backgroundColor: "#a1005b" }}>1</span>
-              Upload Saree
-            </span>
-            <ChevronRight size={14} className="text-gray-300" />
-            <span className="flex items-center gap-1.5">
-              <span className="w-5 h-5 rounded-full text-white flex items-center justify-center text-[10px] font-bold" style={{ backgroundColor: "#a1005b" }}>2</span>
-              Upload Your Photo
-            </span>
-            <ChevronRight size={14} className="text-gray-300" />
-            <span className="flex items-center gap-1.5">
-              <span className="w-5 h-5 rounded-full text-white flex items-center justify-center text-[10px] font-bold" style={{ backgroundColor: "#a1005b" }}>3</span>
-              See the Result
-            </span>
-          </div>
         </div>
       </section>
 
@@ -125,7 +116,6 @@ export default function VirtualTryOnPage() {
           <UploadCard
             id="saree-upload"
             label="Saree Image"
-            stepNumber={1}
             description="Upload any saree image from your gallery or catalogue"
             icon={<ImageIcon size={28} strokeWidth={1.2} />}
             state={saree}
@@ -146,7 +136,6 @@ export default function VirtualTryOnPage() {
           <UploadCard
             id="person-upload"
             label="Your Photo"
-            stepNumber={2}
             description="Upload a clear front-facing full-body photo of yourself"
             icon={<User size={28} strokeWidth={1.2} />}
             state={person}
@@ -228,7 +217,7 @@ export default function VirtualTryOnPage() {
       </section>
 
       {/* Tips Section */}
-      <section className="bg-gray-50 border-t border-gray-100 py-16">
+      <section className="border-t border-gray-100 py-16" style={{ backgroundColor: "#f9f2f5" }}>
         <div className="max-w-4xl mx-auto px-6">
           <h2 className="text-center text-xl font-serif font-semibold text-gray-800 mb-10">Tips for Best Results</h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
@@ -256,7 +245,6 @@ export default function VirtualTryOnPage() {
 interface UploadCardProps {
   id: string;
   label: string;
-  stepNumber: number;
   description: string;
   icon: React.ReactNode;
   state: UploadState;
@@ -271,28 +259,14 @@ interface UploadCardProps {
 }
 
 function UploadCard({
-  id, label, stepNumber, description, icon,
+  id, label, description, icon,
   state, inputRef, onFileChange, onDragOver, onDragLeave, onDrop,
   onClear, onBrowse, accentColor,
 }: UploadCardProps) {
   const hasImage = !!state.preview;
 
   return (
-    <div className="flex flex-col">
-      {/* Card Header */}
-      <div className="flex items-center gap-3 mb-3">
-        <div
-          className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[11px] font-bold flex-shrink-0"
-          style={{ backgroundColor: accentColor }}
-        >
-          {stepNumber}
-        </div>
-        <div>
-          <p className="text-sm font-semibold text-gray-800">{label}</p>
-          <p className="text-[11px] text-gray-400 leading-tight">{description}</p>
-        </div>
-      </div>
-
+    <div className="flex flex-col h-full">
       {/* Drop Zone */}
       <div
         id={id}
@@ -300,11 +274,14 @@ function UploadCard({
         onDragLeave={onDragLeave}
         onDrop={onDrop}
         onClick={!hasImage ? onBrowse : undefined}
-        className="relative flex-1 rounded-2xl border-2 transition-all duration-200 overflow-hidden cursor-pointer"
+        className="group relative flex-1 rounded-2xl border-2 transition-all duration-300 ease-out overflow-hidden cursor-pointer hover:-translate-y-4 hover:scale-[1.02] hover:border-[#a1005b]"
         style={{
-          borderColor: state.isDragging ? accentColor : hasImage ? "#e5e7eb" : "#e5e7eb",
-          backgroundColor: state.isDragging ? `rgba(161,0,91,0.03)` : hasImage ? "#f9fafb" : "#fafafa",
-          minHeight: "280px",
+          borderColor: state.isDragging ? accentColor : hasImage ? "transparent" : "#e5e7eb",
+          backgroundColor: state.isDragging ? `rgba(161,0,91,0.03)` : hasImage ? "#ffffff" : "#fdf9fa",
+          minHeight: "320px",
+          boxShadow: hasImage
+            ? "0 2px 4px rgba(0,0,0,0.04), 0 8px 16px rgba(0,0,0,0.08), 0 24px 48px -8px rgba(0,0,0,0.14)"
+            : "0 2px 4px rgba(0,0,0,0.04), 0 6px 12px rgba(0,0,0,0.06), 0 20px 40px -8px rgba(0,0,0,0.10)",
         }}
       >
         {hasImage ? (
@@ -313,8 +290,8 @@ function UploadCard({
             <img
               src={state.preview!}
               alt={`${label} preview`}
-              className="w-full h-full object-cover"
-              style={{ minHeight: "280px", maxHeight: "360px" }}
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              style={{ minHeight: "320px", maxHeight: "400px" }}
             />
             {/* Overlay Controls */}
             <div className="absolute inset-0 bg-black/0 hover:bg-black/30 transition-all duration-200 flex items-end justify-between p-3 group">
@@ -346,10 +323,15 @@ function UploadCard({
             >
               {icon}
             </div>
-            <p className="text-sm font-medium text-gray-700 mb-1">
-              {state.isDragging ? "Drop to upload" : "Drag & drop here"}
+            <p className="text-2xl font-serif font-bold text-gray-900 mb-2">
+              {label}
             </p>
-            <p className="text-xs text-gray-400 mb-5">or click to browse</p>
+            <p className="text-sm text-gray-500 mb-4 px-2 leading-relaxed">
+              {description}
+            </p>
+            <p className="text-[11px] font-medium text-gray-400 mb-4 uppercase tracking-wider">
+              {state.isDragging ? "Drop to upload" : "Drag & drop or"}
+            </p>
             <button
               id={`${id}-browse`}
               onClick={(e) => { e.stopPropagation(); onBrowse(); }}
@@ -369,6 +351,9 @@ function UploadCard({
           onChange={onFileChange}
           id={`${id}-input`}
         />
+        
+        {/* Reflection Effect */}
+        <div className="absolute inset-0 pointer-events-none bg-gradient-to-tr from-white/0 via-white/5 to-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       </div>
     </div>
   );
@@ -387,29 +372,17 @@ interface ResultCardProps {
 
 function ResultCard({ isReady, isProcessing, hasTriedOn, result, accentColor }: ResultCardProps) {
   return (
-    <div className="flex flex-col">
-      {/* Card Header */}
-      <div className="flex items-center gap-3 mb-3">
-        <div
-          className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[11px] font-bold flex-shrink-0"
-          style={{ backgroundColor: accentColor }}
-        >
-          3
-        </div>
-        <div>
-          <p className="text-sm font-semibold text-gray-800">AI Result</p>
-          <p className="text-[11px] text-gray-400 leading-tight">See how the saree looks on you</p>
-        </div>
-      </div>
-
+    <div className="flex flex-col h-full">
       {/* Result Display */}
       <div
-        className="relative flex-1 rounded-2xl border-2 border-gray-200 overflow-hidden transition-all duration-500"
+        className="group relative flex-1 rounded-2xl border-2 overflow-hidden transition-all duration-300 ease-out hover:-translate-y-4 hover:scale-[1.02] hover:border-[#a1005b]"
         style={{
-          minHeight: "280px",
-          backgroundColor: "#fafafa",
-          borderColor: hasTriedOn ? accentColor : "#e5e7eb",
-          boxShadow: hasTriedOn ? `0 0 0 4px rgba(161,0,91,0.08)` : undefined,
+          minHeight: "320px",
+          backgroundColor: "#ffffff",
+          borderColor: hasTriedOn ? "transparent" : "#e5e7eb",
+          boxShadow: hasTriedOn
+            ? "0 2px 4px rgba(161,0,91,0.06), 0 8px 16px rgba(161,0,91,0.10), 0 24px 48px -8px rgba(161,0,91,0.18)"
+            : "0 2px 4px rgba(0,0,0,0.04), 0 6px 12px rgba(0,0,0,0.06), 0 20px 40px -8px rgba(0,0,0,0.10)",
         }}
       >
         {isProcessing ? (
@@ -425,8 +398,8 @@ function ResultCard({ isReady, isProcessing, hasTriedOn, result, accentColor }: 
               </div>
             </div>
             <div className="text-center">
-              <p className="text-sm font-semibold text-gray-800 mb-1">AI is working its magic…</p>
-              <p className="text-xs text-gray-400">Draping the saree on your photo</p>
+              <p className="text-2xl font-serif font-bold text-gray-900 mb-2">AI is working its magic…</p>
+              <p className="text-sm text-gray-500">Draping the saree on your photo</p>
             </div>
             {/* Progress dots */}
             <div className="flex gap-1.5">
@@ -441,12 +414,12 @@ function ResultCard({ isReady, isProcessing, hasTriedOn, result, accentColor }: 
           </div>
         ) : result ? (
           /* Result Image */
-          <div className="relative w-full h-full" style={{ minHeight: "280px" }}>
+          <div className="relative w-full h-full" style={{ minHeight: "320px" }}>
             <img
               src={result}
               alt="Virtual try-on result"
-              className="w-full h-full object-cover"
-              style={{ minHeight: "280px", maxHeight: "360px" }}
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              style={{ minHeight: "320px", maxHeight: "400px" }}
             />
             {/* Result Badge */}
             <div
@@ -466,20 +439,36 @@ function ResultCard({ isReady, isProcessing, hasTriedOn, result, accentColor }: 
             >
               <Wand2 size={26} strokeWidth={1.2} style={{ color: isReady ? accentColor : "#d1d5db" }} />
             </div>
+            <p className="text-2xl font-serif font-bold text-gray-900 mb-2">AI Result</p>
+            <p className="text-sm text-gray-500 mb-5 px-2 leading-relaxed">
+              See how the saree looks on you
+            </p>
+
             {isReady ? (
               <>
-                <p className="text-sm font-semibold text-gray-800 mb-1">Ready to try on!</p>
-                <p className="text-xs text-gray-400">Click <strong style={{ color: accentColor }}>"Try It On"</strong> below</p>
+                <p className="text-xs font-medium text-gray-600 mb-1">Ready to try on!</p>
+                <p className="text-[10px] text-gray-400 uppercase tracking-wider">Click <strong style={{ color: accentColor }}>"Try It On"</strong> below</p>
               </>
             ) : (
               <>
-                <p className="text-sm font-medium text-gray-400 mb-1">Result will appear here</p>
-                <p className="text-xs text-gray-300">Upload both images first</p>
+                <p className="text-xs font-medium text-gray-400 mb-1">Result will appear here</p>
+                <p className="text-[10px] text-gray-300 uppercase tracking-wider">Upload both images first</p>
               </>
             )}
           </div>
         )}
+        
+        {/* Reflection Effect */}
+        <div className="absolute inset-0 pointer-events-none bg-gradient-to-bl from-white/0 via-white/5 to-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       </div>
     </div>
+  );
+}
+
+export default function VirtualTryOnPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center text-gray-400">Loading…</div>}>
+      <VirtualTryOnContent />
+    </Suspense>
   );
 }
