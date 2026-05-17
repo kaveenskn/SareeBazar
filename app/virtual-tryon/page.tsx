@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { Upload, Sparkles, RefreshCw, Download, ChevronRight, ImageIcon, User, Wand2 } from "lucide-react";
 
 type UploadState = {
@@ -10,6 +11,7 @@ type UploadState = {
 };
 
 export default function VirtualTryOnPage() {
+  const searchParams = useSearchParams();
   const [saree, setSaree] = useState<UploadState>({ file: null, preview: null, isDragging: false });
   const [person, setPerson] = useState<UploadState>({ file: null, preview: null, isDragging: false });
   const [isProcessing, setIsProcessing] = useState(false);
@@ -18,6 +20,32 @@ export default function VirtualTryOnPage() {
 
   const sareeRef = useRef<HTMLInputElement>(null);
   const personRef = useRef<HTMLInputElement>(null);
+
+  /* ─── Auto-load saree image from query param ─── */
+  useEffect(() => {
+    const sareeParam = searchParams.get("saree");
+    if (sareeParam && !saree.preview) {
+      // Fetch the image and convert to a File object for consistency
+      fetch(sareeParam)
+        .then((res) => res.blob())
+        .then((blob) => {
+          const fileName = sareeParam.split("/").pop() || "saree.png";
+          const file = new File([blob], fileName, { type: blob.type });
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            setSaree({
+              file,
+              preview: e.target?.result as string,
+              isDragging: false,
+            });
+          };
+          reader.readAsDataURL(file);
+        })
+        .catch((err) => {
+          console.error("Failed to load saree image from URL:", err);
+        });
+    }
+  }, [searchParams]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleFile = useCallback(
     (setter: React.Dispatch<React.SetStateAction<UploadState>>, file: File) => {

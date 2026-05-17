@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Heart,
   Star,
@@ -66,15 +67,11 @@ function FilterSection({
   );
 }
 
-/* ─── Color Swatch Data ─── */
-const colorSwatches = [
-  "#C62828", "#1565C0", "#2E7D32", "#F9A825", "#6A1B9A", "#E91E63",
-];
-
 /* ─── Product Card (Myntra-style) ─── */
 function ProductCard({ product }: { product: Product }) {
   const [wishlisted, setWishlisted] = useState(product.isWishlisted || false);
   const [hovered, setHovered] = useState(false);
+  const router = useRouter();
 
   const discountPercent = product.originalPrice
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
@@ -160,23 +157,18 @@ function ProductCard({ product }: { product: Product }) {
             </button>
           </div>
           {/* Virtual Try-On Row */}
-          <div className="flex items-center justify-center gap-2 py-2 bg-gradient-to-r from-[#7c3aed] to-[#a855f7] text-white">
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              router.push(`/virtual-tryon?saree=${encodeURIComponent(product.image)}`);
+            }}
+            className="w-full flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-[#7c3aed] to-[#a855f7] text-white hover:from-[#6d28d9] hover:to-[#9333ea] transition-all duration-200"
+          >
             <Bot size={14} className="animate-bounce-subtle" />
-            <span className="text-[11px] font-semibold uppercase tracking-wider animate-pulse">Virtual Try-On</span>
-            {/* Color Swatches */}
-            <div className="flex items-center gap-1 ml-1">
-              {colorSwatches.slice(0, 4).map((color, i) => (
-                <span
-                  key={i}
-                  className="w-3 h-3 rounded-full border border-white/40 animate-swatch-blink"
-                  style={{
-                    backgroundColor: color,
-                    animationDelay: `${i * 0.2}s`,
-                  }}
-                />
-              ))}
-            </div>
-          </div>
+            <span className="text-[11px] font-semibold uppercase tracking-wider">Virtual Try-On</span>
+            <span className="text-[10px] opacity-70">→</span>
+          </button>
         </div>
       </div>
 
