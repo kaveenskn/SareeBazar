@@ -524,22 +524,6 @@ export default function CollectionsPage() {
               ))}
             </FilterSection>
 
-            {/* Fabric Filter */}
-            <FilterSection title="Fabric" defaultOpen={false}>
-              {["Pure Silk", "Banarasi Silk", "Cotton", "Georgette", "Tussar Silk", "Chanderi Cotton"].map(
-                (fabric) => (
-                  <label
-                    key={fabric}
-                    className="flex items-center gap-3 cursor-pointer"
-                  >
-                    <div className="w-4 h-4 rounded-[3px] border-2 border-[#d4d5d9] flex items-center justify-center hover:border-[#ff3f6c] transition-colors" />
-                    <span className="text-[13px] text-[#282c3f] font-normal">
-                      {fabric}
-                    </span>
-                  </label>
-                ),
-              )}
-            </FilterSection>
 
             {/* Customer Ratings */}
             <FilterSection title="Customer Ratings" defaultOpen={false}>
