@@ -10,6 +10,8 @@ export interface Product {
   name: string;
   slug: string;
   image: string;
+  images?: string[];
+  video?: string;
   price: number;
   originalPrice?: number;
   rating: number;
