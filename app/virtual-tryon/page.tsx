@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { Sparkles, RefreshCw, Download, ChevronRight, ImageIcon, User, Wand2 } from "lucide-react";
+import { Upload, Sparkles, RefreshCw, Download, ChevronRight, ImageIcon, User, Wand2 } from "lucide-react";
 
 type UploadState = {
   file: File | null;
@@ -21,13 +21,31 @@ function VirtualTryOnContent() {
   const sareeRef = useRef<HTMLInputElement>(null);
   const personRef = useRef<HTMLInputElement>(null);
 
-  // Pre-fill saree from collection query param
+  /* ─── Auto-load saree image from query param ─── */
   useEffect(() => {
-    const sareeUrl = searchParams.get("saree");
-    if (sareeUrl) {
-      setSaree({ file: null, preview: decodeURIComponent(sareeUrl), isDragging: false });
+    const sareeParam = searchParams.get("saree");
+    if (sareeParam && !saree.preview) {
+      // Fetch the image and convert to a File object for consistency
+      fetch(sareeParam)
+        .then((res) => res.blob())
+        .then((blob) => {
+          const fileName = sareeParam.split("/").pop() || "saree.png";
+          const file = new File([blob], fileName, { type: blob.type });
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            setSaree({
+              file,
+              preview: e.target?.result as string,
+              isDragging: false,
+            });
+          };
+          reader.readAsDataURL(file);
+        })
+        .catch((err) => {
+          console.error("Failed to load saree image from URL:", err);
+        });
     }
-  }, [searchParams]);
+  }, [searchParams]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleFile = useCallback(
     (setter: React.Dispatch<React.SetStateAction<UploadState>>, file: File) => {

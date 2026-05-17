@@ -51,7 +51,7 @@ const categories = [
 export function Collections() {
   return (
     <Section align="center" heightClass="h-[140vh]" topClass="top-[calc(33%-200px)]">
-      <div className="w-full flex flex-col items-center text-center">
+      <div className="w-full flex flex-col items-center text-center" style={{ fontFamily: "var(--font-figtree), sans-serif", fontWeight: 400 }}>
         {/* Heading */}
         <h2 className="text-5xl md:text-7xl font-bold mb-3 text-gray-900 drop-shadow-[0_2px_15px_rgba(255,255,255,1)]">
           Curated <span className="text-[#B88E52]">Collections</span>

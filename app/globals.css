@@ -58,6 +58,36 @@ body {
   animation: slide-in 0.3s ease-out;
 }
 
+/* ─── Collections: Swatch Blink ─── */
+@keyframes swatch-blink {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.75);
+  }
+}
+
+.animate-swatch-blink {
+  animation: swatch-blink 1.4s ease-in-out infinite;
+}
+
+/* ─── Collections: Bot Bounce ─── */
+@keyframes bounce-subtle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+.animate-bounce-subtle {
+  animation: bounce-subtle 1s ease-in-out infinite;
+}
+
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
