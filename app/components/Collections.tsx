@@ -50,13 +50,21 @@ const categories = [
 
 export function Collections() {
   return (
-    <section className="relative w-full py-24 bg-white">
-      <div className="max-w-[1400px] mx-auto px-6 flex flex-col items-center text-center">
+    <section className="relative w-full py-24 bg-[var(--background)] overflow-hidden">
+      {/* Decorative Background Shape */}
+      <div className="absolute left-0 top-[35%] w-full h-full z-0 opacity-40 pointer-events-none">
+        <svg viewBox="0 0 1440 320" className="w-full h-auto text-primary/10 fill-current">
+          <path d="M0,192L80,181.3C160,171,320,149,480,165.3C640,181,800,235,960,229.3C1120,224,1280,160,1360,128L1440,96L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"></path>
+        </svg>
+        <div className="w-full h-full bg-primary/10 -mt-1" />
+      </div>
+
+      <div className="max-w-[1400px] mx-auto px-6 flex flex-col items-center text-center relative z-10">
         {/* Heading */}
-        <h2 className="text-4xl md:text-6xl font-bold mb-4 text-gray-900">
-          Curated <span className="text-[#B88E52]">Collections</span>
+        <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold mb-4 text-gray-900 leading-[1.05] tracking-tight">
+          Curated <span className="text-primary">Collections</span>
         </h2>
-        <p className="text-lg font-medium text-gray-700 mb-16 max-w-2xl">
+        <p className="text-base md:text-[17px] font-normal leading-relaxed text-gray-700 mb-16 max-w-2xl">
           From Banarasi brocades to everyday cotton — discover sarees for every occasion.
         </p>
 
@@ -98,7 +106,7 @@ export function Collections() {
 
         {/* CTA */}
         <Link href="/collections">
-          <button className="mt-20 px-14 py-4.5 border-2 font-bold tracking-wide rounded-full transition-all duration-300 border-[#B88E52] text-[#B88E52] bg-white/60 hover:bg-[#B88E52] hover:text-white shadow-lg hover:shadow-[0_8px_30px_rgb(184,142,82,0.3)] transform hover:-translate-y-1 backdrop-blur-sm">
+          <button className="mt-20 px-8 py-3.5 text-[15px] font-semibold tracking-wide rounded-xl transition-all duration-300 bg-primary hover:bg-primary/90 text-white shadow-[0_8px_30px_rgba(161,0,91,0.3)] hover:shadow-[0_8px_30px_rgba(161,0,91,0.5)] transform hover:-translate-y-1">
             View All Collections
           </button>
         </Link>

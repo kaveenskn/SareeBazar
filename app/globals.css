@@ -12,6 +12,7 @@
   --font-serif: var(--font-playfair), ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
   --font-mono: var(--font-geist-mono);
   --font-figtree: var(--font-figtree);
+  --font-rounded: var(--font-quicksand);
   --color-primary: #a1005b;
   --color-peacock-100: #f8f3eb;
   --color-peacock-300: #dfc7a5;

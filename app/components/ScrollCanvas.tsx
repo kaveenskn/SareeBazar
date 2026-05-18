@@ -141,6 +141,8 @@ export default function ScrollCanvas() {
         />
         {/* Dimmed overlay for better text contrast */}
         <div className="absolute inset-0 z-10 bg-black/5" />
+        {/* Bottom fade overlay to blend with the solid background sections below */}
+        <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-[var(--background)] via-[var(--background)]/30 to-transparent z-10 pointer-events-none" />
       </div>
     </div>
   );
