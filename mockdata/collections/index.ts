@@ -16,6 +16,7 @@ export type {
   FilterCategory,
   HeroBanner,
   CollectionMeta,
+  ColorVariant,
 } from "./types";
 
 // Data

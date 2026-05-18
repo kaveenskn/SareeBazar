@@ -5,6 +5,12 @@
  *  can be reused for API response validation.
  * ───────────────────────────────────────────── */
 
+export interface ColorVariant {
+  name: string;
+  hex: string;
+  image: string;
+}
+
 export interface Product {
   id: number;
   name: string;
@@ -22,6 +28,7 @@ export interface Product {
   description?: string;
   fabric?: string;
   color?: string;
+  colorVariants?: ColorVariant[];
   inStock?: boolean;
   createdAt?: string;
 }
