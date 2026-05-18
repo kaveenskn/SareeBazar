@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ShoppingBag, Heart, Star, Bot, Truck, ShieldCheck, ArrowRightLeft, Tag } from "lucide-react";
 import { products } from "@/mockdata/collections";
 import Navbar from "@/app/components/Navbar";
+import ProductGallery from "@/app/components/ProductGallery";
 
 export default async function ProductPage({ params }: { params: { slug: string } }) {
   const { slug } = await params;
@@ -37,40 +38,13 @@ export default async function ProductPage({ params }: { params: { slug: string }
 
       <div className="max-w-[1400px] mx-auto px-4 pb-20 flex flex-col lg:flex-row gap-8">
         
-        {/* ─── Left Side: Media Gallery (Myntra Style Grid) ─── */}
-        <div className="w-full lg:w-[60%] flex flex-col gap-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {/* Video (if available) - typically placed first or second */}
-            {video && (
-              <div className="relative aspect-[3/4] bg-[#f5f5f6] overflow-hidden group cursor-pointer">
-                <video 
-                  src={video} 
-                  className="w-full h-full object-cover" 
-                  autoPlay 
-                  loop 
-                  muted 
-                  playsInline 
-                />
-              </div>
-            )}
-            
-            {/* Images */}
-            {gallery.map((img, index) => (
-              <div key={index} className="relative aspect-[3/4] bg-[#f5f5f6] overflow-hidden group cursor-zoom-in">
-                <Image
-                  src={img}
-                  alt={`${product.name} - Angle ${index + 1}`}
-                  fill
-                  quality={100}
-                  unoptimized={true}
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                  priority={index < 2}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
+        {/* ─── Left Side: Video + Image Cards with Color Picker ─── */}
+        <ProductGallery
+          video={video}
+          images={gallery}
+          colorVariants={product.colorVariants}
+          productName={product.name}
+        />
 
         {/* ─── Right Side: Product Details (Sticky) ─── */}
         <div className="w-full lg:w-[40%]">
@@ -131,18 +105,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
               </Link>
             </div>
 
-            {/* Size / Fit */}
-            <div className="mt-6">
-              <div className="flex items-center justify-between">
-                <h4 className="text-[16px] font-bold text-[#282c3f]">SELECT SIZE</h4>
-                <button className="text-[14px] font-bold text-[#ff3f6c] uppercase">Size Chart</button>
-              </div>
-              <div className="mt-4 flex gap-3">
-                <button className="w-14 h-14 rounded-full border-2 border-[#ff3f6c] text-[#ff3f6c] font-bold text-[14px] flex items-center justify-center bg-white hover:bg-[#fff0f3] transition-colors">
-                  One Size
-                </button>
-              </div>
-            </div>
+
 
             {/* Actions */}
             <div className="mt-8 flex gap-4">
