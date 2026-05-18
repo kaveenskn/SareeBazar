@@ -102,6 +102,29 @@ export default function ProductView({
               )}
             </div>
           </div>
+
+          {/* ─── OTHER PHOTOS BELOW ─── */}
+          {gallery.length > 1 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-1">
+              {gallery.map((img, idx) => {
+                // Skip the currently active image so we don't show duplicates on the left side
+                if (img === activeImage) return null;
+                return (
+                  <div key={idx} className="relative aspect-[3/4] bg-[#f5f5f6] rounded-[12px] overflow-hidden group cursor-zoom-in shadow-sm hover:shadow-md transition-shadow duration-300">
+                    <Image
+                      src={img}
+                      alt={`${product.name} - Angle ${idx + 1}`}
+                      fill
+                      quality={100}
+                      unoptimized={true}
+                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* ─── RIGHT SIDE: Product Details (Sticky) ─── */}
@@ -157,7 +180,7 @@ export default function ProductView({
                   </span>
                 </div>
 
-                <div className="flex items-start gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                <div className="flex items-start gap-3 overflow-x-auto py-3 px-2 -mx-2 scrollbar-hide">
                   {colorVariants.map((variant) => {
                     const isActive = activeColor === variant.name;
                     return (
@@ -172,7 +195,7 @@ export default function ProductView({
                         `}
                         style={
                           isActive 
-                            ? { boxShadow: `0 0 0 2px ${variant.hex}, 0 0 12px ${variant.hex}60` } 
+                            ? { boxShadow: `0 0 0 2px white, 0 0 0 4px ${variant.hex}, 0 4px 12px ${variant.hex}60` } 
                             : {}
                         }
                         title={variant.name}
@@ -306,6 +329,14 @@ export default function ProductView({
         @keyframes gallerySlideUp {
           0% { opacity: 0; transform: translateY(6px); }
           100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes swatchPulse {
+          0% { transform: scale(0.95); opacity: 0.8; }
+          50% { transform: scale(1.03); opacity: 1; }
+          100% { transform: scale(1); opacity: 1; }
+        }
+        .active-swatch {
+          animation: swatchPulse 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
       `}</style>
     </>
