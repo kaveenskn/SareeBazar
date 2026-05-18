@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Star, ThumbsUp, ThumbsDown, MoreVertical, Edit3 } from "lucide-react";
+import { Star, ThumbsUp, ThumbsDown, MoreVertical, Edit3, X } from "lucide-react";
 import type { Product } from "@/mockdata/collections";
 
 interface Review {
@@ -18,7 +18,7 @@ interface Review {
   images?: string[];
 }
 
-const dummyReviews: Review[] = [
+const initialReviews: Review[] = [
   {
     id: "r1",
     author: "Anjali M.",
@@ -58,6 +58,35 @@ const dummyReviews: Review[] = [
 
 export default function ProductReviews({ product }: { product: Product }) {
   const [activeTab, setActiveTab] = useState("all");
+  const [reviews, setReviews] = useState<Review[]>(initialReviews);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newRating, setNewRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [newTitle, setNewTitle] = useState("");
+  const [newContent, setNewContent] = useState("");
+
+  const handleReviewSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newRating === 0 || !newTitle.trim() || !newContent.trim()) return;
+
+    const newReviewObj: Review = {
+      id: `r${Date.now()}`,
+      author: "Guest User",
+      rating: newRating,
+      date: new Date().toLocaleDateString("en-GB", { day: 'numeric', month: 'long', year: 'numeric' }),
+      title: newTitle,
+      content: newContent,
+      helpful: 0,
+      unhelpful: 0,
+      verified: true,
+    };
+
+    setReviews([newReviewObj, ...reviews]);
+    setIsModalOpen(false);
+    setNewRating(0);
+    setNewTitle("");
+    setNewContent("");
+  };
 
   const ratingSummary = {
     5: 75,
@@ -73,7 +102,10 @@ export default function ProductReviews({ product }: { product: Product }) {
       
       <div className="flex items-center justify-between mb-8">
         <h2 className="text-[28px] font-bold text-[#282c3f] tracking-tight">Customer Ratings & Reviews</h2>
-        <button className="flex items-center gap-2 bg-[#ff3f6c] text-white px-6 py-3 rounded-[4px] font-bold text-[14px] uppercase tracking-wide hover:bg-[#ed315d] transition-colors shadow-sm">
+        <button 
+          onClick={() => setIsModalOpen(true)}
+          className="flex items-center gap-2 bg-[#ff3f6c] text-white px-6 py-3 rounded-[4px] font-bold text-[14px] uppercase tracking-wide hover:bg-[#ed315d] transition-colors shadow-sm"
+        >
           <Edit3 size={18} /> Write a Review
         </button>
       </div>
@@ -152,7 +184,7 @@ export default function ProductReviews({ product }: { product: Product }) {
 
           {/* Review Cards */}
           <div className="space-y-10">
-            {dummyReviews.map((review) => (
+            {reviews.map((review) => (
               <div key={review.id} className="border-b border-[#eaeaec] pb-10 last:border-0 hover:bg-[#fcfcfc] p-4 -mx-4 rounded-xl transition-colors">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-4">
@@ -220,6 +252,94 @@ export default function ProductReviews({ product }: { product: Product }) {
           </button>
         </div>
       </div>
+
+      {/* Write a Review Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-opacity">
+          <div className="bg-white rounded-[12px] w-full max-w-lg p-7 relative shadow-[0_10px_40px_rgba(0,0,0,0.1)] animate-in fade-in zoom-in duration-200">
+            <button 
+              onClick={() => setIsModalOpen(false)}
+              className="absolute top-5 right-5 text-[#7e818c] hover:text-[#282c3f] transition-colors bg-[#f5f5f6] p-1.5 rounded-full hover:bg-[#eaeaec]"
+            >
+              <X size={20} />
+            </button>
+            
+            <h3 className="text-[24px] font-bold text-[#282c3f] mb-6">Write a Review</h3>
+            
+            <form onSubmit={handleReviewSubmit} className="flex flex-col gap-6">
+              {/* Star Rating Input */}
+              <div>
+                <label className="block text-[14px] font-bold text-[#282c3f] mb-3">Overall Rating <span className="text-[#ff3f6c]">*</span></label>
+                <div className="flex gap-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onMouseEnter={() => setHoverRating(star)}
+                      onMouseLeave={() => setHoverRating(0)}
+                      onClick={() => setNewRating(star)}
+                      className="focus:outline-none transition-transform hover:scale-110"
+                    >
+                      <Star 
+                        size={32} 
+                        className={`transition-colors duration-200 ${
+                          star <= (hoverRating || newRating) 
+                            ? "fill-[#14958f] text-[#14958f]" 
+                            : "fill-[#eaeaec] text-[#eaeaec]"
+                        }`} 
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Title Input */}
+              <div>
+                <label className="block text-[14px] font-bold text-[#282c3f] mb-2">Review Title <span className="text-[#ff3f6c]">*</span></label>
+                <input
+                  type="text"
+                  required
+                  value={newTitle}
+                  onChange={(e) => setNewTitle(e.target.value)}
+                  placeholder="Summarize your experience"
+                  className="w-full border-2 border-[#eaeaec] rounded-[6px] px-4 py-3 text-[15px] focus:outline-none focus:border-[#282c3f] transition-colors"
+                />
+              </div>
+
+              {/* Content Input */}
+              <div>
+                <label className="block text-[14px] font-bold text-[#282c3f] mb-2">Review Details <span className="text-[#ff3f6c]">*</span></label>
+                <textarea
+                  required
+                  value={newContent}
+                  onChange={(e) => setNewContent(e.target.value)}
+                  placeholder="What did you like or dislike? How was the fit and fabric?"
+                  rows={4}
+                  className="w-full border-2 border-[#eaeaec] rounded-[6px] px-4 py-3 text-[15px] focus:outline-none focus:border-[#282c3f] transition-colors resize-y"
+                ></textarea>
+              </div>
+
+              {/* Submit Action */}
+              <div className="mt-4 flex justify-end gap-4">
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-6 py-3.5 rounded-[4px] font-bold text-[14px] uppercase tracking-wide text-[#535766] hover:text-[#282c3f] transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={newRating === 0 || !newTitle.trim() || !newContent.trim()}
+                  className="px-8 py-3.5 rounded-[4px] font-bold text-[14px] uppercase tracking-wide bg-[#ff3f6c] text-white hover:bg-[#ed315d] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                >
+                  Submit Review
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
