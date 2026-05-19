@@ -3,6 +3,7 @@ import Link from "next/link";
 import { products } from "@/mockdata/collections";
 import Navbar from "@/app/components/Navbar";
 import ProductView from "@/app/components/ProductView";
+import ProductReviews from "@/app/components/ProductReviews";
 
 export default async function ProductPage({ params }: { params: { slug: string } }) {
   const { slug } = await params;
@@ -40,6 +41,9 @@ export default async function ProductPage({ params }: { params: { slug: string }
         video={video}
         discountPercent={discountPercent}
       />
+
+      {/* Customer Reviews Section */}
+      <ProductReviews product={product} />
     </main>
   );
 }
