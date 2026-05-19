@@ -5,7 +5,7 @@ export function Hero() {
 
     <Section align="left" heightClass="h-[300vh]" isFirst={true} topClass="top-[200px]">
       <div className="max-w-xl text-left">
-        <h1 className="text-6xl md:text-8xl font-serif font-bold tracking-tighter mb-6 drop-shadow-md">
+        <h1 className="text-6xl md:text-8xl font-sans font-bold tracking-tighter mb-6 drop-shadow-md">
           <span className="text-primary">Saree</span>{" "}
           <span className="text-gray-900">Bazar</span>
         </h1>

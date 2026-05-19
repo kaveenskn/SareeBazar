@@ -4,6 +4,7 @@ import { Hero } from "./Hero";
 import { Offers } from "./Offers";
 import { Collections } from "./Collections";
 import { About } from "./About";
+import { Marquee } from "./Marquee";
 
 import { VisitUs } from "./VisitUs";
 import Footer from "./Footer";
@@ -16,6 +17,7 @@ export default function ContentOverlay() {
       <Offers />
       <About />
       <Collections />
+      <Marquee />
 
       <VisitUs />
       <Footer />

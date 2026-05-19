@@ -30,7 +30,7 @@ export function About() {
       <div className="max-w-3xl mx-auto px-6 flex flex-col items-center text-center mb-16 md:mb-24 relative z-10">
         <h2 className="text-5xl md:text-7xl font-serif font-bold text-gray-900 leading-[1.1] mb-8">
           Where Tradition Meets <br />
-          <span className="italic text-primary font-bold">
+          <span className="text-primary font-bold">
             Timeless Elegance
           </span>
         </h2>
