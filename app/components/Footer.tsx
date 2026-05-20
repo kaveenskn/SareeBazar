@@ -143,14 +143,14 @@ export default function Footer() {
 
           {/* 2. Quick Links (Col Span 2) */}
           <div className="lg:col-span-2">
-            <h3 className="text-sm font-bold text-gray-900 tracking-wider uppercase mb-6">
+            <h3 className="text-sm font-bold text-gray-900 tracking-wider uppercase mb-6 mt-1">
               Shop
             </h3>
             <ul className="space-y-4">
               <FooterLink href="/">Home</FooterLink>
+              <FooterLink href="/about">About Us</FooterLink>
               <FooterLink href="/collections">Shop Sarees</FooterLink>
-              <FooterLink href="/collections/new">New Arrivals</FooterLink>
-              <FooterLink href="/collections/bridal">
+              <FooterLink href="/collections?category=bridal#filters">
                 Bridal Collection
               </FooterLink>
               <FooterLink href="/wishlist">Wishlist</FooterLink>
@@ -159,7 +159,7 @@ export default function Footer() {
 
           {/* 3. Customer Support (Col Span 2) */}
           <div className="lg:col-span-2">
-            <h3 className="text-sm font-bold text-gray-900 tracking-wider uppercase mb-6">
+            <h3 className="text-sm font-bold text-gray-900 tracking-wider uppercase mb-6 mt-1">
               Support
             </h3>
             <ul className="space-y-4">
