@@ -24,7 +24,7 @@ export default function Navbar() {
     { href: "#offers", label: "TODAY'S OFFER" },
     { href: "/collections", label: "COLLECTIONS" },
     { href: "/virtual-tryon", label: "VIRTUAL TRY-ON" },
-    { href: "#about", label: "ABOUT US" },
+    { href: "/studio", label: "STUDIO" },
   ];
 
   return (
