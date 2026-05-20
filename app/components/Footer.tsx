@@ -97,6 +97,48 @@ export default function Footer() {
               <SocialIcon icon={<TwitterIcon size={18} />} href="#" />
               <SocialIcon icon={<YoutubeIcon size={18} />} href="#" />
             </div>
+
+            <div className="mt-6 flex items-center gap-6 flex-nowrap">
+              <div className="flex items-center gap-2 text-gray-600 whitespace-nowrap">
+                <ShieldCheck size={18} className="text-primary" />
+                <span className="text-[12px] font-semibold text-gray-900">
+                  Secure Checkout · 100% Protected
+                </span>
+              </div>
+              <div className="hidden sm:block w-px h-8 bg-[#dfc7a5]/40"></div>
+              <div className="flex items-center gap-2 text-gray-600 whitespace-nowrap">
+                <Truck size={18} className="text-primary" />
+                <span className="text-[12px] font-semibold text-gray-900">
+                  Fast Delivery · Global Shipping
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-5 flex items-center gap-3">
+              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider mr-2">
+                We Accept
+              </span>
+              <div className="flex gap-2">
+                <div className="w-10 h-6 bg-white border border-[#dfc7a5] rounded flex items-center justify-center shadow-sm">
+                  <span className="text-[10px] font-bold text-[#1a1f71]">
+                    VISA
+                  </span>
+                </div>
+                <div className="w-10 h-6 bg-white border border-[#dfc7a5] rounded flex items-center justify-center shadow-sm">
+                  <div className="flex -space-x-1">
+                    <div className="w-3 h-3 rounded-full bg-[#eb001b] mix-blend-multiply"></div>
+                    <div className="w-3 h-3 rounded-full bg-[#f79e1b] mix-blend-multiply"></div>
+                  </div>
+                </div>
+                <div className="w-10 h-6 bg-white border border-[#dfc7a5] rounded flex items-center justify-center shadow-sm px-1">
+                  <span className="text-[8px] font-bold text-gray-800 leading-none text-center">
+                    CASH ON
+                    <br />
+                    DELIVERY
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* 2. Quick Links (Col Span 2) */}
@@ -188,64 +230,8 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* 7. Payment & Trust Indicators */}
-        <div className="py-8 border-y border-[#dfc7a5]/40 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex flex-wrap items-center justify-center md:justify-start gap-8">
-            <div className="flex items-center gap-3 text-gray-600">
-              <ShieldCheck size={24} className="text-primary" />
-              <div className="flex flex-col">
-                <span className="text-[13px] font-bold text-gray-900 leading-tight">
-                  Secure Checkout
-                </span>
-                <span className="text-[11px] uppercase tracking-wider">
-                  100% Protected
-                </span>
-              </div>
-            </div>
-            <div className="hidden sm:block w-px h-8 bg-[#dfc7a5]/40"></div>
-            <div className="flex items-center gap-3 text-gray-600">
-              <Truck size={24} className="text-primary" />
-              <div className="flex flex-col">
-                <span className="text-[13px] font-bold text-gray-900 leading-tight">
-                  Fast Delivery
-                </span>
-                <span className="text-[11px] uppercase tracking-wider">
-                  Global Shipping
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider mr-2">
-              We Accept
-            </span>
-            {/* Payment Icons Simulation */}
-            <div className="flex gap-2">
-              <div className="w-10 h-6 bg-white border border-[#dfc7a5] rounded flex items-center justify-center shadow-sm">
-                <span className="text-[10px] font-bold text-[#1a1f71]">
-                  VISA
-                </span>
-              </div>
-              <div className="w-10 h-6 bg-white border border-[#dfc7a5] rounded flex items-center justify-center shadow-sm">
-                <div className="flex -space-x-1">
-                  <div className="w-3 h-3 rounded-full bg-[#eb001b] mix-blend-multiply"></div>
-                  <div className="w-3 h-3 rounded-full bg-[#f79e1b] mix-blend-multiply"></div>
-                </div>
-              </div>
-              <div className="w-10 h-6 bg-white border border-[#dfc7a5] rounded flex items-center justify-center shadow-sm px-1">
-                <span className="text-[8px] font-bold text-gray-800 leading-none text-center">
-                  CASH ON
-                  <br />
-                  DELIVERY
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* 9. Bottom Footer Bar */}
-        <div className="pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
+        <div className="pt-4 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
           <p className="text-[13px] text-gray-500 font-medium">
             © {new Date().getFullYear()} SareeBazar. All rights reserved.
           </p>
