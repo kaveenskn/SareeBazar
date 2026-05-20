@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -287,8 +287,21 @@ const sortOptions = [
 ];
 
 /* ─── Main Page ─── */
-export default function CollectionsPage() {
-  const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
+function CollectionsContent() {
+  const searchParams = useSearchParams();
+  const categoryParam = searchParams.get("category");
+
+  const [selectedFilters, setSelectedFilters] = useState<string[]>(
+    categoryParam ? [categoryParam] : []
+  );
+  
+  useEffect(() => {
+    if (categoryParam) {
+      setSelectedFilters((prev) => 
+        prev.includes(categoryParam) ? prev : [categoryParam]
+      );
+    }
+  }, [categoryParam]);
   const [sortBy, setSortBy] = useState("recommended");
   const [currentPage, setCurrentPage] = useState(1);
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
@@ -796,5 +809,13 @@ export default function CollectionsPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function CollectionsPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+      <CollectionsContent />
+    </Suspense>
   );
 }

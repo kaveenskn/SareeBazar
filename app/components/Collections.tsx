@@ -70,9 +70,10 @@ export function Collections() {
 
         <div className="w-full flex flex-wrap justify-center gap-12">
           {categories.map((cat) => (
-            <div
+            <Link
+              href={`/collections?category=${encodeURIComponent(cat.name)}`}
               key={cat.id}
-              className="group relative w-[350px] flex-shrink-0 rounded-3xl overflow-hidden shadow-[0_12px_40px_rgba(0,0,0,0.15)] bg-white border border-white/60 hover:-translate-y-3 hover:shadow-[0_20px_60px_rgba(0,0,0,0.2)] transition-all duration-500 cursor-pointer"
+              className="group relative w-[350px] flex-shrink-0 rounded-3xl overflow-hidden shadow-[0_12px_40px_rgba(0,0,0,0.15)] bg-white border border-white/60 hover:-translate-y-3 hover:shadow-[0_20px_60px_rgba(0,0,0,0.2)] transition-all duration-500 cursor-pointer block"
             >
               {/* Image */}
               <div className="relative w-full h-[450px] overflow-hidden">
@@ -100,7 +101,7 @@ export function Collections() {
                 <h3 className="text-xl font-bold text-gray-900 leading-tight">{cat.name}</h3>
                 <p className="text-sm text-gray-500 font-medium tracking-wide">{cat.subtitle}</p>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
 

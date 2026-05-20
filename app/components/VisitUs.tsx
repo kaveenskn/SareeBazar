@@ -23,11 +23,11 @@ export function VisitUs() {
       </div>
 
       <div className="max-w-[1300px] mx-auto px-6 flex flex-col lg:flex-row gap-12 lg:gap-20 items-center relative z-10">
-        
+
         {/* Left Side: Image */}
         <div className="w-full lg:w-[45%] relative rounded-[2.5rem] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.1)] h-[550px] lg:h-[650px] flex-shrink-0">
-          <Image 
-            src="/images/collections/bridal_saree.png" 
+          <Image
+            src="/images/collections/bridal_saree.png"
             alt="Saree Bazar Boutique"
             fill
             className="object-cover"
@@ -44,7 +44,7 @@ export function VisitUs() {
               <h3 className="text-white text-2xl font-serif mb-1 leading-none">Saree Bazar</h3>
               <p className="text-white/80 text-xs font-medium tracking-wide">A sanctuary of silk & tradition</p>
             </div>
-            <button className="w-12 h-12 rounded-full bg-[#c48d40] text-white flex items-center justify-center hover:scale-105 transition-transform shadow-lg">
+            <button className="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center hover:scale-105 transition-transform shadow-lg">
               <ArrowUpRight size={20} strokeWidth={2.5} />
             </button>
           </div>
@@ -53,9 +53,9 @@ export function VisitUs() {
         {/* Right Side: Content */}
         <div className="w-full lg:w-[55%] flex flex-col">
           <h2 className="text-5xl md:text-7xl font-serif font-bold text-gray-900 leading-[1.1] mb-6">
-            Visit <span className="italic bg-gradient-to-r from-primary to-[#d4a359] bg-clip-text text-transparent font-bold">Saree Bazar</span>
+            Visit <span className="text-primary font-bold">Saree Bazar</span>
           </h2>
-          
+
           <p className="text-gray-600 font-medium text-[16px] md:text-[17px] leading-relaxed mb-10 max-w-xl">
             Step into a world of elegance, tradition, and timeless fashion. Explore our exclusive saree collections in person and experience premium customer service.
           </p>
@@ -69,7 +69,7 @@ export function VisitUs() {
                 </div>
                 <div>
                   <p className="text-[10px] font-bold text-primary/60 tracking-widest uppercase mb-1">Location</p>
-                  <p className="text-gray-800 font-serif text-[15px] leading-snug">No. 25, Main Street,<br/>Colombo, Sri Lanka</p>
+                  <p className="text-gray-800 font-serif text-[15px] leading-snug">No. 25, Main Street,<br />Colombo, Sri Lanka</p>
                 </div>
               </div>
 
@@ -107,12 +107,10 @@ export function VisitUs() {
           {/* Buttons & Socials */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-8 mt-2">
             <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
-              <button className="w-full sm:w-auto flex justify-center items-center gap-2 px-8 py-3.5 bg-gradient-to-r from-[#b34078] to-[#d8896a] text-white font-bold text-[11px] tracking-widest uppercase rounded-full shadow-[0_8px_20px_rgba(161,0,91,0.25)] hover:shadow-[0_8px_25px_rgba(161,0,91,0.4)] hover:-translate-y-0.5 transition-all">
+              <button className="w-full sm:w-auto flex justify-center items-center gap-2 px-8 py-3.5 bg-primary text-white font-bold text-[11px] tracking-widest uppercase rounded-full shadow-[0_8px_20px_rgba(161,0,91,0.25)] hover:shadow-[0_8px_25px_rgba(161,0,91,0.4)] hover:-translate-y-0.5 transition-all">
                 <Navigation size={14} strokeWidth={2.5} /> Get Directions
               </button>
-              <button className="w-full sm:w-auto flex justify-center items-center gap-2 px-8 py-3.5 bg-white border border-primary/20 text-gray-700 hover:text-primary font-bold text-[11px] tracking-widest uppercase rounded-full hover:bg-primary/5 transition-colors shadow-sm">
-                Explore Collections <ArrowUpRight size={14} strokeWidth={2.5} />
-              </button>
+
             </div>
 
             <div className="flex items-center gap-4">
