@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Figtree, Playfair_Display, Quicksand } from "next/font/google";
 import "./globals.css";
 import NavbarWrapper from "./components/NavbarWrapper";
 import FooterWrapper from "./components/FooterWrapper";
@@ -15,6 +15,25 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const figtree = Figtree({
+  variable: "--font-figtree",
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
+});
+
+const playfair = Playfair_Display({
+  variable: "--font-playfair",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const quicksand = Quicksand({
+  variable: "--font-quicksand",
+  subsets: ["latin"],
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "Saree Bazar",
   description: "Community Ecommerce Project",
@@ -28,8 +47,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased light`}
+      className={`${geistSans.variable} ${geistMono.variable} ${figtree.variable} ${playfair.variable} ${quicksand.variable} h-full antialiased light`}
     >
+
       <body className="min-h-full flex flex-col bg-white text-black">
         <Providers>
           <NavbarWrapper />
@@ -38,6 +58,7 @@ export default function RootLayout({
           </div>
           <FooterWrapper />
         </Providers>
+
       </body>
     </html>
   );

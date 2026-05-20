@@ -39,7 +39,7 @@ const YoutubeIcon = ({ size = 18 }) => (
 
 export default function Footer() {
   return (
-    <footer className="bg-[#f8f3eb] pt-16 pb-8 border-t border-[#dfc7a5]/30">
+    <footer className="bg-[#fbeff6] pt-16 pb-8 border-t border-[#dfc7a5]/30">
       <div className="max-w-7xl mx-auto px-6 md:px-8">
         
         {/* Main Footer Grid */}

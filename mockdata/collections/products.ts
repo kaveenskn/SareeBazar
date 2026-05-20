@@ -31,6 +31,19 @@ export const products: Product[] = [
     color: "Gold",
     inStock: true,
     createdAt: "2026-05-01",
+    images: [
+      "/images/products/kanjivaram-silk-saree/saree1_blue.jpeg",
+      "/images/products/kanjivaram-silk-saree/saree1_green.jpeg",
+      "/images/products/kanjivaram-silk-saree/saree1_purple.jpeg",
+      "/images/products/kanjivaram-silk-saree/saree1_red.jpeg"
+    ],
+    colorVariants: [
+      { name: "Royal Blue", hex: "#1e40af", image: "/images/products/kanjivaram-silk-saree/saree1_blue.jpeg" },
+      { name: "Emerald Green", hex: "#16a34a", image: "/images/products/kanjivaram-silk-saree/saree1_green.jpeg" },
+      { name: "Purple", hex: "#7c3aed", image: "/images/products/kanjivaram-silk-saree/saree1_purple.jpeg" },
+      { name: "Red", hex: "#dc2626", image: "/images/products/kanjivaram-silk-saree/saree1_red.jpeg" },
+    ],
+    video: "/images/products/kanjivaram-silk-saree/0517.mp4",
   },
   {
     id: 2,
