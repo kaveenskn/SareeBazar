@@ -44,17 +44,22 @@ const studioPosts = [
 
 export default function StudioPage() {
   return (
-    <div className="min-h-screen bg-gray-50 pt-28 pb-20 font-sans font-normal">
-      <div className="max-w-[500px] mx-auto bg-white min-h-screen shadow-sm border-x border-gray-100">
-        {/* Header */}
-        <div className="sticky top-20 z-40 bg-white/90 backdrop-blur-md border-b border-gray-100 px-4 py-3 flex items-center justify-between">
-          <h1 className="text-xl font-normal text-gray-900">Studio</h1>
-          <span className="text-xs font-normal bg-primary/10 text-primary px-3 py-1 rounded-full">Feed</span>
-        </div>
+    <div className="fixed inset-0 bg-gray-50 font-sans font-normal z-30 flex justify-center">
+      <div className="w-full max-w-[500px] bg-white h-full flex flex-col shadow-sm border-x border-gray-100">
+        {/* Spacer for global Navbar to prevent feed scrolling through it */}
+        <div className="h-[90px] w-full shrink-0 bg-white"></div>
+        
+        {/* Isolated Scrollable Feed */}
+        <div className="flex-1 overflow-y-auto scrollbar-hide pb-20">
+          {/* Header */}
+          <div className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-gray-100 px-4 py-3 flex items-center justify-between">
+            <h1 className="text-xl font-normal text-gray-900">Studio</h1>
+            <span className="text-xs font-normal bg-primary/10 text-primary px-3 py-1 rounded-full">Feed</span>
+          </div>
 
-        {/* Feed */}
-        <div className="divide-y divide-gray-100">
-          {studioPosts.map((post) => (
+          {/* Feed */}
+          <div className="divide-y divide-gray-100">
+            {studioPosts.map((post) => (
             <article key={post.id} className="py-4">
               {/* Post Header */}
               <div className="px-4 flex items-center justify-between mb-3">
@@ -120,6 +125,7 @@ export default function StudioPage() {
             </article>
           ))}
         </div>
+      </div>
       </div>
     </div>
   );
