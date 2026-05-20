@@ -1,7 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { ShieldCheck, Truck, Sparkles, ArrowRight, Camera } from "lucide-react";
+import {
+  ShieldCheck,
+  Truck,
+  Sparkles,
+  ArrowRight,
+  Camera,
+  Mail,
+} from "lucide-react";
 
 // Social SVG Components
 const InstagramIcon = ({ size = 18 }) => (
@@ -90,6 +97,15 @@ export default function Footer() {
               "Elegance in every thread."
             </p>
 
+            <a
+              id="contact-email"
+              href="mailto:support@sareebazar.lk"
+              className="mt-4 inline-flex items-center gap-2 text-[13px] font-medium text-gray-600 hover:text-primary transition-colors"
+            >
+              <Mail size={16} className="text-primary" />
+              support@sareebazar.lk
+            </a>
+
             {/* 6. Social Media */}
             <div className="flex items-center gap-4 mt-8">
               <SocialIcon icon={<InstagramIcon size={18} />} href="#" />
@@ -153,7 +169,6 @@ export default function Footer() {
               <FooterLink href="/collections?category=bridal#filters">
                 Bridal Collection
               </FooterLink>
-              <FooterLink href="/wishlist">Wishlist</FooterLink>
             </ul>
           </div>
 
@@ -163,11 +178,10 @@ export default function Footer() {
               Support
             </h3>
             <ul className="space-y-4">
-              <FooterLink href="/help">Help Center</FooterLink>
               <FooterLink href="/faq">FAQs</FooterLink>
               <FooterLink href="/shipping">Shipping Info</FooterLink>
               <FooterLink href="/returns">Returns & Refunds</FooterLink>
-              <FooterLink href="/track-order">Order Tracking</FooterLink>
+              <FooterLink href="#contact-email">Contact Us</FooterLink>
             </ul>
           </div>
 
@@ -231,30 +245,10 @@ export default function Footer() {
         </div>
 
         {/* 9. Bottom Footer Bar */}
-        <div className="pt-4 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
+        <div className="pt-4 flex items-center justify-center text-center">
           <p className="text-[13px] text-gray-500 font-medium">
             © {new Date().getFullYear()} SareeBazar. All rights reserved.
           </p>
-          <div className="flex items-center gap-6">
-            <Link
-              href="/privacy"
-              className="text-[13px] text-gray-500 hover:text-primary transition-colors"
-            >
-              Privacy Policy
-            </Link>
-            <Link
-              href="/terms"
-              className="text-[13px] text-gray-500 hover:text-primary transition-colors"
-            >
-              Terms of Service
-            </Link>
-            <Link
-              href="/contact"
-              className="text-[13px] text-gray-500 hover:text-primary transition-colors"
-            >
-              Contact Us
-            </Link>
-          </div>
         </div>
       </div>
     </footer>

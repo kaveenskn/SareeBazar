@@ -60,7 +60,7 @@ const faqs = [
 
 export default function FAQPage() {
   return (
-    <main className="min-h-screen bg-[#fbeff6] px-6 py-12 md:px-8">
+    <main className="min-h-screen bg-[#fbeff6] px-6 pt-24 pb-12 md:px-8">
       <div className="mx-auto w-full max-w-4xl">
         <div className="mb-8">
           <p className="text-xs font-semibold uppercase tracking-wider text-primary">
@@ -108,7 +108,7 @@ export default function FAQPage() {
           </p>
           <div className="mt-4">
             <Link
-              href="/contact"
+              href="/contact#contact-email"
               className="inline-flex items-center rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary/90"
             >
               Contact Support
