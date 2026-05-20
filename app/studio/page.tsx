@@ -44,12 +44,12 @@ const studioPosts = [
 
 export default function StudioPage() {
   return (
-    <div className="min-h-screen bg-gray-50 pt-28 pb-20">
+    <div className="min-h-screen bg-gray-50 pt-28 pb-20 font-sans font-normal">
       <div className="max-w-[500px] mx-auto bg-white min-h-screen shadow-sm border-x border-gray-100">
         {/* Header */}
         <div className="sticky top-20 z-40 bg-white/90 backdrop-blur-md border-b border-gray-100 px-4 py-3 flex items-center justify-between">
-          <h1 className="text-xl font-serif font-semibold text-gray-900">Studio</h1>
-          <span className="text-xs font-medium bg-primary/10 text-primary px-3 py-1 rounded-full">Feed</span>
+          <h1 className="text-xl font-normal text-gray-900">Studio</h1>
+          <span className="text-xs font-normal bg-primary/10 text-primary px-3 py-1 rounded-full">Feed</span>
         </div>
 
         {/* Feed */}
@@ -69,9 +69,9 @@ export default function StudioPage() {
                   </div>
                   <div>
                     <div className="flex items-center">
-                      <span className="font-semibold text-sm text-gray-900">{post.user.username}</span>
+                      <span className="font-normal text-sm text-gray-900">{post.user.username}</span>
                       <span className="mx-1.5 text-gray-300 text-xs">•</span>
-                      <button className="text-primary font-semibold text-sm hover:text-primary/80 transition-colors">
+                      <button className="text-primary font-normal text-sm hover:text-primary/80 transition-colors">
                         Follow
                       </button>
                     </div>
@@ -104,12 +104,12 @@ export default function StudioPage() {
                   </button>
                 </div>
                 
-                <div className="text-sm font-semibold text-gray-900 mb-1">
+                <div className="text-sm font-normal text-gray-900 mb-1">
                   {post.likes} likes
                 </div>
                 
                 <div className="text-sm text-gray-800">
-                  <span className="font-semibold mr-2">{post.user.username}</span>
+                  <span className="font-normal mr-2">{post.user.username}</span>
                   {post.caption}
                 </div>
                 
