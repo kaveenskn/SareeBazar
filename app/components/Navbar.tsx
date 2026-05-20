@@ -2,22 +2,29 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { Search, Heart, ShoppingBag, Menu, X, User, LogOut, FileText, Settings } from "lucide-react";
+import { Search, Heart, ShoppingBag, Menu, X, User, LogOut, Package } from "lucide-react";
+import { getCartCount } from "@/lib/cartStore";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
 
   // Toggle this constant to test logged in vs logged out UI
   const isLoggedIn = false;
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
+    const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    setCartCount(getCartCount());
+    const sync = () => setCartCount(getCartCount());
+    window.addEventListener("cart-updated", sync);
+    return () => window.removeEventListener("cart-updated", sync);
   }, []);
 
   const navLinks = [
@@ -89,7 +96,7 @@ export default function Navbar() {
                             <User size={16} className="mr-3" />My Profile
                           </Link>
                           <Link href="/orders" className="flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors" onClick={() => setProfileDropdownOpen(false)}>
-                            <ShoppingBag size={16} className="mr-3" />Orders
+                            <Package size={16} className="mr-3" />My Orders
                           </Link>
                           <Link href="/wishlist" className="flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors" onClick={() => setProfileDropdownOpen(false)}>
                             <Heart size={16} className="mr-3" />Wishlist
@@ -121,12 +128,18 @@ export default function Navbar() {
                 )}
               </div>
 
-              <button
-                className="flex items-center space-x-2 px-5 py-2 rounded-full text-white text-[13px] font-medium transition-transform hover:scale-105 bg-primary"
+              <Link
+                href="/cart"
+                className="relative flex items-center space-x-2 px-5 py-2 rounded-full text-white text-[13px] font-medium transition-transform hover:scale-105 bg-primary"
               >
                 <ShoppingBag size={16} strokeWidth={1.5} />
                 <span className="hidden sm:inline">Cart</span>
-              </button>
+                {cartCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-[#ff3f6c] text-white text-[10px] font-bold flex items-center justify-center border-2 border-white shadow">
+                    {cartCount > 9 ? "9+" : cartCount}
+                  </span>
+                )}
+              </Link>
               <button
                 className="lg:hidden text-gray-700"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -158,6 +171,7 @@ export default function Navbar() {
                 ) : (
                   <>
                     <Link href="/profile" onClick={() => setMobileMenuOpen(false)} className="text-[13px] font-semibold text-gray-700">My Profile</Link>
+                    <Link href="/orders" onClick={() => setMobileMenuOpen(false)} className="text-[13px] font-semibold text-gray-700">My Orders</Link>
                     <button className="text-[13px] font-semibold text-red-600 text-left" onClick={() => setMobileMenuOpen(false)}>Logout</button>
                   </>
                 )}

@@ -3,8 +3,11 @@
 import { useState, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ShoppingBag, Heart, Star, Bot, Truck, Tag } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ShoppingBag, Heart, Star, Bot, Truck, Tag, Check, CreditCard } from "lucide-react";
+import toast from "react-hot-toast";
 import type { Product, ColorVariant } from "@/mockdata/collections";
+import { addToCart, setCheckoutItems } from "@/lib/cartStore";
 
 interface ProductViewProps {
   product: Product;
@@ -19,11 +22,17 @@ export default function ProductView({
   video,
   discountPercent,
 }: ProductViewProps) {
+  const router = useRouter();
   const colorVariants = product.colorVariants;
   const [activeImage, setActiveImage] = useState(gallery[0] || "");
   const [activeColor, setActiveColor] = useState<string | null>(
     colorVariants && colorVariants.length > 0 ? colorVariants[0].name : null
   );
+  const [activeColorHex, setActiveColorHex] = useState<string>(
+    colorVariants && colorVariants.length > 0 ? colorVariants[0].hex : "#000"
+  );
+  const [quantity, setQuantity] = useState(1);
+  const [addedToBag, setAddedToBag] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [prevImage, setPrevImage] = useState<string | null>(null);
 
@@ -33,7 +42,9 @@ export default function ProductView({
       setPrevImage(activeImage);
       setIsTransitioning(true);
       setActiveColor(variant.name);
+      setActiveColorHex(variant.hex);
       setActiveImage(variant.image);
+      setAddedToBag(false);
       setTimeout(() => {
         setIsTransitioning(false);
         setPrevImage(null);
@@ -41,6 +52,36 @@ export default function ProductView({
     },
     [activeColor, activeImage]
   );
+
+  const buildVariant = () => ({
+    productId: product.id,
+    slug: product.slug,
+    name: product.name,
+    selectedColor: activeColor || product.color || "Default",
+    selectedColorHex: activeColorHex,
+    selectedColorImage: activeImage,
+    quantity,
+    price: product.price,
+    originalPrice: product.originalPrice,
+    image: gallery[0],
+    category: product.category,
+    fabric: product.fabric,
+  });
+
+  const handleAddToBag = () => {
+    addToCart(buildVariant());
+    setAddedToBag(true);
+    toast.success(
+      `Added to bag: ${product.name} · ${activeColor || "Default"}`,
+      { icon: "🛍️" }
+    );
+    setTimeout(() => setAddedToBag(false), 2500);
+  };
+
+  const handleBuyNow = () => {
+    setCheckoutItems([buildVariant()]);
+    router.push("/checkout");
+  };
 
   return (
     <>
@@ -235,15 +276,53 @@ export default function ProductView({
               </Link>
             </div>
 
+            {/* Quantity Selector */}
+            <div className="mt-6 flex items-center gap-4">
+              <span className="text-[14px] font-semibold text-[#535766] uppercase tracking-wide">Qty:</span>
+              <div className="flex items-center border border-[#d4d5d9] rounded-[4px] overflow-hidden">
+                <button
+                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                  className="w-9 h-9 flex items-center justify-center text-[#282c3f] hover:bg-[#f5f5f6] transition-colors text-[18px] font-bold"
+                >
+                  −
+                </button>
+                <span className="w-10 h-9 flex items-center justify-center text-[15px] font-bold text-[#282c3f] border-x border-[#d4d5d9]">
+                  {quantity}
+                </span>
+                <button
+                  onClick={() => setQuantity((q) => q + 1)}
+                  className="w-9 h-9 flex items-center justify-center text-[#282c3f] hover:bg-[#f5f5f6] transition-colors text-[18px] font-bold"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
             {/* Actions */}
-            <div className="mt-6 flex gap-4">
-              <button className="flex-1 h-14 bg-[#ff3f6c] text-white rounded-[4px] font-bold text-[15px] uppercase tracking-wide flex items-center justify-center gap-2 shadow-sm hover:bg-[#ed315d] transition-colors">
-                <ShoppingBag size={20} /> Add to Bag
+            <div className="mt-4 flex gap-4">
+              <button
+                onClick={handleAddToBag}
+                className={`flex-1 h-14 rounded-[4px] font-bold text-[15px] uppercase tracking-wide flex items-center justify-center gap-2 shadow-sm transition-all ${
+                  addedToBag
+                    ? "bg-[#03a685] text-white"
+                    : "bg-[#ff3f6c] text-white hover:bg-[#ed315d]"
+                }`}
+              >
+                {addedToBag ? <Check size={20} /> : <ShoppingBag size={20} />}
+                {addedToBag ? "Added!" : "Add to Bag"}
               </button>
-              <button className="flex-1 h-14 bg-white border border-[#d4d5d9] text-[#282c3f] rounded-[4px] font-bold text-[15px] uppercase tracking-wide flex items-center justify-center gap-2 hover:border-[#282c3f] transition-colors">
-                <Heart size={20} /> Wishlist
+              <button
+                onClick={handleBuyNow}
+                className="flex-1 h-14 bg-white border-2 border-[#282c3f] text-[#282c3f] rounded-[4px] font-bold text-[15px] uppercase tracking-wide flex items-center justify-center gap-2 hover:bg-[#282c3f] hover:text-white transition-all"
+              >
+                <CreditCard size={20} /> Buy Now
               </button>
             </div>
+
+            {/* Wishlist */}
+            <button className="mt-3 w-full h-10 bg-transparent border border-[#d4d5d9] text-[#535766] rounded-[4px] font-semibold text-[14px] uppercase tracking-wide flex items-center justify-center gap-2 hover:border-[#282c3f] hover:text-[#282c3f] transition-colors">
+              <Heart size={17} /> Add to Wishlist
+            </button>
 
             {/* Delivery Options */}
             <div className="mt-8">
