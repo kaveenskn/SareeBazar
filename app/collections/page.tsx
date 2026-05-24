@@ -19,10 +19,7 @@ import {
   Bot,
 } from "lucide-react";
 
-import {
-  products,
-  filterCategories,
-} from "@/mockdata/collections";
+import { products, filterCategories } from "@/mockdata/collections";
 import type { Product } from "@/mockdata/collections";
 
 const ITEMS_PER_PAGE = 12;
@@ -74,7 +71,10 @@ function ProductCard({ product }: { product: Product }) {
   const router = useRouter();
 
   // For image carousel
-  const images = product.images && product.images.length > 0 ? product.images : [product.image];
+  const images =
+    product.images && product.images.length > 0
+      ? product.images
+      : [product.image];
   const [currentImageIdx, setCurrentImageIdx] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
@@ -106,7 +106,9 @@ function ProductCard({ product }: { product: Product }) {
   };
 
   const discountPercent = product.originalPrice
-    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+    ? Math.round(
+        ((product.originalPrice - product.price) / product.originalPrice) * 100,
+      )
     : 0;
 
   return (
@@ -143,13 +145,13 @@ function ProductCard({ product }: { product: Product }) {
             >
               <ChevronRight size={16} className="text-[#282c3f]" />
             </button>
-            
+
             {/* Carousel dots */}
             <div className="absolute bottom-24 left-0 right-0 flex justify-center gap-1.5 z-10 transition-transform duration-300">
               {images.map((_, idx) => (
-                <div 
-                  key={idx} 
-                  className={`h-1.5 rounded-full transition-all ${idx === currentImageIdx ? "w-3 bg-white" : "w-1.5 bg-white/50"}`} 
+                <div
+                  key={idx}
+                  className={`h-1.5 rounded-full transition-all ${idx === currentImageIdx ? "w-3 bg-white" : "w-1.5 bg-white/50"}`}
                 />
               ))}
             </div>
@@ -193,9 +195,7 @@ function ProductCard({ product }: { product: Product }) {
           <Heart
             size={16}
             className={
-              wishlisted
-                ? "fill-[#ff3e6c] text-[#ff3e6c]"
-                : "text-[#535766]"
+              wishlisted ? "fill-[#ff3e6c] text-[#ff3e6c]" : "text-[#535766]"
             }
           />
         </button>
@@ -224,12 +224,16 @@ function ProductCard({ product }: { product: Product }) {
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              router.push(`/virtual-tryon?saree=${encodeURIComponent(images[currentImageIdx])}`);
+              router.push(
+                `/virtual-tryon?saree=${encodeURIComponent(images[currentImageIdx])}`,
+              );
             }}
             className="w-full flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-[#7c3aed] to-[#a855f7] text-white hover:from-[#6d28d9] hover:to-[#9333ea] transition-all duration-200"
           >
             <Bot size={14} className="animate-bounce-subtle" />
-            <span className="text-[11px] font-semibold uppercase tracking-wider animate-pulse">Virtual Try-On</span>
+            <span className="text-[11px] font-semibold uppercase tracking-wider animate-pulse">
+              Virtual Try-On
+            </span>
             <span className="text-[10px] opacity-70 ml-1">→</span>
           </button>
         </div>
@@ -303,6 +307,7 @@ function CollectionsContent() {
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const searchParams = useSearchParams();
 
   const toggleFilter = (category: string) => {
     setSelectedFilters((prev) =>
@@ -317,6 +322,29 @@ function CollectionsContent() {
     setSelectedFilters([]);
     setCurrentPage(1);
   };
+
+  useEffect(() => {
+    const rawCategory =
+      searchParams.get("category") || searchParams.get("filter");
+    if (!rawCategory) {
+      return;
+    }
+
+    const normalized = rawCategory.trim().toLowerCase();
+    const match = filterCategories.find((cat) => {
+      return (
+        cat.label.toLowerCase() === normalized ||
+        cat.slug.toLowerCase() === normalized
+      );
+    });
+
+    if (!match) {
+      return;
+    }
+
+    setSelectedFilters([match.label]);
+    setCurrentPage(1);
+  }, [searchParams]);
 
   /* ─── Filtering ─── */
   const filteredProducts = useMemo(() => {
@@ -408,7 +436,6 @@ function CollectionsContent() {
           </div>
         </div>
       </div>
-
 
       {/* ─── Page Title Bar ─── */}
       <div className="bg-white border-b border-[#e8e8e1]">
@@ -522,7 +549,10 @@ function CollectionsContent() {
       {/* ─── Content ─── */}
       <div className="max-w-[1400px] mx-auto flex">
         {/* ─── Sidebar Filters (Desktop) ─── */}
-        <aside className="hidden lg:block w-[250px] flex-shrink-0 bg-white border-r border-[#e8e8e1] min-h-[calc(100vh-180px)]">
+        <aside
+          id="filters"
+          className="hidden lg:block w-[250px] flex-shrink-0 bg-white border-r border-[#e8e8e1] min-h-[calc(100vh-180px)]"
+        >
           <div className="sticky top-[70px] p-4 overflow-y-auto max-h-[calc(100vh-70px)]">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-[14px] font-bold text-[#282c3f] uppercase tracking-wide">
@@ -655,12 +685,26 @@ function CollectionsContent() {
                         onClick={() => toggleFilter(cat.label)}
                       >
                         {selectedFilters.includes(cat.label) && (
-                          <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                            <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                          <svg
+                            width="10"
+                            height="8"
+                            viewBox="0 0 10 8"
+                            fill="none"
+                          >
+                            <path
+                              d="M1 4L3.5 6.5L9 1"
+                              stroke="white"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
                           </svg>
                         )}
                       </div>
-                      <span className="text-[13px] text-[#282c3f]" onClick={() => toggleFilter(cat.label)}>
+                      <span
+                        className="text-[13px] text-[#282c3f]"
+                        onClick={() => toggleFilter(cat.label)}
+                      >
                         {cat.label}
                       </span>
                     </label>
