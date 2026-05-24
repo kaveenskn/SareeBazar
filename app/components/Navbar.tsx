@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { Search, Heart, ShoppingBag, Menu, X, User, LogOut, Package } from "lucide-react";
+import { Search, Heart, ShoppingBag, Menu, X, Settings, LogOut, Package, User } from "lucide-react";
 import { getCartCount } from "@/lib/cartStore";
 
 export default function Navbar() {
@@ -28,7 +28,7 @@ export default function Navbar() {
   }, []);
 
   const navLinks = [
-    { href: "#offers", label: "TODAY'S OFFER" },
+    { href: "/#offers", label: "TODAY'S OFFER" },
     { href: "/collections", label: "COLLECTIONS" },
     { href: "/virtual-tryon", label: "VIRTUAL TRY-ON" },
     { href: "/studio", label: "STUDIO" },
@@ -78,52 +78,40 @@ export default function Navbar() {
               <div className="relative">
                 <button
                   onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                  className="text-gray-700 hover:text-primary transition-colors flex items-center"
+                  className="text-gray-700 hover:text-primary transition-colors flex items-center gap-2"
                 >
-                  <User size={18} strokeWidth={1.5} />
+                  <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-bold border border-primary/20 hover:bg-primary hover:text-white transition-colors">
+                    {isLoggedIn ? "JD" : "JD"}
+                  </div>
                 </button>
 
                 {profileDropdownOpen && (
-                  <div className="absolute right-[-10px] sm:right-[-80px] mt-4 w-[300px] bg-white rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] border border-gray-100 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                    {isLoggedIn ? (
-                      <div className="py-2">
-                        <div className="px-5 py-4 border-b border-gray-50 bg-gray-50/50">
-                          <p className="text-sm font-medium text-gray-900">John Doe</p>
-                          <p className="text-xs text-gray-500 mt-0.5">john.doe@example.com</p>
-                        </div>
-                        <div className="px-3 py-2">
-                          <Link href="/profile" className="flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors" onClick={() => setProfileDropdownOpen(false)}>
-                            <User size={16} className="mr-3" />My Profile
+                  <div className="absolute right-[-10px] sm:right-0 mt-4 w-[200px] bg-white rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] border border-gray-100 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="p-2 flex flex-col space-y-1">
+                      {isLoggedIn ? (
+                        <>
+                          <Link href="/dashboard" onClick={() => setProfileDropdownOpen(false)} className="flex items-center px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-primary/5 hover:text-primary rounded-lg transition-colors">
+                            Dashboard
                           </Link>
-                          <Link href="/orders" className="flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors" onClick={() => setProfileDropdownOpen(false)}>
-                            <Package size={16} className="mr-3" />My Orders
+                          <Link href="/settings" onClick={() => setProfileDropdownOpen(false)} className="flex items-center px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-primary/5 hover:text-primary rounded-lg transition-colors">
+                            <Settings size={16} className="mr-3 text-gray-400" /> Settings
                           </Link>
-                          <Link href="/wishlist" className="flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors" onClick={() => setProfileDropdownOpen(false)}>
-                            <Heart size={16} className="mr-3" />Wishlist
-                          </Link>
-                        </div>
-                        <div className="border-t border-gray-50 px-3 py-2">
-                          <button className="flex w-full items-center px-3 py-2.5 text-sm text-red-600 rounded-lg hover:bg-red-50 transition-colors" onClick={() => setProfileDropdownOpen(false)}>
-                            <LogOut size={16} className="mr-3" />Logout
+                          <div className="h-px bg-gray-100 my-1" />
+                          <button onClick={() => setProfileDropdownOpen(false)} className="flex items-center w-full text-left px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                            <LogOut size={16} className="mr-3" /> Logout
                           </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="p-5">
-                        <div className="mb-5">
-                          <h3 className="text-xl font-bold text-gray-900 whitespace-nowrap">Welcome to SareeBazar</h3>
-                          <p className="text-sm text-gray-500 mt-1">To access account and manage orders</p>
-                        </div>
-                        <div className="space-y-3">
-                          <Link href="/login" onClick={() => setProfileDropdownOpen(false)} className="flex w-full justify-center items-center px-4 py-2.5 rounded-lg text-white text-sm font-medium transition-transform hover:scale-[1.02] bg-primary">
+                        </>
+                      ) : (
+                        <>
+                          <Link href="/login" onClick={() => setProfileDropdownOpen(false)} className="flex items-center px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-primary/5 hover:text-primary rounded-lg transition-colors">
                             Login
                           </Link>
-                          <Link href="/register" onClick={() => setProfileDropdownOpen(false)} className="flex w-full justify-center items-center px-4 py-2.5 rounded-lg text-primary border border-primary text-sm font-medium transition-colors hover:bg-primary/5">
-                            Signup
+                          <Link href="/register" onClick={() => setProfileDropdownOpen(false)} className="flex items-center px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-primary/5 hover:text-primary rounded-lg transition-colors">
+                            Sign Up
                           </Link>
-                        </div>
-                      </div>
-                    )}
+                        </>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>

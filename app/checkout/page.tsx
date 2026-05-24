@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { ShieldCheck, Truck, Package, ChevronRight, Loader2, CreditCard, BadgeCheck } from "lucide-react";
 import toast from "react-hot-toast";
 import { getCheckoutItems, clearCheckoutItems, type CheckoutVariant } from "@/lib/cartStore";
-import { saveOrder, generateOrderId, type ShippingDetails } from "@/lib/ordersStore";
+import { placeOrder, type ShippingDetails, type OrderPayload } from "@/lib/ordersStore";
 import Navbar from "@/app/components/Navbar";
 
 const SHIPPING_FEE = 350;
@@ -45,25 +45,40 @@ export default function CheckoutPage() {
       return;
     }
     setStep("processing");
-    // Simulate gateway delay
-    await new Promise((r) => setTimeout(r, 2200));
 
-    const orderId = generateOrderId();
-    saveOrder({
-      id: orderId,
-      items: items.map((i) => ({ ...i })),
-      shipping,
-      subtotal,
-      shippingFee: SHIPPING_FEE,
-      discount: 0,
-      total,
-      paymentId: `PAY-${Date.now()}`,
-      paymentMethod: payMethod === "card" ? "Credit/Debit Card" : "Cash on Delivery",
-      status: "confirmed",
-      createdAt: new Date().toISOString(),
-    });
-    clearCheckoutItems();
-    router.push(`/order-success?id=${orderId}`);
+    try {
+      const payload: OrderPayload = {
+        items: items.map((i) => ({
+          productId: i.productId,
+          slug: i.slug,
+          name: i.name,
+          selectedColor: i.selectedColor,
+          selectedColorHex: i.selectedColorHex,
+          selectedColorImage: i.selectedColorImage,
+          quantity: i.quantity,
+          price: i.price,
+          originalPrice: i.originalPrice ?? i.price,
+          image: i.image,
+          category: i.category,
+          fabric: i.fabric ?? "",
+        })),
+        shipping,
+        subtotal,
+        shippingFee: SHIPPING_FEE,
+        discount: 0,
+        total,
+        paymentMethod: payMethod === "card" ? "Razorpay" : "Cash on Delivery",
+        paymentId: payMethod === "card" ? "" : undefined,
+      };
+
+      const data = await placeOrder(payload);
+      clearCheckoutItems();
+      router.push(`/order-success?id=${data.order.orderId}`);
+    } catch (error: unknown) {
+      setStep("payment");
+      const message = error instanceof Error ? error.message : "Failed to place order";
+      toast.error(message);
+    }
   };
 
   if (!items.length) return null;

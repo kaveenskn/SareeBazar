@@ -77,7 +77,7 @@ export function Offers() {
   };
 
   return (
-    <Section align="center" heightClass="h-[150vh]" topClass="top-[15vh]">
+    <Section id="offers" align="center" heightClass="h-[150vh]" topClass="top-[15vh]">
       {/* Two-column layout */}
       <div className="w-full flex flex-col md:flex-row items-center justify-between gap-12 lg:gap-20">
 

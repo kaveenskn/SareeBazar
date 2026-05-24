@@ -16,9 +16,12 @@ function OrderSuccessContent() {
   useEffect(() => {
     const id = params.get("id");
     if (!id) { router.replace("/"); return; }
-    const found = getOrder(id);
-    if (!found) { router.replace("/"); return; }
-    setOrder(found);
+    const fetchOrder = async () => {
+      const found = await getOrder(id);
+      if (!found) { router.replace("/"); return; }
+      setOrder(found);
+    };
+    fetchOrder();
   }, [params, router]);
 
   if (!order) return null;

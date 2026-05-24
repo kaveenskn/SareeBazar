@@ -20,10 +20,11 @@ export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
 
   useEffect(() => {
-    setOrders(getOrders());
-    const sync = () => setOrders(getOrders());
-    window.addEventListener("storage", sync);
-    return () => window.removeEventListener("storage", sync);
+    const fetchOrders = async () => {
+      const data = await getOrders();
+      setOrders(data);
+    };
+    fetchOrders();
   }, []);
 
   return (
