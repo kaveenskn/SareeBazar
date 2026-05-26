@@ -11,8 +11,20 @@ export default function Navbar() {
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
 
-  // Toggle this constant to test logged in vs logged out UI
-  const isLoggedIn = true;
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState<{name: string, email: string} | null>(null);
+
+  useEffect(() => {
+    const checkAuth = () => {
+      import('@/lib/authStore').then((module) => {
+        setIsLoggedIn(module.isLoggedIn());
+        setUser(module.getUser());
+      });
+    };
+    checkAuth();
+    window.addEventListener("auth-updated", checkAuth);
+    return () => window.removeEventListener("auth-updated", checkAuth);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -81,7 +93,7 @@ export default function Navbar() {
                   className="text-gray-700 hover:text-primary transition-colors flex items-center gap-2"
                 >
                   <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-bold border border-primary/20 hover:bg-primary hover:text-white transition-colors">
-                    {isLoggedIn ? "JD" : "JD"}
+                    {isLoggedIn && user ? user.name.substring(0, 2).toUpperCase() : "JD"}
                   </div>
                 </button>
 
@@ -100,7 +112,10 @@ export default function Navbar() {
                             <Settings size={16} className="mr-3 text-gray-400" /> Settings
                           </Link>
                           <div className="h-px bg-gray-100 my-1" />
-                          <button onClick={() => setProfileDropdownOpen(false)} className="flex items-center w-full text-left px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                          <button onClick={() => {
+                            setProfileDropdownOpen(false);
+                            import('@/lib/authStore').then((module) => module.logoutUser());
+                          }} className="flex items-center w-full text-left px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors">
                             <LogOut size={16} className="mr-3" /> Logout
                           </button>
                         </>
@@ -164,7 +179,10 @@ export default function Navbar() {
                     <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} className="text-[13px] font-semibold text-primary">Dashboard</Link>
                     <Link href="/orders" onClick={() => setMobileMenuOpen(false)} className="text-[13px] font-semibold text-gray-700">My Orders</Link>
                     <Link href="/profile" onClick={() => setMobileMenuOpen(false)} className="text-[13px] font-semibold text-gray-700">My Profile</Link>
-                    <button className="text-[13px] font-semibold text-red-600 text-left" onClick={() => setMobileMenuOpen(false)}>Logout</button>
+                    <button className="text-[13px] font-semibold text-red-600 text-left" onClick={() => {
+                      setMobileMenuOpen(false);
+                      import('@/lib/authStore').then((module) => module.logoutUser());
+                    }}>Logout</button>
                   </>
                 )}
               </div>

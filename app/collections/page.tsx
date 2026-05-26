@@ -307,7 +307,6 @@ function CollectionsContent() {
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const searchParams = useSearchParams();
 
   const toggleFilter = (category: string) => {
     setSelectedFilters((prev) =>
