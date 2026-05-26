@@ -7,44 +7,20 @@ import { Section } from "./Section";
 
 const categories = [
   {
+    id: "kanjivaram",
+    name: "Kanjivaram Silk Saree",
+    subtitle: "Traditional Temple Weaves",
+    items: "120+ Styles",
+    image: "/images/collections/kanjivaram-silk.png",
+    accent: "#7B3FA0",
+  },
+  {
     id: "silk",
     name: "Silk Sarees",
     subtitle: "Kanjivaram & Banarasi",
     items: "240+ Styles",
     image: "/images/collections/silk_saree.png",
-    accent: "#7B3FA0",
-  },
-  {
-    id: "cotton",
-    name: "Cotton Sarees",
-    subtitle: "Breathable & Elegant",
-    items: "180+ Styles",
-    image: "/images/collections/cotton_saree.png",
-    accent: "#2E86AB",
-  },
-  {
-    id: "handloom",
-    name: "Handloom",
-    subtitle: "Artisan Crafted",
-    items: "150+ Styles",
-    image: "/images/collections/handloom_saree.png",
-    accent: "#C45E1B",
-  },
-  {
-    id: "bridal",
-    name: "Bridal",
-    subtitle: "Wedding Collections",
-    items: "120+ Styles",
-    image: "/images/collections/bridal_saree.png",
-    accent: "#B8112A",
-  },
-  {
-    id: "dailywear",
-    name: "Daily Wear",
-    subtitle: "Comfort & Style",
-    items: "300+ Styles",
-    image: "/images/collections/dailywear_saree.png",
-    accent: "#2D7A5F",
+    accent: "#A0153E",
   },
 ];
 
