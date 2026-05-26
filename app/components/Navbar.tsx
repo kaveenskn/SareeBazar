@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { Search, Heart, ShoppingBag, Menu, X, Settings, LogOut, Package, User } from "lucide-react";
+import { Search, Heart, ShoppingBag, Menu, X, Settings, LogOut, Package, User, BarChart3 } from "lucide-react";
 import { getCartCount } from "@/lib/cartStore";
 
 export default function Navbar() {
@@ -12,7 +12,7 @@ export default function Navbar() {
   const [cartCount, setCartCount] = useState(0);
 
   // Toggle this constant to test logged in vs logged out UI
-  const isLoggedIn = false;
+  const isLoggedIn = true;
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -91,7 +91,10 @@ export default function Navbar() {
                       {isLoggedIn ? (
                         <>
                           <Link href="/dashboard" onClick={() => setProfileDropdownOpen(false)} className="flex items-center px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-primary/5 hover:text-primary rounded-lg transition-colors">
-                            Dashboard
+                            <BarChart3 size={16} className="mr-3 text-gray-400" /> Dashboard
+                          </Link>
+                          <Link href="/orders" onClick={() => setProfileDropdownOpen(false)} className="flex items-center px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-primary/5 hover:text-primary rounded-lg transition-colors">
+                            <Package size={16} className="mr-3 text-gray-400" /> My Orders
                           </Link>
                           <Link href="/settings" onClick={() => setProfileDropdownOpen(false)} className="flex items-center px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-primary/5 hover:text-primary rounded-lg transition-colors">
                             <Settings size={16} className="mr-3 text-gray-400" /> Settings
@@ -158,8 +161,9 @@ export default function Navbar() {
                   </>
                 ) : (
                   <>
-                    <Link href="/profile" onClick={() => setMobileMenuOpen(false)} className="text-[13px] font-semibold text-gray-700">My Profile</Link>
+                    <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} className="text-[13px] font-semibold text-primary">Dashboard</Link>
                     <Link href="/orders" onClick={() => setMobileMenuOpen(false)} className="text-[13px] font-semibold text-gray-700">My Orders</Link>
+                    <Link href="/profile" onClick={() => setMobileMenuOpen(false)} className="text-[13px] font-semibold text-gray-700">My Profile</Link>
                     <button className="text-[13px] font-semibold text-red-600 text-left" onClick={() => setMobileMenuOpen(false)}>Logout</button>
                   </>
                 )}
