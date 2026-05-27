@@ -350,12 +350,26 @@ function CollectionsContent() {
       if (!p.category) return;
       counts[p.category] = (counts[p.category] || 0) + 1;
     });
-    return Object.entries(counts).map(([label, count]) => ({
+    
+    const categories = Object.entries(counts).map(([label, count]) => ({
       label,
       slug: label.toLowerCase().replace(/\s+/g, '-'),
       count,
       icon: "✦"
     }));
+
+    // Add Today's Offer
+    const saleCount = products.filter(p => p.badge === 'Sale').length;
+    if (saleCount > 0) {
+      categories.unshift({
+        label: "Today's Offer",
+        slug: "todays-offer",
+        count: saleCount,
+        icon: "✦"
+      });
+    }
+
+    return categories;
   }, [products]);
 
   useEffect(() => {
@@ -398,7 +412,13 @@ function CollectionsContent() {
     }
 
     if (selectedFilters.length > 0) {
-      result = result.filter((p) => selectedFilters.includes(p.category));
+      if (selectedFilters.includes("Today's Offer")) {
+        result = result.filter(
+          (p) => p.badge === "Sale" || selectedFilters.includes(p.category)
+        );
+      } else {
+        result = result.filter((p) => selectedFilters.includes(p.category));
+      }
     }
 
     switch (sortBy) {
