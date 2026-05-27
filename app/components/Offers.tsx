@@ -59,8 +59,14 @@ function productToSlide(product: Product): OfferSlide {
     "Party Wear": "#FF6347",
   };
 
+  let safeImage = product.image;
+  // If the image is a local blob from the admin panel, it won't work in the user app
+  if (!safeImage || safeImage.startsWith("blob:")) {
+    safeImage = "/images/offers/offer_saree_1.png";
+  }
+
   return {
-    src: product.image || "/images/offers/offer_saree_1.png",
+    src: safeImage,
     label: product.name,
     badge: discount > 0 ? `${discount}% OFF` : "SALE",
     color: colorMap[product.category] || "#B88E52",

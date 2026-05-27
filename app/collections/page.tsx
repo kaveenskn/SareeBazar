@@ -344,6 +344,20 @@ function CollectionsContent() {
     setCurrentPage(1);
   };
 
+  const dynamicCategories = useMemo(() => {
+    const counts: Record<string, number> = {};
+    products.forEach(p => {
+      if (!p.category) return;
+      counts[p.category] = (counts[p.category] || 0) + 1;
+    });
+    return Object.entries(counts).map(([label, count]) => ({
+      label,
+      slug: label.toLowerCase().replace(/\s+/g, '-'),
+      count,
+      icon: "✦"
+    }));
+  }, [products]);
+
   useEffect(() => {
     const rawCategory =
       searchParams.get("category") || searchParams.get("filter");
@@ -352,7 +366,7 @@ function CollectionsContent() {
     }
 
     const normalized = rawCategory.trim().toLowerCase();
-    const match = filterCategories.find((cat) => {
+    const match = dynamicCategories.find((cat) => {
       return (
         cat.label.toLowerCase() === normalized ||
         cat.slug.toLowerCase() === normalized
@@ -365,7 +379,7 @@ function CollectionsContent() {
 
     setSelectedFilters([match.label]);
     setCurrentPage(1);
-  }, [searchParams]);
+  }, [searchParams, dynamicCategories]);
 
   /* ─── Filtering ─── */
   const filteredProducts = useMemo(() => {
@@ -408,7 +422,7 @@ function CollectionsContent() {
     }
 
     return result;
-  }, [selectedFilters, sortBy, searchQuery]);
+  }, [products, selectedFilters, sortBy, searchQuery]);
 
   /* ─── Pagination ─── */
   const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
@@ -591,7 +605,7 @@ function CollectionsContent() {
 
             {/* Category Filter */}
             <FilterSection title="Categories">
-              {filterCategories.map((cat) => (
+              {dynamicCategories.map((cat) => (
                 <label
                   key={cat.label}
                   className="flex items-center gap-3 cursor-pointer group/check"
@@ -692,7 +706,7 @@ function CollectionsContent() {
 
               <div className="px-4 pb-20">
                 <FilterSection title="Categories">
-                  {filterCategories.map((cat) => (
+                  {dynamicCategories.map((cat) => (
                     <label
                       key={cat.label}
                       className="flex items-center gap-3 cursor-pointer"

@@ -35,14 +35,19 @@ interface ApiProduct {
   createdAt: string;
 }
 
+function sanitizeImage(url: string | undefined): string {
+  if (!url || url.startsWith("blob:")) return "";
+  return url;
+}
+
 function mapApiToProduct(api: ApiProduct): Product {
   return {
     id: api._id as unknown as number,
     name: api.name,
     slug: api.slug,
-    image: api.image,
-    images: api.images?.filter(Boolean) || [],
-    video: api.video || undefined,
+    image: sanitizeImage(api.image),
+    images: api.images?.filter(Boolean).map(sanitizeImage).filter(Boolean) || [],
+    video: sanitizeImage(api.video) || undefined,
     price: api.price,
     originalPrice: api.originalPrice ?? undefined,
     rating: api.rating,
@@ -52,7 +57,7 @@ function mapApiToProduct(api: ApiProduct): Product {
     description: api.description,
     fabric: api.fabric,
     color: api.color,
-    colorVariants: api.colorVariants || [],
+    colorVariants: (api.colorVariants || []).map(cv => ({ ...cv, image: sanitizeImage(cv.image) })),
     inStock: api.inStock,
     createdAt: api.createdAt,
   };

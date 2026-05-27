@@ -64,14 +64,18 @@ export function Collections() {
 
     // Build category cards
     const apiCategories = Object.entries(grouped).map(([category, products]) => {
-      // Use the first product's image as the category image
       const firstProduct = products[0];
+      let safeImage = firstProduct.image;
+      if (!safeImage || safeImage.startsWith("blob:")) {
+        safeImage = "/images/collections/kanjivaram-silk.png";
+      }
+
       return {
         id: category.toLowerCase().replace(/\s+/g, "-"),
         name: category,
         subtitle: `${products.length} product${products.length > 1 ? "s" : ""} available`,
         items: `${products.length}+ Styles`,
-        image: firstProduct.image || "/images/collections/kanjivaram-silk.png",
+        image: safeImage,
         accent: accentColors[category] || "#7B3FA0",
       };
     });

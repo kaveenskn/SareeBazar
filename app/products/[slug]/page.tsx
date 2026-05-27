@@ -3,7 +3,7 @@ import Link from "next/link";
 import { products as staticProducts } from "@/mockdata/collections";
 import Navbar from "@/app/components/Navbar";
 import ProductView from "@/app/components/ProductView";
-import ProductReviews from "@/app/components/ProductReviews";
+
 import { fetchProductBySlug } from "@/lib/productApi";
 
 export default async function ProductPage({ params }: { params: { slug: string } }) {
@@ -49,8 +49,6 @@ export default async function ProductPage({ params }: { params: { slug: string }
         discountPercent={discountPercent}
       />
 
-      {/* Customer Reviews Section */}
-      <ProductReviews product={product} />
     </main>
   );
 }

@@ -4,7 +4,7 @@ import { useState, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ShoppingBag, Heart, Star, Bot, Truck, Tag, Check, CreditCard } from "lucide-react";
+import { ShoppingBag, Heart, Star, Bot, Check, CreditCard, ThumbsUp, ThumbsDown, MoreVertical, PenLine } from "lucide-react";
 import toast from "react-hot-toast";
 import type { Product, ColorVariant } from "@/mockdata/collections";
 import { addToCart, setCheckoutItems } from "@/lib/cartStore";
@@ -143,29 +143,166 @@ export default function ProductView({
               )}
             </div>
           </div>
-
-          {/* ─── OTHER PHOTOS BELOW ─── */}
-          {gallery.length > 1 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-1">
-              {gallery.map((img, idx) => {
-                // Skip the currently active image so we don't show duplicates on the left side
-                if (img === activeImage) return null;
-                return (
-                  <div key={idx} className="relative aspect-[3/4] bg-[#f5f5f6] rounded-[12px] overflow-hidden group cursor-zoom-in shadow-sm hover:shadow-md transition-shadow duration-300">
-                    <Image
-                      src={img}
-                      alt={`${product.name} - Angle ${idx + 1}`}
-                      fill
-                      quality={100}
-                      unoptimized={true}
-                      className="object-cover transition-transform duration-700 group-hover:scale-105"
-                      sizes="(max-width: 768px) 100vw, 50vw"
-                    />
+          {/* ─── CUSTOMER RATINGS & REVIEWS ─── */}
+          <div className="mt-12 mb-4">
+            <h2 className="text-[22px] font-bold text-[#282c3f] mb-6">Customer Ratings & Reviews</h2>
+            <div className="bg-white border border-[#eaeaec] rounded-[12px] p-6 md:p-8 shadow-sm">
+              <div className="flex flex-col md:flex-row gap-8 md:gap-12">
+                {/* Left: Overall Rating */}
+                <div className="flex flex-col items-start justify-center min-w-[150px]">
+                  <div className="flex items-center gap-2 text-[#282c3f]">
+                    <span className="text-[52px] font-bold leading-none tracking-tight">{(product.rating || 5.0).toFixed(1)}</span>
+                    <Star size={36} className="fill-[#14958f] text-[#14958f]" />
                   </div>
-                );
-              })}
+                  <div className="mt-3">
+                    <p className="text-[16px] font-bold text-[#282c3f]">Overall Rating</p>
+                    <p className="text-[14px] text-[#535766] mt-0.5">{product.reviews || 1} Verified Buyers</p>
+                  </div>
+                </div>
+
+                {/* Right: Star Distribution */}
+                <div className="flex-1 flex flex-col justify-center gap-3 md:border-l-0 md:pl-4 pt-4 md:pt-0">
+                  {[
+                    { stars: 5, percent: 75, color: "bg-[#14958f]" },
+                    { stars: 4, percent: 15, color: "bg-[#14958f]" },
+                    { stars: 3, percent: 5, color: "bg-[#ff905a]" },
+                    { stars: 2, percent: 3, color: "bg-[#ff3f6c]" },
+                    { stars: 1, percent: 2, color: "bg-[#ff3f6c]" },
+                  ].map((row) => (
+                    <div key={row.stars} className="flex items-center gap-3">
+                      <div className="flex items-center justify-end gap-1 w-8 text-[14px] font-bold text-[#282c3f]">
+                        {row.stars} <Star size={12} className="fill-[#535766] text-[#535766]" />
+                      </div>
+                      <div className="flex-1 h-[6px] bg-[#f5f5f6] rounded-full overflow-hidden">
+                        <div className={`h-full rounded-full ${row.color}`} style={{ width: `${row.percent}%` }}></div>
+                      </div>
+                      <div className="w-8 text-right text-[13px] text-[#535766] font-medium">{row.percent}%</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <hr className="my-8 border-[#eaeaec]" />
+
+              {/* What Customers Say */}
+              <div>
+                <h3 className="text-[16px] font-bold text-[#282c3f] mb-4">What Customers Say</h3>
+                <div className="flex flex-wrap gap-2.5">
+                  {["Excellent Fabric", "Great Color", "Perfect Fit", "Premium Quality", "Value for Money"].map((tag) => (
+                    <span key={tag} className="px-4 py-2 bg-[#f5f5f6] text-[#282c3f] text-[13px] font-semibold rounded-full hover:bg-[#eaeaec] transition-colors cursor-default">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
             </div>
-          )}
+          </div>
+          {/* ─── DETAILED REVIEWS LIST ─── */}
+          <div className="mt-8 mb-8">
+            {/* Header: Tabs & Button */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#eaeaec] pb-3 mb-6">
+              <div className="flex items-center gap-6 text-[15px] font-bold">
+                <button className="text-[#ff3f6c] border-b-2 border-[#ff3f6c] pb-3 -mb-[14px]">All Reviews</button>
+                <button className="text-[#535766] hover:text-[#282c3f] pb-3 -mb-[14px]">With Images</button>
+                <button className="text-[#535766] hover:text-[#282c3f] pb-3 -mb-[14px]">Recent</button>
+              </div>
+              <button className="bg-[#ff3f6c] text-white px-5 py-2.5 rounded-[4px] font-bold text-[14px] flex items-center gap-2 hover:bg-[#ed315d] transition-colors shadow-sm">
+                <PenLine size={16} />
+                WRITE A REVIEW
+              </button>
+            </div>
+
+            {/* Reviews List */}
+            <div className="space-y-6">
+              {/* Review 1 */}
+              <div className="bg-white border border-[#eaeaec] rounded-[12px] p-6 shadow-sm">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full overflow-hidden bg-[#eaeaec] border border-[#d4d5d9] flex items-center justify-center text-[#282c3f] font-bold text-[18px]">
+                      A
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-[15px] text-[#282c3f]">Anjali M.</span>
+                        <span className="flex items-center gap-1 text-[10px] font-bold text-[#03a685] bg-[#e6f6f4] px-1.5 py-0.5 rounded-sm uppercase">
+                          <Check size={10} strokeWidth={3} /> Verified
+                        </span>
+                      </div>
+                      <p className="text-[13px] text-[#94969f] mt-0.5">12 May 2026</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 bg-[#14958f] text-white px-2 py-0.5 rounded-[3px] text-[13px] font-bold">
+                    5 <Star size={10} className="fill-white" />
+                  </div>
+                </div>
+                
+                <div className="mt-4">
+                  <h4 className="font-bold text-[15px] text-[#282c3f]">Absolutely Stunning and Premium Quality</h4>
+                  <p className="text-[14px] text-[#535766] mt-2 leading-relaxed">
+                    I wore this saree for my sister's wedding and received so many compliments! The fabric feels incredibly soft, and the vibrant color exactly matches the pictures. The intricate embroidery work is flawless. Highly recommend purchasing from SareeBazar!
+                  </p>
+                </div>
+
+                <div className="mt-5 flex items-center justify-between text-[13px] text-[#94969f] border-t border-[#eaeaec] pt-4">
+                  <div className="flex items-center gap-4">
+                    <span>Was this helpful?</span>
+                    <button className="flex items-center gap-1.5 hover:text-[#282c3f] transition-colors"><ThumbsUp size={16} /> Yes (45)</button>
+                    <button className="flex items-center gap-1.5 hover:text-[#282c3f] transition-colors"><ThumbsDown size={16} /> No</button>
+                  </div>
+                  <button className="flex items-center gap-1 hover:text-[#282c3f] transition-colors">
+                    <MoreVertical size={16} /> Report
+                  </button>
+                </div>
+              </div>
+
+              {/* Review 2 */}
+              <div className="bg-white border border-[#eaeaec] rounded-[12px] p-6 shadow-sm">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full overflow-hidden bg-[#f5f5f6] border border-[#d4d5d9] flex items-center justify-center text-[#535766] font-bold text-[18px]">
+                      K
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-[15px] text-[#282c3f]">Kavya S.</span>
+                        <span className="flex items-center gap-1 text-[10px] font-bold text-[#03a685] bg-[#e6f6f4] px-1.5 py-0.5 rounded-sm uppercase">
+                          <Check size={10} strokeWidth={3} /> Verified
+                        </span>
+                      </div>
+                      <p className="text-[13px] text-[#94969f] mt-0.5">28 April 2026</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 bg-[#14958f] text-white px-2 py-0.5 rounded-[3px] text-[13px] font-bold">
+                    4 <Star size={10} className="fill-white" />
+                  </div>
+                </div>
+                
+                <div className="mt-4">
+                  <h4 className="font-bold text-[15px] text-[#282c3f]">Beautiful color, good fabric</h4>
+                  <p className="text-[14px] text-[#535766] mt-2 leading-relaxed">
+                    The saree is very beautiful and looks just like the pictures. The only reason I am giving it 4 stars instead of 5 is because the blouse piece was slightly smaller than expected. But overall a great purchase!
+                  </p>
+                </div>
+
+                <div className="mt-5 flex items-center justify-between text-[13px] text-[#94969f] border-t border-[#eaeaec] pt-4">
+                  <div className="flex items-center gap-4">
+                    <span>Was this helpful?</span>
+                    <button className="flex items-center gap-1.5 hover:text-[#282c3f] transition-colors"><ThumbsUp size={16} /> Yes (12)</button>
+                    <button className="flex items-center gap-1.5 hover:text-[#282c3f] transition-colors"><ThumbsDown size={16} /> No (2)</button>
+                  </div>
+                  <button className="flex items-center gap-1 hover:text-[#282c3f] transition-colors">
+                    <MoreVertical size={16} /> Report
+                  </button>
+                </div>
+              </div>
+            </div>
+            {/* Load More Reviews Button */}
+            <div className="mt-8 text-center">
+              <button className="bg-white border border-[#d4d5d9] text-[#282c3f] px-6 py-2.5 rounded-[4px] font-bold text-[14px] hover:border-[#282c3f] hover:bg-[#f5f5f6] transition-colors shadow-sm">
+                Load More Reviews
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* ─── RIGHT SIDE: Product Details (Sticky) ─── */}
@@ -324,56 +461,7 @@ export default function ProductView({
               <Heart size={17} /> Add to Wishlist
             </button>
 
-            {/* Delivery Options */}
-            <div className="mt-8">
-              <h4 className="text-[16px] font-bold text-[#282c3f] flex items-center gap-2 uppercase">
-                Delivery Options <Truck size={18} />
-              </h4>
-              <div className="mt-4 relative max-w-[300px]">
-                <input
-                  type="text"
-                  placeholder="Enter pincode"
-                  className="w-full p-3 pr-20 border border-[#d4d5d9] rounded-[4px] text-[14px] focus:outline-none focus:border-[#282c3f]"
-                />
-                <button className="absolute right-3 top-1/2 -translate-y-1/2 text-[14px] font-bold text-[#ff3f6c]">Check</button>
-              </div>
-              <p className="text-[13px] text-[#535766] mt-2">
-                Please enter PIN code to check delivery time &amp; Pay on Delivery Availability
-              </p>
 
-              <ul className="mt-5 space-y-3 text-[14px] text-[#535766]">
-                <li className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-[#535766]"></span>
-                  100% Original Products
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-[#535766]"></span>
-                  Pay on delivery might be available
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-[#535766]"></span>
-                  Easy 14 days returns and exchanges
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-[#535766]"></span>
-                  Try &amp; Buy might be available
-                </li>
-              </ul>
-            </div>
-
-            {/* Best Offers */}
-            <div className="mt-8 pt-6 border-t border-[#eaeaec]">
-              <h4 className="text-[16px] font-bold text-[#282c3f] flex items-center gap-2 uppercase mb-4">
-                Best Offers <Tag size={18} />
-              </h4>
-              <div className="text-[14px] text-[#282c3f]">
-                <p className="font-bold">Applicable on: Orders above Rs. 1499</p>
-                <p className="text-[#535766] mt-1">Coupon code: <span className="font-bold text-[#282c3f]">SAREE100</span></p>
-                <p className="text-[#535766]">Coupon Discount: Rs. 100 off (check cart for final savings)</p>
-              </div>
-            </div>
-
-            <hr className="my-6 border-[#eaeaec]" />
 
             {/* Product Details */}
             <div>
