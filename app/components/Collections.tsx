@@ -1,11 +1,15 @@
 "use client";
 
+import { useEffect, useState, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
 import { Section } from "./Section";
+import { fetchAllProducts } from "@/lib/productApi";
+import type { Product } from "@/mockdata/collections";
 
-const categories = [
+/* ── Static fallback categories ── */
+const defaultCategories = [
   {
     id: "kanjivaram",
     name: "Kanjivaram Silk Saree",
@@ -24,7 +28,68 @@ const categories = [
   },
 ];
 
+const accentColors: Record<string, string> = {
+  "Silk Sarees": "#A0153E",
+  "Kanjivaram Silk Saree": "#7B3FA0",
+  "Cotton Sarees": "#4A7C59",
+  "Handloom": "#5B7FBE",
+  "Bridal": "#D4175C",
+  "Daily Wear": "#6B8E23",
+  "Georgette": "#9370DB",
+  "Designer": "#D93097",
+  "Party Wear": "#FF6347",
+};
+
 export function Collections() {
+  const [apiProducts, setApiProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    fetchAllProducts().then((data) => {
+      if (data.length > 0) {
+        setApiProducts(data);
+      }
+    });
+  }, []);
+
+  // Build category cards from API products
+  const categories = useMemo(() => {
+    if (apiProducts.length === 0) return defaultCategories;
+
+    // Group products by category
+    const grouped: Record<string, Product[]> = {};
+    apiProducts.forEach((p) => {
+      if (!grouped[p.category]) grouped[p.category] = [];
+      grouped[p.category].push(p);
+    });
+
+    // Build category cards
+    const apiCategories = Object.entries(grouped).map(([category, products]) => {
+      const firstProduct = products[0];
+      let safeImage = firstProduct.image;
+      if (!safeImage || safeImage.startsWith("blob:")) {
+        safeImage = "/images/collections/kanjivaram-silk.png";
+      }
+
+      return {
+        id: category.toLowerCase().replace(/\s+/g, "-"),
+        name: category,
+        subtitle: `${products.length} product${products.length > 1 ? "s" : ""} available`,
+        items: `${products.length}+ Styles`,
+        image: safeImage,
+        accent: accentColors[category] || "#7B3FA0",
+      };
+    });
+
+    if (apiCategories.length > 0) {
+      // Merge: API categories + default ones not covered by API
+      const apiCategoryNames = new Set(apiCategories.map(c => c.name));
+      const uniqueDefaults = defaultCategories.filter(c => !apiCategoryNames.has(c.name));
+      return [...apiCategories, ...uniqueDefaults];
+    }
+
+    return defaultCategories;
+  }, [apiProducts]);
+
   return (
     <section className="relative w-full py-24 bg-[var(--background)] overflow-hidden">
       {/* Decorative Background Shape */}
@@ -59,6 +124,7 @@ export function Collections() {
                   fill
                   sizes="(max-width: 768px) 100vw, 350px"
                   className="object-cover object-top group-hover:scale-110 transition-transform duration-700"
+                  unoptimized
                 />
                 {/* Gradient overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />

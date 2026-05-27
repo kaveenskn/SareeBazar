@@ -1,17 +1,24 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { products } from "@/mockdata/collections";
+import { products as staticProducts } from "@/mockdata/collections";
 import Navbar from "@/app/components/Navbar";
 import ProductView from "@/app/components/ProductView";
-import ProductReviews from "@/app/components/ProductReviews";
+
+import { fetchProductBySlug } from "@/lib/productApi";
 
 export default async function ProductPage({ params }: { params: { slug: string } }) {
   const { slug } = await params;
   
-  const product = products.find((p) => p.slug === slug);
-
+  // Try fetching from backend API first, fallback to static data
+  let product = await fetchProductBySlug(slug);
+  
   if (!product) {
-    notFound();
+    // Fallback to static mock data
+    const staticProduct = staticProducts.find((p) => p.slug === slug);
+    if (!staticProduct) {
+      notFound();
+    }
+    product = staticProduct;
   }
 
   // Fallback to a single image if the gallery array is not provided
@@ -42,8 +49,6 @@ export default async function ProductPage({ params }: { params: { slug: string }
         discountPercent={discountPercent}
       />
 
-      {/* Customer Reviews Section */}
-      <ProductReviews product={product} />
     </main>
   );
 }
