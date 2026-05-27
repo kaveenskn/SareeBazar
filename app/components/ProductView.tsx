@@ -464,7 +464,7 @@ export default function ProductView({
 
 
             {/* Product Details */}
-            <div>
+            <div className="mt-8">
               <h4 className="text-[16px] font-bold text-[#282c3f] uppercase mb-4">Product Details</h4>
               <p className="text-[14px] text-[#535766] leading-relaxed">
                 {product.description}

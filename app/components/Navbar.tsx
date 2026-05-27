@@ -40,7 +40,6 @@ export default function Navbar() {
   }, []);
 
   const navLinks = [
-    { href: "/#offers", label: "TODAY'S OFFER" },
     { href: "/collections", label: "COLLECTIONS" },
     { href: "/virtual-tryon", label: "VIRTUAL TRY-ON" },
     { href: "/studio", label: "STUDIO" },

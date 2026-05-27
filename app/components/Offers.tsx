@@ -181,9 +181,9 @@ export function Offers() {
     ))}
   </div>
 
-  <Link href="/collections?badge=Sale">
+  <Link href="/collections?category=Today's Offer">
     <button className="px-8 py-3.5 text-[15px] font-semibold tracking-wide rounded-xl transition-all duration-300 transform hover:-translate-y-1 bg-primary hover:bg-primary/90 text-white shadow-[0_8px_30px_rgba(161,0,91,0.35)] hover:shadow-[0_8px_30px_rgba(161,0,91,0.55)]">
-      Explore Offers
+      Explore Today's Offers
     </button>
   </Link>
 </div>
