@@ -3,33 +3,87 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
+import Link from "next/link";
 import { Section } from "./Section";
+import { fetchSaleProducts } from "@/lib/productApi";
+import type { Product } from "@/mockdata/collections";
 
-const slides = [
+/* ── Default static slides (fallback when no Sale products exist) ── */
+const defaultSlides = [
   {
     src: "/images/offers/offer_saree_1.png",
     label: "Kanjivaram Silk",
     badge: "40% OFF",
     color: "#B88E52",
+    link: "/collections",
   },
   {
     src: "/images/offers/offer_saree_2.png",
     label: "Banarasi Elegance",
     badge: "35% OFF",
     color: "#5B7FBE",
+    link: "/collections",
   },
   {
     src: "/images/offers/offer_saree_3.png",
     label: "Chanderi Collection",
     badge: "30% OFF",
     color: "#4A7C59",
+    link: "/collections",
   },
 ];
+
+interface OfferSlide {
+  src: string;
+  label: string;
+  badge: string;
+  color: string;
+  link: string;
+}
+
+/* ── Convert a Sale-badge product into an offer slide ── */
+function productToSlide(product: Product): OfferSlide {
+  const discount = product.originalPrice
+    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+    : 0;
+
+  // Pick a color accent based on category
+  const colorMap: Record<string, string> = {
+    "Silk Sarees": "#B88E52",
+    "Cotton Sarees": "#4A7C59",
+    "Handloom": "#5B7FBE",
+    "Bridal": "#A0153E",
+    "Daily Wear": "#6B8E23",
+    "Georgette": "#9370DB",
+    "Designer": "#D93097",
+    "Party Wear": "#FF6347",
+  };
+
+  return {
+    src: product.image || "/images/offers/offer_saree_1.png",
+    label: product.name,
+    badge: discount > 0 ? `${discount}% OFF` : "SALE",
+    color: colorMap[product.category] || "#B88E52",
+    link: `/products/${product.slug}`,
+  };
+}
 
 export function Offers() {
   const [current, setCurrent] = useState(0);
   const [direction, setDirection] = useState(1);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [slides, setSlides] = useState<OfferSlide[]>(defaultSlides);
+
+  // Fetch Sale products from the backend
+  useEffect(() => {
+    fetchSaleProducts().then((saleProducts) => {
+      if (saleProducts.length > 0) {
+        const saleSlides = saleProducts.map(productToSlide);
+        // Combine sale products with defaults for a richer carousel
+        setSlides([...saleSlides, ...defaultSlides.slice(0, Math.max(0, 3 - saleSlides.length))]);
+      }
+    });
+  }, []);
 
   const goTo = (index: number, dir: number) => {
     setDirection(dir);
@@ -50,7 +104,7 @@ export function Offers() {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, []);
+  }, [slides.length]);
 
   const handleDot = (idx: number) => {
     if (timerRef.current) clearInterval(timerRef.current);
@@ -76,6 +130,9 @@ export function Offers() {
     }),
   };
 
+  // Guard against empty slides
+  const activeSlide = slides[current] || slides[0];
+
   return (
     <Section id="offers" align="center" heightClass="h-[150vh]" topClass="top-[15vh]">
       {/* Two-column layout */}
@@ -92,7 +149,7 @@ export function Offers() {
   </div>
 
   <h2 className="text-5xl md:text-[4.5rem] lg:text-[5.5rem] font-serif font-bold mb-4 text-gray-900 leading-[1.05] tracking-tight drop-shadow-[0_2px_15px_rgba(255,255,255,0.9)]">
-    Exclusive{" "}
+    Today&apos;s{" "}
     <span className="text-primary relative inline-block">
       Offers
       <span className="absolute -bottom-2 left-0 w-full h-1 bg-gradient-to-r from-primary to-transparent rounded-full" />
@@ -118,9 +175,11 @@ export function Offers() {
     ))}
   </div>
 
-  <button className="px-8 py-3.5 text-[15px] font-semibold tracking-wide rounded-xl transition-all duration-300 transform hover:-translate-y-1 bg-primary hover:bg-primary/90 text-white shadow-[0_8px_30px_rgba(161,0,91,0.35)] hover:shadow-[0_8px_30px_rgba(161,0,91,0.55)]">
-    Explore Offers
-  </button>
+  <Link href="/collections?badge=Sale">
+    <button className="px-8 py-3.5 text-[15px] font-semibold tracking-wide rounded-xl transition-all duration-300 transform hover:-translate-y-1 bg-primary hover:bg-primary/90 text-white shadow-[0_8px_30px_rgba(161,0,91,0.35)] hover:shadow-[0_8px_30px_rgba(161,0,91,0.55)]">
+      Explore Offers
+    </button>
+  </Link>
 </div>
 
         {/* RIGHT — Image Slider */}
@@ -139,29 +198,41 @@ export function Offers() {
                 transition={{ duration: 0.55, ease: [0.4, 0, 0.2, 1] }}
                 className="absolute inset-0"
               >
-                <Image
-                  src={slides[current].src}
-                  alt={slides[current].label}
-                  fill
-                  className="object-cover"
-                  priority
-                />
+                {activeSlide.link ? (
+                  <Link href={activeSlide.link} className="block w-full h-full">
+                    <Image
+                      src={activeSlide.src}
+                      alt={activeSlide.label}
+                      fill
+                      className="object-cover"
+                      priority
+                    />
+                  </Link>
+                ) : (
+                  <Image
+                    src={activeSlide.src}
+                    alt={activeSlide.label}
+                    fill
+                    className="object-cover"
+                    priority
+                  />
+                )}
 
                 {/* Gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
 
                 {/* Badge */}
                 <div
                   className="absolute top-5 right-5 px-3 py-1.5 rounded-full text-white text-sm font-bold shadow-lg"
-                  style={{ backgroundColor: slides[current].color }}
+                  style={{ backgroundColor: activeSlide.color }}
                 >
-                  {slides[current].badge}
+                  {activeSlide.badge}
                 </div>
 
                 {/* Bottom label */}
-                <div className="absolute bottom-0 left-0 right-0 px-6 pb-14 pt-4">
+                <div className="absolute bottom-0 left-0 right-0 px-6 pb-14 pt-4 pointer-events-none">
                   <p className="text-white font-semibold text-lg tracking-wide">
-                    {slides[current].label}
+                    {activeSlide.label}
                   </p>
                 </div>
               </motion.div>

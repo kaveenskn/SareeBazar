@@ -19,8 +19,9 @@ import {
   Bot,
 } from "lucide-react";
 
-import { products, filterCategories } from "@/mockdata/collections";
+import { products as staticProducts, filterCategories } from "@/mockdata/collections";
 import type { Product } from "@/mockdata/collections";
+import { fetchAllProducts } from "@/lib/productApi";
 
 const ITEMS_PER_PAGE = 12;
 
@@ -307,6 +308,27 @@ function CollectionsContent() {
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [apiProducts, setApiProducts] = useState<Product[]>([]);
+
+  // Fetch products from backend API
+  useEffect(() => {
+    fetchAllProducts().then((data) => {
+      if (data.length > 0) {
+        setApiProducts(data);
+      }
+    });
+  }, []);
+
+  // Merge static products with API products (API products take priority)
+  const products = useMemo(() => {
+    if (apiProducts.length > 0) {
+      // Combine: API products first, then static ones not duplicated by slug
+      const apiSlugs = new Set(apiProducts.map(p => p.slug));
+      const uniqueStatic = staticProducts.filter(p => !apiSlugs.has(p.slug));
+      return [...apiProducts, ...uniqueStatic];
+    }
+    return staticProducts;
+  }, [apiProducts]);
 
   const toggleFilter = (category: string) => {
     setSelectedFilters((prev) =>
