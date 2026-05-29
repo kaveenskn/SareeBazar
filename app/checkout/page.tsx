@@ -7,6 +7,7 @@ import { ShieldCheck, Truck, Package, ChevronRight, Loader2, CreditCard, BadgeCh
 import toast from "react-hot-toast";
 import { getCheckoutItems, clearCheckoutItems, type CheckoutVariant } from "@/lib/cartStore";
 import { placeOrder, type ShippingDetails, type OrderPayload } from "@/lib/ordersStore";
+import { isLoggedIn } from "@/lib/authStore";
 import Navbar from "@/app/components/Navbar";
 
 const SHIPPING_FEE = 350;
@@ -24,6 +25,11 @@ export default function CheckoutPage() {
   const [card, setCard] = useState({ number: "", expiry: "", cvv: "", name: "" });
 
   useEffect(() => {
+    if (!isLoggedIn()) {
+      toast.error("Please login to place an order.");
+      router.replace("/login?redirect=/checkout");
+      return;
+    }
     const data = getCheckoutItems();
     if (!data.length) { router.replace("/collections"); return; }
     setItems(data);

@@ -2,7 +2,9 @@
 
 import { useState, useRef, useCallback, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { Upload, Sparkles, RefreshCw, Download, ChevronRight, ImageIcon, User, Wand2 } from "lucide-react";
+import { Sparkles, RefreshCw, Download, ImageIcon, User, Wand2 } from "lucide-react";
+
+/* eslint-disable @next/next/no-img-element */
 
 type UploadState = {
   file: File | null;
@@ -17,6 +19,8 @@ function VirtualTryOnContent() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [hasTriedOn, setHasTriedOn] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const sareeRef = useRef<HTMLInputElement>(null);
   const personRef = useRef<HTMLInputElement>(null);
@@ -74,15 +78,42 @@ function VirtualTryOnContent() {
     [handleFile]
   );
 
-  const handleTryOn = () => {
+  const handleTryOn = async () => {
     if (!saree.preview || !person.preview) return;
     setIsProcessing(true);
     setHasTriedOn(false);
-    setTimeout(() => {
-      setResult(person.preview);
+    setResult(null);
+    setErrorMessage(null);
+    setStatusMessage("⏳ Sending images to Gemini AI... this may take 15–40 seconds");
+
+    try {
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL || "/api/backend";
+      const response = await fetch(`${API_BASE}/virtual-tryon/generate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          personImage: person.preview,
+          sareeImage: saree.preview,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success && data.image) {
+        setResult(data.image);
+        setHasTriedOn(true);
+        setStatusMessage(`✅ Done in ${data.processingTime || "~30s"}! Click Download to save.`);
+      } else {
+        setErrorMessage(data.message || "Gemini did not return an image. Try different photos.");
+        setStatusMessage(null);
+      }
+    } catch (err) {
+      console.error("Virtual try-on error:", err);
+      setErrorMessage("Failed to connect to the server. Make sure the backend is running on port 5000.");
+      setStatusMessage(null);
+    } finally {
       setIsProcessing(false);
-      setHasTriedOn(true);
-    }, 3000);
+    }
   };
 
   const handleReset = () => {
@@ -90,6 +121,8 @@ function VirtualTryOnContent() {
     setPerson({ file: null, preview: null, isDragging: false });
     setResult(null);
     setHasTriedOn(false);
+    setStatusMessage(null);
+    setErrorMessage(null);
   };
 
   const isReady = !!saree.preview && !!person.preview;
@@ -228,9 +261,21 @@ function VirtualTryOnContent() {
           )}
         </div>
 
+        {/* Status / Error Messages */}
+        {statusMessage && (
+          <p className="text-center text-sm font-medium mt-4" style={{ color: "#a1005b" }}>
+            {statusMessage}
+          </p>
+        )}
+        {errorMessage && (
+          <div className="max-w-lg mx-auto mt-4 p-4 rounded-xl border border-red-200 bg-red-50 text-center">
+            <p className="text-sm text-red-700 font-medium">⚠️ {errorMessage}</p>
+          </div>
+        )}
+
         {/* Info Note */}
         <p className="text-center text-xs text-gray-400 mt-6">
-          Supports JPG, PNG, WebP · Max 10 MB per image · Your images are not stored
+          Supports JPG, PNG, WebP · Max 10 MB per image · Your images are not stored · Powered by Google Gemini AI
         </p>
       </section>
 
@@ -465,7 +510,7 @@ function ResultCard({ isReady, isProcessing, hasTriedOn, result, accentColor }: 
             {isReady ? (
               <>
                 <p className="text-xs font-medium text-gray-600 mb-1">Ready to try on!</p>
-                <p className="text-[10px] text-gray-400 uppercase tracking-wider">Click <strong style={{ color: accentColor }}>"Try It On"</strong> below</p>
+                <p className="text-[10px] text-gray-400 uppercase tracking-wider">Click <strong style={{ color: accentColor }}>&quot;Try It On&quot;</strong> below</p>
               </>
             ) : (
               <>

@@ -51,8 +51,29 @@ export interface Order {
   total: number;
   paymentId: string;
   paymentMethod: string;
+  paymentStatus: string;
   status: OrderStatus;
   createdAt: string;
+}
+
+/* ─── Normalize backend order → frontend Order ─── */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function normalizeOrder(raw: any): Order {
+  return {
+    id: raw.orderId || raw._id || raw.id || "",
+    orderId: raw.orderId,
+    items: raw.items || [],
+    shipping: raw.shipping || {},
+    subtotal: raw.subtotal || 0,
+    shippingFee: raw.shippingFee || 0,
+    discount: raw.discount || 0,
+    total: raw.total || 0,
+    paymentId: raw.paymentId || "",
+    paymentMethod: raw.paymentMethod || "",
+    paymentStatus: raw.paymentStatus || "pending",
+    status: raw.status || "pending",
+    createdAt: raw.createdAt || new Date().toISOString(),
+  };
 }
 
 /* ─── Auth helper ─── */
@@ -151,7 +172,8 @@ export async function getOrders(): Promise<Order[]> {
       throw new Error(data.message || "Failed to fetch orders");
     }
     // Backend may return { orders: [...] } or an array directly
-    return Array.isArray(data) ? data : (data.orders ?? []);
+    const rawOrders = Array.isArray(data) ? data : (data.orders ?? []);
+    return rawOrders.map(normalizeOrder);
   } catch {
     return [];
   }
@@ -169,8 +191,28 @@ export async function getOrder(id: string): Promise<Order | null> {
     const data = await response.json();
     if (!response.ok) return null;
     // Backend may return { order: {...} } or the order directly
-    return data.order ?? data;
+    const raw = data.order ?? data;
+    return normalizeOrder(raw);
   } catch {
     return null;
   }
+}
+
+/* ─── Cancel Order (PATCH) ─── */
+
+export async function cancelOrder(
+  orderId: string,
+  reason: string
+): Promise<Order> {
+  const response = await fetch(`${API_BASE}/${orderId}/cancel`, {
+    method: "PATCH",
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ reason }),
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.message || "Failed to cancel order");
+  }
+  return data;
 }
