@@ -268,9 +268,14 @@ function ProductCard({ product }: { product: Product }) {
           )}
         </div>
 
-        {/* Rating */}
-        <div className="mt-1.5">
+        {/* Rating & Stock */}
+        <div className="mt-1.5 flex items-center justify-between">
           <RatingBadge rating={product.rating} reviews={product.reviews} />
+          {product.stock !== undefined && (
+            <span className={`text-[11px] font-semibold ${product.stock === 0 ? 'text-[#ff3e6c]' : product.stock <= 5 ? 'text-[#ff905a]' : 'text-[#535766]'}`}>
+              {product.stock === 0 ? 'Out of Stock' : product.stock <= 5 ? `Only ${product.stock} left` : `${product.stock} Available`}
+            </span>
+          )}
         </div>
       </div>
     </Link>

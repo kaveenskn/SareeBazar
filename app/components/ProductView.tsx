@@ -345,6 +345,12 @@ export default function ProductView({
               )}
             </div>
             <p className="text-[14px] text-[#03a685] font-bold mt-1">inclusive of all taxes</p>
+            
+            {product.stock !== undefined && (
+              <p className={`text-[14px] font-bold mt-2 ${product.stock === 0 ? 'text-[#ff3e6c]' : product.stock <= 5 ? 'text-[#ff905a]' : 'text-[#388e3c]'}`}>
+                {product.stock === 0 ? 'Out of Stock' : product.stock <= 5 ? `Only ${product.stock} left in stock` : 'In Stock'}
+              </p>
+            )}
 
             {/* ─── COLOR SELECTOR (below price) ─── */}
             {colorVariants && colorVariants.length > 0 && (
