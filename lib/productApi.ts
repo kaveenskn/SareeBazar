@@ -59,6 +59,7 @@ function mapApiToProduct(api: ApiProduct): Product {
     color: api.color,
     colorVariants: (api.colorVariants || []).map(cv => ({ ...cv, image: sanitizeImage(cv.image) })),
     inStock: api.inStock,
+    stock: api.stock,
     createdAt: api.createdAt,
   };
 }

@@ -30,6 +30,7 @@ export interface Product {
   color?: string;
   colorVariants?: ColorVariant[];
   inStock?: boolean;
+  stock?: number;
   createdAt?: string;
 }
 
