@@ -71,11 +71,18 @@ function ProductCard({ product }: { product: Product }) {
   const [hovered, setHovered] = useState(false);
   const router = useRouter();
 
-  // For image carousel
-  const images =
-    product.images && product.images.length > 0
-      ? product.images
-      : [product.image];
+  // For image carousel — filter out empty/falsy URLs
+  const images = useMemo(() => {
+    const imgs =
+      product.images && product.images.length > 0
+        ? product.images.filter((img) => img && img.trim() !== "")
+        : [];
+    if (imgs.length > 0) return imgs;
+    // Fallback to single image if available
+    if (product.image && product.image.trim() !== "") return [product.image];
+    return [];
+  }, [product.images, product.image]);
+
   const [currentImageIdx, setCurrentImageIdx] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
@@ -112,6 +119,8 @@ function ProductCard({ product }: { product: Product }) {
       )
     : 0;
 
+  const currentImageSrc = images.length > 0 ? images[currentImageIdx] : null;
+
   return (
     <Link
       href={`/products/${product.slug}`}
@@ -121,8 +130,9 @@ function ProductCard({ product }: { product: Product }) {
     >
       {/* Image */}
       <div className="relative aspect-[3/4] overflow-hidden bg-[#f5f5f6]">
+        {currentImageSrc ? (
         <Image
-          src={images[currentImageIdx]}
+          src={currentImageSrc}
           alt={product.name}
           fill
           quality={100}
@@ -130,6 +140,11 @@ function ProductCard({ product }: { product: Product }) {
           className="object-cover transition-transform duration-500 group-hover:scale-105"
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
         />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center text-[#94969f] text-[12px]">
+            No Image
+          </div>
+        )}
 
         {/* Carousel manual controls */}
         {hovered && images.length > 1 && (

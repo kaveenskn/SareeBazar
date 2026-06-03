@@ -1,8 +1,11 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect, Suspense } from "react";
+import { useState, useRef, useCallback, useEffect, Suspense, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
-import { Sparkles, RefreshCw, Download, ImageIcon, User, Wand2 } from "lucide-react";
+import { Sparkles, RefreshCw, Download, ImageIcon, User, Wand2, Search, X } from "lucide-react";
+import { fetchAllProducts } from "@/lib/productApi";
+import { products as staticProducts } from "@/mockdata/collections";
+import type { Product } from "@/mockdata/collections";
 
 /* eslint-disable @next/next/no-img-element */
 
@@ -22,8 +25,89 @@ function VirtualTryOnContent() {
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const sareeRef = useRef<HTMLInputElement>(null);
+  const [isCollectionModalOpen, setIsCollectionModalOpen] = useState(false);
+  const [modalSearchQuery, setModalSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [apiProducts, setApiProducts] = useState<Product[]>([]);
+  const [loadingProducts, setLoadingProducts] = useState(false);
+
   const personRef = useRef<HTMLInputElement>(null);
+
+  // Load products
+  useEffect(() => {
+    setLoadingProducts(true);
+    fetchAllProducts()
+      .then((data) => {
+        if (data && data.length > 0) {
+          setApiProducts(data);
+        }
+        setLoadingProducts(false);
+      })
+      .catch((err) => {
+        console.error("Failed to load products:", err);
+        setLoadingProducts(false);
+      });
+  }, []);
+
+  // Merge products
+  const products = useMemo(() => {
+    if (apiProducts.length > 0) {
+      const apiSlugs = new Set(apiProducts.map((p) => p.slug));
+      const uniqueStatic = staticProducts.filter((p) => !apiSlugs.has(p.slug));
+      return [...apiProducts, ...uniqueStatic];
+    }
+    return staticProducts;
+  }, [apiProducts]);
+
+  // Categories list
+  const categories = useMemo(() => {
+    const cats = new Set<string>();
+    products.forEach((p) => {
+      if (p.category) cats.add(p.category);
+    });
+    return ["All", ...Array.from(cats)];
+  }, [products]);
+
+  // Filtered products for modal
+  const filteredProducts = useMemo(() => {
+    return products.filter((p) => {
+      const matchesSearch = p.name.toLowerCase().includes(modalSearchQuery.toLowerCase()) ||
+        (p.category && p.category.toLowerCase().includes(modalSearchQuery.toLowerCase()));
+      const matchesCategory = selectedCategory === "All" || p.category === selectedCategory;
+      return matchesSearch && matchesCategory;
+    });
+  }, [products, modalSearchQuery, selectedCategory]);
+
+  const selectSaree = (prod: Product) => {
+    const imgUrl = prod.images && prod.images.length > 0 ? prod.images[0] : prod.image;
+    if (!imgUrl) return;
+
+    fetch(imgUrl)
+      .then((res) => res.blob())
+      .then((blob) => {
+        const fileName = imgUrl.split("/").pop() || "saree.png";
+        const file = new File([blob], fileName, { type: blob.type });
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          setSaree({
+            file,
+            preview: e.target?.result as string,
+            isDragging: false,
+          });
+        };
+        reader.readAsDataURL(file);
+      })
+      .catch((err) => {
+        console.error("Failed to load saree image from collection:", err);
+        setSaree({
+          file: null,
+          preview: imgUrl,
+          isDragging: false,
+        });
+      });
+
+    setIsCollectionModalOpen(false);
+  };
 
   /* ─── Auto-load saree image from query param ─── */
   useEffect(() => {
@@ -142,18 +226,13 @@ function VirtualTryOnContent() {
         />
 
         <div className="max-w-5xl mx-auto px-6 text-center relative">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border text-[11px] font-semibold tracking-[0.15em] uppercase mb-6"
-            style={{ borderColor: "#a1005b", color: "#a1005b", backgroundColor: "rgba(161,0,91,0.05)" }}>
-            <Sparkles size={12} />
-            AI-Powered
-          </div>
+
 
           <h1 className="text-4xl md:text-5xl font-serif font-bold text-gray-900 leading-tight mb-4">
             Virtual <span style={{ color: "#a1005b" }}>Try-On</span>
           </h1>
           <p className="text-gray-500 text-base md:text-lg max-w-xl mx-auto leading-relaxed">
-            Upload a saree and your photo — our AI drapes it on you instantly. See how it looks before you buy.
+            Choose a saree from our collection and upload your photo — our AI drapes it on you instantly. See how it looks before you buy.
           </p>
         </div>
       </section>
@@ -163,23 +242,13 @@ function VirtualTryOnContent() {
         {/* Three-Column Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-          {/* === Column 1: Saree Upload === */}
-          <UploadCard
-            id="saree-upload"
+          {/* === Column 1: Saree Selection === */}
+          <SareeCard
+            id="saree-select"
             label="Saree Image"
-            description="Upload any saree image from your gallery or catalogue"
-            icon={<ImageIcon size={28} strokeWidth={1.2} />}
             state={saree}
-            inputRef={sareeRef}
-            onFileChange={(e) => {
-              const f = e.target.files?.[0];
-              if (f) handleFile(setSaree, f);
-            }}
-            onDragOver={(e) => { e.preventDefault(); setSaree((p) => ({ ...p, isDragging: true })); }}
-            onDragLeave={() => setSaree((p) => ({ ...p, isDragging: false }))}
-            onDrop={(e) => handleDrop(setSaree, e)}
             onClear={() => setSaree({ file: null, preview: null, isDragging: false })}
-            onBrowse={() => sareeRef.current?.click()}
+            onChooseFromCollection={() => setIsCollectionModalOpen(true)}
             accentColor="#a1005b"
           />
 
@@ -286,7 +355,7 @@ function VirtualTryOnContent() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             {[
               { icon: "📸", title: "Full Body Photo", desc: "Use a clear, front-facing full-body photo with good lighting and a plain background." },
-              { icon: "🥻", title: "Flat Saree Image", desc: "Upload an image of the saree laid flat or on a mannequin for best draping accuracy." },
+              { icon: "🥻", title: "Saree Selection", desc: "Choose a saree from our collections that drapes beautifully on you." },
               { icon: "💡", title: "Good Lighting", desc: "Ensure both images are well-lit without harsh shadows for realistic results." },
             ].map((tip) => (
               <div key={tip.title} className="bg-white rounded-2xl border border-gray-100 p-6 text-center shadow-sm">
@@ -298,7 +367,214 @@ function VirtualTryOnContent() {
           </div>
         </div>
       </section>
+
+      {/* Collection Selector Modal */}
+      {isCollectionModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all duration-300">
+          <div className="bg-white rounded-3xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden shadow-2xl">
+            {/* Header */}
+            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-serif font-bold text-gray-900">Choose from Collection</h3>
+                <p className="text-xs text-gray-500">Select a saree to try on virtually</p>
+              </div>
+              <button
+                onClick={() => setIsCollectionModalOpen(false)}
+                className="w-9 h-9 rounded-full bg-gray-50 hover:bg-gray-100 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Search & Category Filter */}
+            <div className="px-6 py-4 bg-gray-50/50 border-b border-gray-100 flex flex-col sm:flex-row gap-4">
+              {/* Search */}
+              <div className="relative flex-1">
+                <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  value={modalSearchQuery}
+                  onChange={(e) => setModalSearchQuery(e.target.value)}
+                  placeholder="Search sarees..."
+                  className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:border-[#a1005b] focus:ring-1 focus:ring-[#a1005b] transition-all"
+                />
+                {modalSearchQuery && (
+                  <button
+                    onClick={() => setModalSearchQuery("")}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+
+              {/* Category Filter Chips */}
+              <div className="flex gap-2 overflow-x-auto pb-1 sm:pb-0 scrollbar-none max-w-full">
+                {categories.map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setSelectedCategory(cat)}
+                    className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${selectedCategory === cat
+                      ? "bg-[#a1005b] text-white"
+                      : "bg-white text-gray-600 border border-gray-200 hover:border-gray-300"
+                      }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Grid of sarees */}
+            <div className="flex-1 overflow-y-auto p-6 bg-gray-50/30">
+              {loadingProducts ? (
+                <div className="flex flex-col items-center justify-center py-16">
+                  <div className="w-10 h-10 border-4 border-[#a1005b]/20 border-t-[#a1005b] rounded-full animate-spin mb-3" />
+                  <p className="text-sm text-gray-500">Loading collection...</p>
+                </div>
+              ) : filteredProducts.length === 0 ? (
+                <div className="text-center py-16">
+                  <p className="text-base text-gray-500 font-medium">No sarees found</p>
+                  <p className="text-xs text-gray-400 mt-1">Try adjusting your search or category filter</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                  {filteredProducts.map((prod) => {
+                    const mainImg = prod.images && prod.images.length > 0 ? prod.images[0] : prod.image;
+                    return (
+                      <div
+                        key={prod.slug}
+                        onClick={() => selectSaree(prod)}
+                        className="group cursor-pointer bg-white border border-gray-100 rounded-2xl p-2.5 hover:shadow-md hover:border-[#a1005b]/30 transition-all duration-200 flex flex-col h-full"
+                      >
+                        <div className="relative aspect-[3/4] w-full rounded-xl overflow-hidden bg-gray-50 mb-3">
+                          {mainImg ? (
+                            <img
+                              src={mainImg}
+                              alt={prod.name}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            />
+                          ) : (
+                            <div className="absolute inset-0 flex items-center justify-center text-xs text-gray-400 bg-gray-100">
+                              No Image
+                            </div>
+                          )}
+                        </div>
+                        <h4 className="text-xs font-bold text-gray-900 line-clamp-1 leading-tight mb-1">
+                          {prod.name}
+                        </h4>
+                        <p className="text-[10px] text-gray-500 mt-auto">{prod.category}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </main>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   Saree Collection Card Component
+───────────────────────────────────────────── */
+interface SareeCardProps {
+  id: string;
+  label: string;
+  state: UploadState;
+  onClear: () => void;
+  onChooseFromCollection: () => void;
+  accentColor: string;
+}
+
+function SareeCard({
+  id, label, state, onClear, onChooseFromCollection, accentColor,
+}: SareeCardProps) {
+  const hasImage = !!state.preview;
+
+  return (
+    <div className="flex flex-col h-full">
+      <div
+        id={id}
+        onClick={!hasImage ? onChooseFromCollection : undefined}
+        className="group relative flex-1 rounded-2xl border-2 transition-all duration-300 ease-out overflow-hidden cursor-pointer hover:-translate-y-4 hover:scale-[1.02] hover:border-[#a1005b]"
+        style={{
+          borderColor: hasImage ? "transparent" : "#e5e7eb",
+          backgroundColor: hasImage ? "#ffffff" : "#fdf9fa",
+          minHeight: "320px",
+          boxShadow: hasImage
+            ? "0 2px 4px rgba(0,0,0,0.04), 0 8px 16px rgba(0,0,0,0.08), 0 24px 48px -8px rgba(0,0,0,0.14)"
+            : "0 2px 4px rgba(0,0,0,0.04), 0 6px 12px rgba(0,0,0,0.06), 0 20px 40px -8px rgba(0,0,0,0.10)",
+        }}
+      >
+        {hasImage ? (
+          /* Preview */
+          <div className="relative w-full h-full" style={{ minHeight: "280px" }}>
+            <img
+              src={state.preview!}
+              alt={`${label} preview`}
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              style={{ minHeight: "320px", maxHeight: "400px" }}
+            />
+            {/* Overlay Controls */}
+            <div className="absolute inset-0 bg-black/0 hover:bg-black/35 transition-all duration-200 flex items-end justify-between p-4 group">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onChooseFromCollection();
+                }}
+                className="opacity-0 group-hover:opacity-100 px-3.5 py-1.5 bg-white text-gray-900 rounded-full text-xs font-semibold hover:bg-gray-100 transition-all shadow-md"
+              >
+                Change Saree
+              </button>
+              <button
+                id={`${id}-clear`}
+                onClick={(e) => { e.stopPropagation(); onClear(); }}
+                className="opacity-0 group-hover:opacity-100 text-white bg-red-500 hover:bg-red-600 rounded-full w-7 h-7 flex items-center justify-center text-xs font-bold transition-all shadow-md"
+              >
+                ✕
+              </button>
+            </div>
+            {/* Selected Saree Badge */}
+            <div
+              className="absolute top-3 left-3 flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold text-white shadow-sm"
+              style={{ backgroundColor: accentColor }}
+            >
+              ✓ Selected Saree
+            </div>
+          </div>
+        ) : (
+          /* Empty State */
+          <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
+            <div
+              className="w-14 h-14 rounded-full flex items-center justify-center mb-4 transition-colors"
+              style={{ backgroundColor: "rgba(161,0,91,0.07)", color: accentColor }}
+            >
+              <ImageIcon size={28} strokeWidth={1.2} />
+            </div>
+            <p className="text-2xl font-serif font-bold text-gray-900 mb-2">
+              {label}
+            </p>
+            <p className="text-sm text-gray-500 mb-6 px-2 leading-relaxed">
+              Choose a premium saree from our exclusive collection for try-on
+            </p>
+            <button
+              onClick={(e) => { e.stopPropagation(); onChooseFromCollection(); }}
+              className="px-6 py-3 rounded-full text-xs font-semibold text-white transition-all hover:opacity-90 active:scale-95 shadow-md flex items-center gap-2"
+              style={{ backgroundColor: accentColor }}
+            >
+              <Sparkles size={14} />
+              Choose from Collection
+            </button>
+          </div>
+        )}
+
+        {/* Reflection Effect */}
+        <div className="absolute inset-0 pointer-events-none bg-gradient-to-tr from-white/0 via-white/5 to-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      </div>
+    </div>
   );
 }
 
@@ -414,7 +690,7 @@ function UploadCard({
           onChange={onFileChange}
           id={`${id}-input`}
         />
-        
+
         {/* Reflection Effect */}
         <div className="absolute inset-0 pointer-events-none bg-gradient-to-tr from-white/0 via-white/5 to-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       </div>
@@ -520,7 +796,7 @@ function ResultCard({ isReady, isProcessing, hasTriedOn, result, accentColor }: 
             )}
           </div>
         )}
-        
+
         {/* Reflection Effect */}
         <div className="absolute inset-0 pointer-events-none bg-gradient-to-bl from-white/0 via-white/5 to-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       </div>

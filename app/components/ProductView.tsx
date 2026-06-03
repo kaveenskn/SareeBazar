@@ -8,6 +8,7 @@ import { ShoppingBag, Heart, Star, Bot, Check, CreditCard, ThumbsUp, ThumbsDown,
 import toast from "react-hot-toast";
 import type { Product, ColorVariant } from "@/mockdata/collections";
 import { addToCart, setCheckoutItems } from "@/lib/cartStore";
+import { isLoggedIn } from "@/lib/authStore";
 
 interface ProductViewProps {
   product: Product;
@@ -69,6 +70,11 @@ export default function ProductView({
   });
 
   const handleAddToBag = () => {
+    if (!isLoggedIn()) {
+      toast.error("Please login to add items to cart", { icon: "🔒" });
+      router.push("/login");
+      return;
+    }
     addToCart(buildVariant());
     setAddedToBag(true);
     toast.success(
@@ -79,6 +85,11 @@ export default function ProductView({
   };
 
   const handleBuyNow = () => {
+    if (!isLoggedIn()) {
+      toast.error("Please login to purchase items", { icon: "🔒" });
+      router.push("/login");
+      return;
+    }
     setCheckoutItems([buildVariant()]);
     router.push("/checkout");
   };
