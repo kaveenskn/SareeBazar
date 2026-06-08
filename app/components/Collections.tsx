@@ -3,9 +3,8 @@
 import { useEffect, useState, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ShoppingCart } from "lucide-react";
-import { Section } from "./Section";
 import { fetchAllProducts } from "@/lib/productApi";
+import { fetchAllCollections, type ApiCollection } from "@/lib/collectionApi";
 import type { Product } from "@/mockdata/collections";
 
 /* ── Static fallback categories ── */
@@ -42,6 +41,7 @@ const accentColors: Record<string, string> = {
 
 export function Collections() {
   const [apiProducts, setApiProducts] = useState<Product[]>([]);
+  const [apiCollections, setApiCollections] = useState<ApiCollection[]>([]);
 
   useEffect(() => {
     fetchAllProducts().then((data) => {
@@ -49,46 +49,105 @@ export function Collections() {
         setApiProducts(data);
       }
     });
+    fetchAllCollections().then((data) => {
+      if (data.length > 0) {
+        setApiCollections(data);
+      }
+    });
   }, []);
 
-  // Build category cards from API products
+  // Build category cards — prefer API collections with cover images
   const categories = useMemo(() => {
-    if (apiProducts.length === 0) return defaultCategories;
+    if (apiCollections.length === 0 && apiProducts.length === 0) return defaultCategories;
 
-    // Group products by category
-    const grouped: Record<string, Product[]> = {};
+    // Build a map of product images per category as fallback
+    const productImageMap: Record<string, string> = {};
     apiProducts.forEach((p) => {
-      if (!grouped[p.category]) grouped[p.category] = [];
-      grouped[p.category].push(p);
-    });
-
-    // Build category cards
-    const apiCategories = Object.entries(grouped).map(([category, products]) => {
-      const firstProduct = products[0];
-      let safeImage = firstProduct.image;
-      if (!safeImage || safeImage.startsWith("blob:")) {
-        safeImage = "/images/collections/kanjivaram-silk.png";
+      if (!productImageMap[p.category] && p.image && !p.image.startsWith("blob:")) {
+        productImageMap[p.category] = p.image;
       }
-
-      return {
-        id: category.toLowerCase().replace(/\s+/g, "-"),
-        name: category,
-        subtitle: `${products.length} product${products.length > 1 ? "s" : ""} available`,
-        items: `${products.length}+ Styles`,
-        image: safeImage,
-        accent: accentColors[category] || "#7B3FA0",
-      };
     });
 
-    if (apiCategories.length > 0) {
-      // Merge: API categories + default ones not covered by API
-      const apiCategoryNames = new Set(apiCategories.map(c => c.name));
-      const uniqueDefaults = defaultCategories.filter(c => !apiCategoryNames.has(c.name));
-      return [...apiCategories, ...uniqueDefaults];
+    // Build a map of product counts per category
+    const productCountMap: Record<string, number> = {};
+    apiProducts.forEach((p) => {
+      productCountMap[p.category] = (productCountMap[p.category] || 0) + 1;
+    });
+
+    // If we have API collections, use them
+    if (apiCollections.length > 0) {
+      const collectionCards = apiCollections.map((col) => {
+        // Use coverImage if available, otherwise fallback to first product image in that category
+        let safeImage = col.coverImage || "";
+        if (!safeImage || safeImage.startsWith("blob:")) {
+          safeImage = productImageMap[col.title] || "/images/collections/kanjivaram-silk.png";
+        }
+
+        const productCount = col.productCount || productCountMap[col.title] || 0;
+
+        return {
+          id: col.slug || col.title.toLowerCase().replace(/\s+/g, "-"),
+          name: col.title,
+          subtitle: col.description || `${productCount} product${productCount !== 1 ? "s" : ""} available`,
+          items: `${productCount}+ Styles`,
+          image: safeImage,
+          accent: accentColors[col.title] || "#7B3FA0",
+          hasCoverImage: !!col.coverImage && !col.coverImage.startsWith("blob:"),
+        };
+      });
+
+      // Add any product categories not covered by collections
+      const collectionNames = new Set(apiCollections.map(c => c.title));
+      const extraCategories = Object.entries(productCountMap)
+        .filter(([cat]) => !collectionNames.has(cat))
+        .map(([category, count]) => ({
+          id: category.toLowerCase().replace(/\s+/g, "-"),
+          name: category,
+          subtitle: `${count} product${count > 1 ? "s" : ""} available`,
+          items: `${count}+ Styles`,
+          image: productImageMap[category] || "/images/collections/kanjivaram-silk.png",
+          accent: accentColors[category] || "#7B3FA0",
+          hasCoverImage: false,
+        }));
+
+      const all = [...collectionCards, ...extraCategories];
+      if (all.length > 0) return all;
     }
 
-    return defaultCategories;
-  }, [apiProducts]);
+    // Fallback: group products by category (original behavior)
+    if (apiProducts.length > 0) {
+      const grouped: Record<string, Product[]> = {};
+      apiProducts.forEach((p) => {
+        if (!grouped[p.category]) grouped[p.category] = [];
+        grouped[p.category].push(p);
+      });
+
+      const apiCategories = Object.entries(grouped).map(([category, products]) => {
+        let safeImage = products[0].image;
+        if (!safeImage || safeImage.startsWith("blob:")) {
+          safeImage = "/images/collections/kanjivaram-silk.png";
+        }
+
+        return {
+          id: category.toLowerCase().replace(/\s+/g, "-"),
+          name: category,
+          subtitle: `${products.length} product${products.length > 1 ? "s" : ""} available`,
+          items: `${products.length}+ Styles`,
+          image: safeImage,
+          accent: accentColors[category] || "#7B3FA0",
+          hasCoverImage: false,
+        };
+      });
+
+      if (apiCategories.length > 0) {
+        const apiCategoryNames = new Set(apiCategories.map(c => c.name));
+        const uniqueDefaults = defaultCategories.map(c => ({ ...c, hasCoverImage: false })).filter(c => !apiCategoryNames.has(c.name));
+        return [...apiCategories, ...uniqueDefaults];
+      }
+    }
+
+    return defaultCategories.map(c => ({ ...c, hasCoverImage: false }));
+  }, [apiProducts, apiCollections]);
 
   return (
     <section className="relative w-full py-24 bg-[var(--background)] overflow-hidden">
@@ -116,14 +175,14 @@ export function Collections() {
               key={cat.id}
               className="group relative w-[350px] flex-shrink-0 rounded-3xl overflow-hidden shadow-[0_12px_40px_rgba(0,0,0,0.15)] bg-white border border-white/60 hover:-translate-y-3 hover:shadow-[0_20px_60px_rgba(0,0,0,0.2)] transition-all duration-500 cursor-pointer block"
             >
-              {/* Image */}
-              <div className="relative w-full h-[450px] overflow-hidden">
+              {/* Image — cover images use 3:2 ratio, product images use taller layout */}
+              <div className={`relative w-full overflow-hidden ${cat.hasCoverImage ? "aspect-[3/2]" : "h-[450px]"}`}>
                 <Image
                   src={cat.image}
                   alt={cat.name}
                   fill
                   sizes="(max-width: 768px) 100vw, 350px"
-                  className="object-cover object-top group-hover:scale-110 transition-transform duration-700"
+                  className={`object-cover ${cat.hasCoverImage ? "object-center" : "object-top"} group-hover:scale-110 transition-transform duration-700`}
                   unoptimized
                 />
                 {/* Gradient overlay */}
