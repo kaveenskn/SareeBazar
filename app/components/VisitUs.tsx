@@ -1,7 +1,41 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { MapPin, Phone, Clock, Sparkles, Navigation, ArrowUpRight, Send, Flower2, Camera, Globe } from "lucide-react";
 
+interface ShopInfo {
+  storeName: string;
+  supportEmail: string;
+  phone: string;
+  address: string;
+  openingHours: string;
+  tagline: string;
+  description: string;
+  socialLinks: {
+    instagram: string;
+    facebook: string;
+    twitter: string;
+    youtube: string;
+  };
+}
+
 export function VisitUs() {
+  const [shopInfo, setShopInfo] = useState<ShopInfo | null>(null);
+
+  useEffect(() => {
+    fetch("/api/backend/shop-info")
+      .then((res) => res.json())
+      .then((data) => setShopInfo(data))
+      .catch((err) => console.error("Failed to load shop info:", err));
+  }, []);
+
+  // Fallback values while loading
+  const storeName = shopInfo?.storeName || "Saree Bazar";
+  const address = shopInfo?.address || "No. 25, Main Street, Colombo, Sri Lanka";
+  const phone = shopInfo?.phone || "+94 77 123 4567";
+  const openingHours = shopInfo?.openingHours || "Mon – Sat : 9.00 AM – 8.00 PM";
+
   return (
     <section className="relative w-full py-24 bg-[var(--background)] overflow-hidden">
       {/* Top tag */}
@@ -28,7 +62,7 @@ export function VisitUs() {
         <div className="w-full lg:w-[45%] relative rounded-[2.5rem] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.1)] h-[550px] lg:h-[650px] flex-shrink-0">
           <Image
             src="/images/collections/bridal_saree.png"
-            alt="Saree Bazar Boutique"
+            alt={`${storeName} Boutique`}
             fill
             className="object-cover"
           />
@@ -41,7 +75,7 @@ export function VisitUs() {
           {/* Bottom glass banner */}
           <div className="absolute bottom-6 left-6 right-6 backdrop-blur-md bg-black/30 border border-white/20 rounded-[2rem] p-5 flex justify-between items-center">
             <div>
-              <h3 className="text-white text-2xl font-serif mb-1 leading-none">Saree Bazar</h3>
+              <h3 className="text-white text-2xl font-serif mb-1 leading-none">{storeName}</h3>
               <p className="text-white/80 text-xs font-medium tracking-wide">A sanctuary of silk & tradition</p>
             </div>
             <button className="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center hover:scale-105 transition-transform shadow-lg">
@@ -53,7 +87,7 @@ export function VisitUs() {
         {/* Right Side: Content */}
         <div className="w-full lg:w-[55%] flex flex-col">
           <h2 className="text-5xl md:text-7xl font-serif font-bold text-gray-900 leading-[1.1] mb-6">
-            Visit <span className="text-primary font-bold">Saree Bazar</span>
+            Visit <span className="text-primary font-bold">{storeName}</span>
           </h2>
 
           <p className="text-gray-600 font-medium text-[16px] md:text-[17px] leading-relaxed mb-10 max-w-xl">
@@ -69,7 +103,7 @@ export function VisitUs() {
                 </div>
                 <div>
                   <p className="text-[10px] font-bold text-primary/60 tracking-widest uppercase mb-1">Location</p>
-                  <p className="text-gray-800 font-serif text-[15px] leading-snug">No. 25, Main Street,<br />Colombo, Sri Lanka</p>
+                  <p className="text-gray-800 font-serif text-[15px] leading-snug">{address}</p>
                 </div>
               </div>
 
@@ -79,7 +113,7 @@ export function VisitUs() {
                 </div>
                 <div>
                   <p className="text-[10px] font-bold text-primary/60 tracking-widest uppercase mb-1">Contact</p>
-                  <p className="text-gray-800 font-serif text-[15px] leading-snug">+94 77 123 4567</p>
+                  <p className="text-gray-800 font-serif text-[15px] leading-snug">{phone}</p>
                 </div>
               </div>
             </div>
@@ -91,7 +125,7 @@ export function VisitUs() {
               </div>
               <div>
                 <p className="text-[10px] font-bold text-primary/60 tracking-widest uppercase mb-1">Opening Hours</p>
-                <p className="text-gray-800 font-serif text-[15px]">Mon – Sat : 9.00 AM – 8.00 PM</p>
+                <p className="text-gray-800 font-serif text-[15px]">{openingHours}</p>
               </div>
             </div>
 
@@ -99,7 +133,7 @@ export function VisitUs() {
             <div className="bg-[#fcf5f8] border border-primary/10 rounded-3xl p-6 flex items-start gap-4 shadow-sm mt-2">
               <Sparkles size={20} className="text-primary flex-shrink-0 mt-0.5" strokeWidth={2} />
               <p className="text-gray-700 font-serif italic text-[16px] leading-relaxed">
-                "From bridal collections to modern designer sarees, Saree Bazar offers handpicked styles crafted for every special moment."
+                &quot;From bridal collections to modern designer sarees, {storeName} offers handpicked styles crafted for every special moment.&quot;
               </p>
             </div>
           </div>

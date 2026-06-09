@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Eye, EyeOff } from 'lucide-react';
@@ -20,6 +20,14 @@ export default function LoginPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [redirectUrl, setRedirectUrl] = useState('/');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      setRedirectUrl(params.get('redirect') || '/');
+    }
+  }, []);
 
   const {
     register,
@@ -49,7 +57,7 @@ export default function LoginPage() {
       loginUser(result.user, result.accessToken);
       
       toast.success('Logged in successfully');
-      router.push('/');
+      router.push(redirectUrl);
     } catch (error: any) {
       toast.error('An unexpected error occurred');
     } finally {
@@ -161,7 +169,10 @@ export default function LoginPage() {
           
           <div className="text-center pt-2">
             <span className="text-[15px] text-gray-500">Don't have an account? </span>
-            <Link href="/register" className="text-[15px] font-medium text-primary-600 hover:text-primary-700 underline underline-offset-4 decoration-primary-600/30">
+            <Link 
+              href={redirectUrl !== '/' ? `/register?redirect=${encodeURIComponent(redirectUrl)}` : '/register'} 
+              className="text-[15px] font-medium text-primary-600 hover:text-primary-700 underline underline-offset-4 decoration-primary-600/30"
+            >
               Sign up
             </Link>
           </div>

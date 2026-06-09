@@ -22,6 +22,7 @@ import {
 import { products as staticProducts, filterCategories } from "@/mockdata/collections";
 import type { Product } from "@/mockdata/collections";
 import { fetchAllProducts } from "@/lib/productApi";
+import { fetchAllCollections, type ApiCollection } from "@/lib/collectionApi";
 
 const ITEMS_PER_PAGE = 12;
 
@@ -71,11 +72,18 @@ function ProductCard({ product }: { product: Product }) {
   const [hovered, setHovered] = useState(false);
   const router = useRouter();
 
-  // For image carousel
-  const images =
-    product.images && product.images.length > 0
-      ? product.images
-      : [product.image];
+  // For image carousel — filter out empty/falsy URLs
+  const images = useMemo(() => {
+    const imgs =
+      product.images && product.images.length > 0
+        ? product.images.filter((img) => img && img.trim() !== "")
+        : [];
+    if (imgs.length > 0) return imgs;
+    // Fallback to single image if available
+    if (product.image && product.image.trim() !== "") return [product.image];
+    return [];
+  }, [product.images, product.image]);
+
   const [currentImageIdx, setCurrentImageIdx] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
@@ -112,6 +120,8 @@ function ProductCard({ product }: { product: Product }) {
       )
     : 0;
 
+  const currentImageSrc = images.length > 0 ? images[currentImageIdx] : null;
+
   return (
     <Link
       href={`/products/${product.slug}`}
@@ -121,8 +131,9 @@ function ProductCard({ product }: { product: Product }) {
     >
       {/* Image */}
       <div className="relative aspect-[3/4] overflow-hidden bg-[#f5f5f6]">
+        {currentImageSrc ? (
         <Image
-          src={images[currentImageIdx]}
+          src={currentImageSrc}
           alt={product.name}
           fill
           quality={100}
@@ -130,6 +141,11 @@ function ProductCard({ product }: { product: Product }) {
           className="object-cover transition-transform duration-500 group-hover:scale-105"
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
         />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center text-[#94969f] text-[12px]">
+            No Image
+          </div>
+        )}
 
         {/* Carousel manual controls */}
         {hovered && images.length > 1 && (
@@ -314,12 +330,18 @@ function CollectionsContent() {
   const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [apiProducts, setApiProducts] = useState<Product[]>([]);
+  const [apiCollections, setApiCollections] = useState<ApiCollection[]>([]);
 
-  // Fetch products from backend API
+  // Fetch products and collections from backend API
   useEffect(() => {
     fetchAllProducts().then((data) => {
       if (data.length > 0) {
         setApiProducts(data);
+      }
+    });
+    fetchAllCollections().then((data) => {
+      if (data.length > 0) {
+        setApiCollections(data);
       }
     });
   }, []);
@@ -574,6 +596,49 @@ function CollectionsContent() {
           </div>
         </div>
       )}
+
+      {/* ─── Collection Banner ─── */}
+      {(() => {
+        // Show banner when a single category filter matches a collection with a coverImage
+        if (selectedFilters.length === 1) {
+          const matchedCollection = apiCollections.find(
+            (col) => col.title === selectedFilters[0] && col.coverImage && !col.coverImage.startsWith("blob:")
+          );
+          if (matchedCollection) {
+            return (
+              <div className="bg-white border-b border-[#e8e8e1]">
+                <div className="max-w-[1400px] mx-auto">
+                  <div className="relative w-full overflow-hidden" style={{ aspectRatio: '3 / 2', maxHeight: '400px' }}>
+                    <Image
+                      src={matchedCollection.coverImage}
+                      alt={matchedCollection.title}
+                      fill
+                      className="object-cover object-center"
+                      sizes="100vw"
+                      unoptimized
+                      priority
+                    />
+                    {/* Gradient overlay for readability */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+                    {/* Banner text */}
+                    <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
+                      <h2 className="text-2xl md:text-4xl font-serif font-bold text-white drop-shadow-md">
+                        {matchedCollection.title}
+                      </h2>
+                      {matchedCollection.description && (
+                        <p className="text-white/85 text-sm md:text-base mt-1 max-w-xl drop-shadow-sm">
+                          {matchedCollection.description}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          }
+        }
+        return null;
+      })()}
 
       {/* ─── Mobile Filter Toggle ─── */}
       <div className="lg:hidden bg-white border-b border-[#e8e8e1]">

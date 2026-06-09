@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   ShieldCheck,
@@ -74,7 +75,46 @@ const YoutubeIcon = ({ size = 18 }) => (
   </svg>
 );
 
+interface ShopInfo {
+  storeName: string;
+  supportEmail: string;
+  phone: string;
+  address: string;
+  openingHours: string;
+  tagline: string;
+  description: string;
+  socialLinks: {
+    instagram: string;
+    facebook: string;
+    twitter: string;
+    youtube: string;
+  };
+}
+
 export default function Footer() {
+  const [shopInfo, setShopInfo] = useState<ShopInfo | null>(null);
+
+  useEffect(() => {
+    fetch("/api/backend/shop-info")
+      .then((res) => res.json())
+      .then((data) => setShopInfo(data))
+      .catch((err) => console.error("Failed to load shop info:", err));
+  }, []);
+
+  // Fallback values while loading
+  const storeName = shopInfo?.storeName || "SareeBazar";
+  const email = shopInfo?.supportEmail || "support@sareebazar.lk";
+  const tagline = shopInfo?.tagline || "Elegance in every thread.";
+  const description =
+    shopInfo?.description ||
+    "Weaving tradition into modern elegance. Discover handpicked, premium sarees crafted for the contemporary woman.";
+  const socialLinks = shopInfo?.socialLinks || {
+    instagram: "#",
+    facebook: "#",
+    twitter: "#",
+    youtube: "#",
+  };
+
   return (
     <footer className="bg-[#fbeff6] pt-16 pb-8 border-t border-[#dfc7a5]/30">
       <div className="max-w-7xl mx-auto px-6 md:px-8">
@@ -86,32 +126,31 @@ export default function Footer() {
               href="/"
               className="text-3xl font-serif tracking-wide flex items-center mb-6"
             >
-              <span className="text-primary">Saree</span>
-              <span className="text-gray-900">Bazar</span>
+              <span className="text-primary">{storeName.includes(" ") ? storeName.split(" ")[0] : "Saree"}</span>
+              <span className="text-gray-900">{storeName.includes(" ") ? storeName.split(" ").slice(1).join(" ") : "Bazar"}</span>
             </Link>
             <p className="text-[15px] text-gray-600 leading-relaxed mb-6 font-medium">
-              Weaving tradition into modern elegance. Discover handpicked,
-              premium sarees crafted for the contemporary woman.
+              {description}
             </p>
             <p className="text-sm font-serif italic text-primary">
-              "Elegance in every thread."
+              &quot;{tagline}&quot;
             </p>
 
             <a
               id="contact-email"
-              href="mailto:support@sareebazar.lk"
+              href={`mailto:${email}`}
               className="mt-4 inline-flex items-center gap-2 text-[13px] font-medium text-gray-600 hover:text-primary transition-colors"
             >
               <Mail size={16} className="text-primary" />
-              support@sareebazar.lk
+              {email}
             </a>
 
             {/* 6. Social Media */}
             <div className="flex items-center gap-4 mt-8">
-              <SocialIcon icon={<InstagramIcon size={18} />} href="#" />
-              <SocialIcon icon={<FacebookIcon size={18} />} href="#" />
-              <SocialIcon icon={<TwitterIcon size={18} />} href="#" />
-              <SocialIcon icon={<YoutubeIcon size={18} />} href="#" />
+              <SocialIcon icon={<InstagramIcon size={18} />} href={socialLinks.instagram || "#"} />
+              <SocialIcon icon={<FacebookIcon size={18} />} href={socialLinks.facebook || "#"} />
+              <SocialIcon icon={<TwitterIcon size={18} />} href={socialLinks.twitter || "#"} />
+              <SocialIcon icon={<YoutubeIcon size={18} />} href={socialLinks.youtube || "#"} />
             </div>
 
             <div className="mt-6 flex items-center gap-6 flex-nowrap">
@@ -247,7 +286,7 @@ export default function Footer() {
         {/* 9. Bottom Footer Bar */}
         <div className="pt-4 flex items-center justify-center text-center">
           <p className="text-[13px] text-gray-500 font-medium">
-            © {new Date().getFullYear()} SareeBazar. All rights reserved.
+            © {new Date().getFullYear()} {storeName}. All rights reserved.
           </p>
         </div>
       </div>

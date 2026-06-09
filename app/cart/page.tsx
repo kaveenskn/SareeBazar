@@ -12,22 +12,39 @@ import {
 } from "@/lib/cartStore";
 import Navbar from "@/app/components/Navbar";
 
-const SHIPPING_FEE = 350;
+interface ShippingCosts {
+  cardPayment: number;
+  cashOnDelivery: number;
+}
 
 export default function CartPage() {
   const router = useRouter();
   const [items, setItems] = useState<CartItem[]>([]);
+  const [shippingCosts, setShippingCosts] = useState<ShippingCosts>({ cardPayment: 0, cashOnDelivery: 0 });
 
   const sync = () => setItems(getCart());
 
   useEffect(() => {
     sync();
     window.addEventListener("cart-updated", sync);
+
+    // Fetch dynamic shipping costs from admin settings
+    fetch("/api/backend/shop-info/shipping-costs")
+      .then((res) => res.json())
+      .then((data) => {
+        setShippingCosts({
+          cardPayment: data.cardPayment ?? 0,
+          cashOnDelivery: data.cashOnDelivery ?? 0,
+        });
+      })
+      .catch(() => console.error("Failed to fetch shipping costs"));
+
     return () => window.removeEventListener("cart-updated", sync);
   }, []);
 
   const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0);
-  const total    = subtotal + (items.length ? SHIPPING_FEE : 0);
+  const cardTotal = subtotal + (items.length ? shippingCosts.cardPayment : 0);
+  const codTotal  = subtotal + (items.length ? shippingCosts.cashOnDelivery : 0);
 
   const handleRemove = (productId: number, color: string) => {
     removeFromCart(productId, color);
@@ -143,13 +160,33 @@ export default function CartPage() {
                     <span>Subtotal ({items.length} item{items.length !== 1 ? "s" : ""})</span>
                     <span>LKR {subtotal.toLocaleString("en-LK")}</span>
                   </div>
+
+                  {/* Card shipping */}
                   <div className="flex justify-between text-[13px] text-[#535766]">
-                    <span>Shipping</span>
-                    <span>LKR {SHIPPING_FEE.toLocaleString("en-LK")}</span>
+                    <span className="flex items-center gap-1">
+                      Shipping
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-500 font-semibold">Card</span>
+                    </span>
+                    <span>{shippingCosts.cardPayment === 0 ? <span className="text-[#03a685] font-semibold">FREE</span> : `LKR ${shippingCosts.cardPayment.toLocaleString("en-LK")}`}</span>
                   </div>
-                  <div className="flex justify-between text-[16px] font-bold text-[#282c3f] pt-2 border-t border-[#eaeaec]">
-                    <span>Total</span>
-                    <span>LKR {total.toLocaleString("en-LK")}</span>
+                  {/* COD shipping */}
+                  <div className="flex justify-between text-[13px] text-[#535766]">
+                    <span className="flex items-center gap-1">
+                      Shipping
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-600 font-semibold">COD</span>
+                    </span>
+                    <span>{shippingCosts.cashOnDelivery === 0 ? <span className="text-[#03a685] font-semibold">FREE</span> : `LKR ${shippingCosts.cashOnDelivery.toLocaleString("en-LK")}`}</span>
+                  </div>
+
+                  <div className="border-t border-[#eaeaec] pt-2 mt-2 space-y-1">
+                    <div className="flex justify-between text-[14px] font-bold text-[#282c3f]">
+                      <span>Total <span className="text-[11px] font-medium text-[#94969f]">(via Card)</span></span>
+                      <span>LKR {cardTotal.toLocaleString("en-LK")}</span>
+                    </div>
+                    <div className="flex justify-between text-[14px] font-bold text-[#282c3f]">
+                      <span>Total <span className="text-[11px] font-medium text-[#94969f]">(via COD)</span></span>
+                      <span>LKR {codTotal.toLocaleString("en-LK")}</span>
+                    </div>
                   </div>
                 </div>
 

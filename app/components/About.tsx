@@ -1,6 +1,20 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import { Gem, Crown, Flower2, Sparkles } from "lucide-react";
 
 export function About() {
+  const [shopInfo, setShopInfo] = useState<{storeName: string} | null>(null);
+
+  useEffect(() => {
+    fetch("/api/backend/shop-info")
+      .then((res) => res.json())
+      .then((data) => setShopInfo(data))
+      .catch((err) => console.error("Failed to load shop info:", err));
+  }, []);
+
+  const storeName = shopInfo?.storeName || "Saree Bazar";
+
   const cards = [
     {
       icon: <Gem size={18} className="text-white" strokeWidth={1.5} />,
@@ -35,7 +49,7 @@ export function About() {
           </span>
         </h2>
         <p className="text-lg md:text-[19px] font-medium leading-relaxed text-gray-700">
-          At Saree Bazar, every saree tells a story of culture, grace, and craftsmanship.
+          At {storeName}, every saree tells a story of culture, grace, and craftsmanship.
           From festive collections to modern classics, we bring handpicked elegance to every woman&apos;s wardrobe.
         </p>
       </div>

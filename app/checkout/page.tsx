@@ -7,9 +7,13 @@ import { ShieldCheck, Truck, Package, ChevronRight, Loader2, CreditCard, BadgeCh
 import toast from "react-hot-toast";
 import { getCheckoutItems, clearCheckoutItems, type CheckoutVariant } from "@/lib/cartStore";
 import { placeOrder, type ShippingDetails, type OrderPayload } from "@/lib/ordersStore";
+import { isLoggedIn } from "@/lib/authStore";
 import Navbar from "@/app/components/Navbar";
 
-const SHIPPING_FEE = 350;
+interface ShippingCosts {
+  cardPayment: number;
+  cashOnDelivery: number;
+}
 
 const SRI_LANKA_REGIONS: Record<string, string[]> = {
   "Central": ["Kandy", "Matale", "Nuwara Eliya"],
@@ -37,6 +41,8 @@ export default function CheckoutPage() {
   });
   const [payMethod, setPayMethod] = useState<"card" | "cod">("card");
   const [card, setCard] = useState({ number: "", expiry: "", cvv: "", name: "" });
+  const [shippingCosts, setShippingCosts] = useState<ShippingCosts>({ cardPayment: 0, cashOnDelivery: 0 });
+  const [loadingShipping, setLoadingShipping] = useState(true);
 
   const handleShippingChange = (key: keyof ShippingDetails, value: string) => {
     setShipping((prev) => {
@@ -59,13 +65,33 @@ export default function CheckoutPage() {
   };
 
   useEffect(() => {
+    if (!isLoggedIn()) {
+      toast.error("Please login to place an order.");
+      router.replace("/login?redirect=/checkout");
+      return;
+    }
     const data = getCheckoutItems();
     if (!data.length) { router.replace("/collections"); return; }
     setItems(data);
+
+    // Fetch dynamic shipping costs from admin settings
+    fetch("/api/backend/shop-info/shipping-costs")
+      .then((res) => res.json())
+      .then((data) => {
+        setShippingCosts({
+          cardPayment: data.cardPayment ?? 0,
+          cashOnDelivery: data.cashOnDelivery ?? 0,
+        });
+      })
+      .catch(() => {
+        console.error("Failed to fetch shipping costs, using defaults");
+      })
+      .finally(() => setLoadingShipping(false));
   }, [router]);
 
   const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0);
-  const total = subtotal + SHIPPING_FEE;
+  const currentShippingFee = payMethod === "cod" ? shippingCosts.cashOnDelivery : shippingCosts.cardPayment;
+  const total = subtotal + currentShippingFee;
 
   const isShippingValid = () =>
     shipping.fullName && shipping.email && shipping.phone &&
@@ -99,7 +125,7 @@ export default function CheckoutPage() {
         })),
         shipping,
         subtotal,
-        shippingFee: SHIPPING_FEE,
+        shippingFee: currentShippingFee,
         discount: 0,
         total,
         paymentMethod: payMethod === "card" ? "Razorpay" : "Cash on Delivery",
@@ -372,8 +398,13 @@ export default function CheckoutPage() {
                   )}
 
                   {payMethod === "cod" && (
-                    <div className="p-4 rounded-xl bg-[#f0fdf4] border border-[#86efac] text-[14px] text-[#16a34a] font-medium">
-                      You will pay <strong>LKR {total.toLocaleString("en-LK")}</strong> in cash when your order is delivered.
+                    <div className="p-4 rounded-xl bg-[#f0fdf4] border border-[#86efac] text-[14px] text-[#16a34a] font-medium space-y-1">
+                      <p>You will pay <strong>LKR {total.toLocaleString("en-LK")}</strong> in cash when your order is delivered.</p>
+                      {shippingCosts.cashOnDelivery > 0 && (
+                        <p className="text-[12px] text-[#15803d]">
+                          Includes COD shipping charge of LKR {shippingCosts.cashOnDelivery.toLocaleString("en-LK")}
+                        </p>
+                      )}
                     </div>
                   )}
 
@@ -423,8 +454,13 @@ export default function CheckoutPage() {
                   <span>LKR {subtotal.toLocaleString("en-LK")}</span>
                 </div>
                 <div className="flex justify-between text-[13px] text-[#535766]">
-                  <span>Shipping</span>
-                  <span>LKR {SHIPPING_FEE.toLocaleString("en-LK")}</span>
+                  <span className="flex items-center gap-1">
+                    Shipping
+                    <span className="text-[11px] px-1.5 py-0.5 rounded-full bg-[#f5f5f6] text-[#94969f] font-medium">
+                      {payMethod === "cod" ? "COD" : "Card"}
+                    </span>
+                  </span>
+                  <span>{currentShippingFee === 0 ? <span className="text-[#03a685] font-semibold">FREE</span> : `LKR ${currentShippingFee.toLocaleString("en-LK")}`}</span>
                 </div>
                 <div className="flex justify-between text-[16px] font-bold text-[#282c3f] border-t border-[#eaeaec] pt-3 mt-2">
                   <span>Total</span>

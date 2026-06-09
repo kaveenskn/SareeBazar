@@ -1,9 +1,19 @@
-export const metadata = {
-  title: "SareeBazar | About Us",
-  description: "Learn about SareeBazar, our journey, and our values.",
-};
+"use client";
+
+import { useState, useEffect } from "react";
 
 export default function AboutPage() {
+  const [shopInfo, setShopInfo] = useState<{storeName: string} | null>(null);
+
+  useEffect(() => {
+    fetch("/api/backend/shop-info")
+      .then((res) => res.json())
+      .then((data) => setShopInfo(data))
+      .catch((err) => console.error("Failed to load shop info:", err));
+  }, []);
+
+  const storeName = shopInfo?.storeName || "SareeBazar";
+
   return (
     <main className="min-h-screen bg-[#fbeff6] px-6 pt-24 pb-12 md:px-8">
       <div className="mx-auto w-full max-w-4xl space-y-10">
@@ -12,11 +22,11 @@ export default function AboutPage() {
             Our Story
           </p>
           <h1 className="mt-2 text-3xl font-serif text-gray-900 md:text-4xl">
-            About SareeBazar
+            About {storeName}
           </h1>
           <div className="mt-4 space-y-4 text-[14px] leading-relaxed text-gray-600">
             <p>
-              Founded in 2005 in Badulla, Sri Lanka, SareeBazar began as a
+              Founded in 2005 in Badulla, Sri Lanka, {storeName} began as a
               single boutique with a small, dedicated team.
             </p>
             <p>
@@ -28,7 +38,7 @@ export default function AboutPage() {
               Lanka reflects our commitment to accessible, high-quality fashion.
             </p>
             <p>
-              Today, SareeBazar continues to expand its reach while staying true
+              Today, {storeName} continues to expand its reach while staying true
               to the craftsmanship, culture, and community that define us.
             </p>
           </div>
@@ -53,7 +63,7 @@ export default function AboutPage() {
         <section className="rounded-2xl border border-primary/20 bg-white/70 p-6">
           <h2 className="text-lg font-serif text-gray-900">Values</h2>
           <p className="mt-3 text-[14px] leading-relaxed text-gray-600">
-            SareeBazar is built on a foundation of conscience, ethics, and
+            {storeName} is built on a foundation of conscience, ethics, and
             culture. These values guide our team and shape every customer
             experience.
           </p>

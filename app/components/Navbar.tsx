@@ -13,6 +13,16 @@ export default function Navbar() {
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState<{name: string, email: string} | null>(null);
+  const [shopInfo, setShopInfo] = useState<{storeName: string} | null>(null);
+
+  useEffect(() => {
+    fetch("/api/backend/shop-info")
+      .then(res => res.json())
+      .then(data => setShopInfo(data))
+      .catch(err => console.error(err));
+  }, []);
+  
+  const storeName = shopInfo?.storeName || "SareeBazar";
 
   useEffect(() => {
     const checkAuth = () => {
@@ -59,8 +69,8 @@ export default function Navbar() {
           <div className="px-5 md:px-7 flex items-center justify-between">
             {/* Logo */}
             <Link href="/" className="text-3xl font-serif tracking-wide flex items-center">
-              <span className="text-primary">Saree</span>
-              <span className="text-gray-900">Bazar</span>
+              <span className="text-primary">{storeName.includes(" ") ? storeName.split(" ")[0] : "Saree"}</span>
+              <span className="text-gray-900">{storeName.includes(" ") ? storeName.split(" ").slice(1).join(" ") : "Bazar"}</span>
             </Link>
 
             {/* Desktop Nav */}
@@ -121,10 +131,7 @@ export default function Navbar() {
                       ) : (
                         <>
                           <Link href="/login" onClick={() => setProfileDropdownOpen(false)} className="flex items-center px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-primary/5 hover:text-primary rounded-lg transition-colors">
-                            Login
-                          </Link>
-                          <Link href="/register" onClick={() => setProfileDropdownOpen(false)} className="flex items-center px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-primary/5 hover:text-primary rounded-lg transition-colors">
-                            Sign Up
+                            Login / Sign Up
                           </Link>
                         </>
                       )}
@@ -170,8 +177,7 @@ export default function Navbar() {
               <div className="pt-3 mt-1 border-t border-gray-100 flex flex-col space-y-3">
                 {!isLoggedIn ? (
                   <>
-                    <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="text-[13px] font-semibold text-primary">Login</Link>
-                    <Link href="/register" onClick={() => setMobileMenuOpen(false)} className="text-[13px] font-semibold text-gray-700">Create Account</Link>
+                    <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="text-[13px] font-semibold text-primary">Login / Sign Up</Link>
                   </>
                 ) : (
                   <>
