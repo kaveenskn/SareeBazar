@@ -39,14 +39,10 @@ export function About() {
   ];
 
   return (
-    <section className="relative w-full py-24 md:py-32 bg-[var(--background)] overflow-hidden">
-      {/* Top text content */}
-      <div className="max-w-3xl mx-auto px-6 flex flex-col items-center text-center mb-16 md:mb-24 relative z-10">
-        <h2 className="text-5xl md:text-7xl font-serif font-bold text-gray-900 leading-[1.1] mb-8">
-          Where Tradition Meets <br />
-          <span className="text-primary font-bold">
-            Timeless Elegance
-          </span>
+    <Section align="left" heightClass="h-[200vh]">
+      <div className="max-w-xl text-left">
+        <h2 className="text-5xl md:text-7xl font-bold mb-8 text-gray-900 drop-shadow-[0_2px_15px_rgba(255,255,255,1)]">
+          Our <span className="text-[#B88E52]">Heritage</span>
         </h2>
         <p className="text-lg md:text-[19px] font-medium leading-relaxed text-gray-700">
           At {storeName}, every saree tells a story of culture, grace, and craftsmanship.
