@@ -4,17 +4,23 @@ import { Hero } from "./Hero";
 import { Offers } from "./Offers";
 import { Collections } from "./Collections";
 import { About } from "./About";
+import { Marquee } from "./Marquee";
 
 import { VisitUs } from "./VisitUs";
+import Footer from "./Footer";
 
 export default function ContentOverlay() {
   return (
     <div className="relative z-10 w-full transition-colors duration-300">
       <Hero />
+
       <Offers />
-      <Collections />
       <About />
+      <Collections />
+      <Marquee />
+
       <VisitUs />
+      <Footer />
     </div>
   );
 }

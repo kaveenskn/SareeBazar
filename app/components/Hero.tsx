@@ -1,6 +1,23 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import { Section } from "./Section";
 
 export function Hero() {
+  const [shopInfo, setShopInfo] = useState<{storeName: string, description: string} | null>(null);
+
+  useEffect(() => {
+    fetch("/api/backend/shop-info")
+      .then((res) => res.json())
+      .then((data) => setShopInfo(data))
+      .catch((err) => console.error("Failed to load shop info:", err));
+  }, []);
+
+  const storeName = shopInfo?.storeName || "Saree Bazar";
+  const firstName = storeName.includes(" ") ? storeName.split(" ")[0] : "Saree";
+  const secondName = storeName.includes(" ") ? storeName.split(" ").slice(1).join(" ") : "Bazar";
+  const description = shopInfo?.description || "Explore bridal, silk, and designer sarees that blend traditional beauty with contemporary fashion and elegance.";
+
   return (
     <Section align="left" heightClass="h-[200vh]" isFirst={true} topClass="top-[35%]">
       <div className="max-w-xl text-center">

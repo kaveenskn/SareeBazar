@@ -1,3 +1,9 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
+import Link from "next/link";
 import { Section } from "./Section";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";

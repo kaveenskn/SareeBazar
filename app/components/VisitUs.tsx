@@ -2,6 +2,21 @@ import { Section } from "./Section";
 import { motion } from "framer-motion";
 
 export function VisitUs() {
+  const [shopInfo, setShopInfo] = useState<ShopInfo | null>(null);
+
+  useEffect(() => {
+    fetch("/api/backend/shop-info")
+      .then((res) => res.json())
+      .then((data) => setShopInfo(data))
+      .catch((err) => console.error("Failed to load shop info:", err));
+  }, []);
+
+  // Fallback values while loading
+  const storeName = shopInfo?.storeName || "Saree Bazar";
+  const address = shopInfo?.address || "No. 25, Main Street, Colombo, Sri Lanka";
+  const phone = shopInfo?.phone || "+94 77 123 4567";
+  const openingHours = shopInfo?.openingHours || "Mon – Sat : 9.00 AM – 8.00 PM";
+
   return (
     <Section align="left" heightClass="h-[100vh]" topClass="top-[30%]">
       <div className="max-w-3xl text-left flex flex-col items-start px-4">

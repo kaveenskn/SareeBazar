@@ -2,10 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 
-const FRAME_COUNT = 144;
+const FRAME_COUNT = 150;
 
 function currentFrame(index: number) {
-  return `/final_frames/final_${index.toString().padStart(3, "0")}.png`;
+  return `/Heroscrollframes/Imported_Media_202605141416_${index.toString().padStart(3, "0")}.png`;
 }
 
 export default function ScrollCanvas() {
@@ -48,7 +48,7 @@ export default function ScrollCanvas() {
 
     const updateCanvasSize = () => {
       canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight - 68;
+      canvas.height = window.innerHeight;
       renderImage(Math.round(currentFrameIndex));
     };
 
@@ -61,17 +61,19 @@ export default function ScrollCanvas() {
       const imgAspectRatio = img.width / img.height;
       let renderableHeight, renderableWidth, xStart, yStart;
 
-      // Maintain aspect ratio while covering the whole canvas (object-fit: cover)
+      // Use object-fit: cover logic, aligning to the top
       if (imgAspectRatio < canvasAspectRatio) {
+        // Canvas is wider than image. Scale width to fit, crop bottom.
         renderableWidth = canvas.width;
         renderableHeight = img.height * (renderableWidth / img.width);
         xStart = 0;
-        // Shift image up slightly (negative yStart) to adjust the head position
-        yStart = -50;
+        yStart = 0; // Keep the top part properly visible
       } else {
+        // Canvas is taller than image. Scale height to fit, crop sides.
         renderableHeight = canvas.height;
         renderableWidth = img.width * (renderableHeight / img.height);
         yStart = 0;
+        // Center horizontally
         xStart = (canvas.width - renderableWidth) / 2;
       }
 
@@ -86,20 +88,18 @@ export default function ScrollCanvas() {
     }
 
     const handleScroll = () => {
-      const scrollTop = document.documentElement.scrollTop;
-      const maxScrollTop = document.documentElement.scrollHeight - window.innerHeight;
+      const scrollTop = window.scrollY;
+      const scrollRange = window.innerHeight * 2; // Animation finishes exactly as the canvas slides up
 
-      if (maxScrollTop <= 0) return;
-
-      const scrollFraction = Math.max(0, Math.min(1, scrollTop / maxScrollTop));
+      const scrollFraction = Math.max(0, Math.min(1, scrollTop / scrollRange));
       const frameIndex = Math.min(
         FRAME_COUNT - 1,
-        Math.floor(scrollFraction * FRAME_COUNT)
+        Math.floor(scrollFraction * (FRAME_COUNT - 1))
       );
       targetFrameIndex = frameIndex;
     };
 
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll(); // initial state
 
     const update = () => {
@@ -124,22 +124,26 @@ export default function ScrollCanvas() {
   }, [loaded, images]);
 
   return (
-    <div className="fixed top-[68px] left-0 w-full h-[calc(100vh-68px)] z-0 pointer-events-none bg-white">
-      {!loaded && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center z-20 text-peacock-accent bg-white">
-          <div className="w-12 h-12 border-4 rounded-full animate-spin mb-4 border-peacock-accent/30 border-t-peacock-accent" />
-          <div className="text-xl font-light tracking-widest animate-pulse">
-            LOADING EXPERIENCE...
+    <div className="absolute top-0 left-0 w-full h-[300vh] z-0 pointer-events-none">
+      <div className="sticky top-0 w-full h-screen">
+        {!loaded && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center z-20 text-peacock-accent" style={{ backgroundColor: "var(--background)" }}>
+            <div className="w-12 h-12 border-4 rounded-full animate-spin mb-4 border-peacock-accent/30 border-t-peacock-accent" />
+            <div className="text-xl font-light tracking-widest animate-pulse">
+              LOADING EXPERIENCE...
+            </div>
           </div>
-        </div>
-      )}
-      <canvas
-        ref={canvasRef}
-        className="block w-full h-full object-cover transition-opacity duration-300"
-        style={{ opacity: loaded ? 1 : 0 }}
-      />
-      {/* Dimmed overlay for better text contrast */}
-      <div className="absolute inset-0 z-10 bg-black/0" />
+        )}
+        <canvas
+          ref={canvasRef}
+          className="block w-full h-full object-cover transition-opacity duration-300"
+          style={{ opacity: loaded ? 1 : 0 }}
+        />
+        {/* Dimmed overlay for better text contrast */}
+        <div className="absolute inset-0 z-10 bg-black/5" />
+        {/* Bottom fade overlay to blend with the solid background sections below */}
+        <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-[var(--background)] via-[var(--background)]/30 to-transparent z-10 pointer-events-none" />
+      </div>
     </div>
   );
 }
