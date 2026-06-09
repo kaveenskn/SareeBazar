@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import {
   Package,
@@ -20,9 +21,9 @@ import {
   XCircle,
 } from "lucide-react";
 import {
-  mockOrders,
   computeDashboardStats,
 } from "@/mockdata/orders";
+import { getOrders } from "@/lib/ordersStore";
 
 /* ─── Status badge config ─── */
 const STATUS_CONFIG: Record<
@@ -78,25 +79,53 @@ const FILTER_TABS: FilterType[] = [
 export default function DashboardPage() {
   const [activeFilter, setActiveFilter] = useState<FilterType>("All");
   const [searchQuery, setSearchQuery] = useState("");
+  const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+  const [orders, setOrders] = useState<MockOrder[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const stats = useMemo(() => computeDashboardStats(mockOrders), []);
+  useEffect(() => {
+    async function load() {
+      try {
+        const fetched = await getOrders();
+        const mapped: MockOrder[] = fetched.map(o => {
+          let mappedStatus = o.status.charAt(0).toUpperCase() + o.status.slice(1);
+          if (mappedStatus === "Confirmed") mappedStatus = "Processing";
+          return {
+            ...o,
+            id: o.orderId || o.id,
+            customerName: o.shipping?.fullName || "Unknown",
+            customerCity: o.shipping?.city || "Unknown",
+            deliveryStatus: mappedStatus as MockOrder["deliveryStatus"]
+          };
+        });
+        setOrders(mapped);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+  }, []);
+
+  const stats = useMemo(() => computeDashboardStats(orders), [orders]);
 
   const filteredOrders = useMemo(() => {
-    let orders = mockOrders;
+    let filtered = orders;
     if (activeFilter !== "All") {
-      orders = orders.filter((o) => o.deliveryStatus === activeFilter);
+      filtered = filtered.filter((o) => o.deliveryStatus === activeFilter);
     }
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
-      orders = orders.filter(
+      filtered = filtered.filter(
         (o) =>
           o.id.toLowerCase().includes(q) ||
           o.items.some((item) => item.name.toLowerCase().includes(q)) ||
           o.shipping.fullName.toLowerCase().includes(q)
       );
     }
-    return orders;
-  }, [activeFilter, searchQuery]);
+    return filtered;
+  }, [activeFilter, searchQuery, orders]);
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -247,7 +276,14 @@ export default function DashboardPage() {
 
           {/* Orders List */}
           <div className="divide-y divide-gray-50">
-            {filteredOrders.length === 0 ? (
+            {loading ? (
+              <div className="py-16 text-center">
+                <div className="w-8 h-8 border-4 border-[#a1005b]/20 border-t-[#a1005b] rounded-full animate-spin mx-auto mb-4" />
+                <h3 className="text-[16px] font-bold text-gray-400 mb-1">
+                  Loading orders...
+                </h3>
+              </div>
+            ) : filteredOrders.length === 0 ? (
               <div className="py-16 text-center">
                 <ShoppingBag size={48} className="text-gray-200 mx-auto mb-4" />
                 <h3 className="text-[16px] font-bold text-gray-400 mb-1">
