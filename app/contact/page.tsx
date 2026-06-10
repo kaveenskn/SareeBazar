@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Mail, Phone, MapPin, Clock } from "lucide-react";
 
 interface ShopInfo {
@@ -80,6 +81,17 @@ export default function ContactPage() {
           <p className="mt-2 text-[14px] text-gray-600">
             Come visit our boutique in person for a premium shopping experience.
           </p>
+          
+          <div className="mt-4 mb-4 overflow-hidden rounded-xl border border-primary/10">
+            <Image
+              src="/sareebazar_shop_exterior.png"
+              alt="SareeBazar Shop Exterior"
+              width={800}
+              height={450}
+              className="h-48 w-full object-cover transition-transform duration-500 hover:scale-105 md:h-64"
+            />
+          </div>
+
           <div className="mt-4 flex items-start gap-2 text-sm font-semibold text-primary">
             <MapPin size={16} className="mt-0.5 flex-shrink-0" />
             <span>{address}</span>

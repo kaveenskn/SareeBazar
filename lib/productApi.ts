@@ -22,6 +22,7 @@ interface ApiProduct {
   reviews: number;
   category: string;
   badge: string;
+  status: string;
   description: string;
   fabric: string;
   color: string;
@@ -29,9 +30,8 @@ interface ApiProduct {
   inStock: boolean;
   stock: number;
   sizes: string[];
+  discountPercent: number | null;
   isFeatured: boolean;
-  isLatest: boolean;
-  isTrending: boolean;
   createdAt: string;
 }
 
@@ -54,12 +54,14 @@ function mapApiToProduct(api: ApiProduct): Product {
     reviews: api.reviews,
     category: api.category,
     badge: api.badge || undefined,
+    status: api.status || undefined,
     description: api.description,
     fabric: api.fabric,
     color: api.color,
     colorVariants: (api.colorVariants || []).map(cv => ({ ...cv, image: sanitizeImage(cv.image) })),
     inStock: api.inStock,
     stock: api.stock,
+    discountPercent: api.discountPercent ?? undefined,
     createdAt: api.createdAt,
   };
 }
@@ -82,11 +84,11 @@ export async function fetchAllProducts(): Promise<Product[]> {
 }
 
 /**
- * Fetch products with "Sale" badge — used for Today's Offers
+ * Fetch products with "sale" status — used for Today's Offers
  */
 export async function fetchSaleProducts(): Promise<Product[]> {
   try {
-    const res = await fetch(`${API_BASE}/products?badge=Sale`, {
+    const res = await fetch(`${API_BASE}/products?status=sale`, {
       cache: "no-store",
     });
     if (!res.ok) return [];

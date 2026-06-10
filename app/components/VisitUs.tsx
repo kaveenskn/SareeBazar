@@ -61,7 +61,7 @@ export function VisitUs() {
         {/* Left Side: Image */}
         <div className="w-full lg:w-[45%] relative rounded-[2.5rem] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.1)] h-[550px] lg:h-[650px] flex-shrink-0">
           <Image
-            src="/images/collections/bridal_saree.png"
+            src="/sareebazar_shop_exterior.png"
             alt={`${storeName} Boutique`}
             fill
             className="object-cover"

@@ -24,6 +24,7 @@ export interface Product {
   reviews: number;
   category: string;
   badge?: string;
+  status?: string;
   isWishlisted?: boolean;
   description?: string;
   fabric?: string;
@@ -31,6 +32,7 @@ export interface Product {
   colorVariants?: ColorVariant[];
   inStock?: boolean;
   stock?: number;
+  discountPercent?: number;
   createdAt?: string;
 }
 
