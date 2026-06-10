@@ -597,48 +597,7 @@ function CollectionsContent() {
         </div>
       )}
 
-      {/* ─── Collection Banner ─── */}
-      {(() => {
-        // Show banner when a single category filter matches a collection with a coverImage
-        if (selectedFilters.length === 1) {
-          const matchedCollection = apiCollections.find(
-            (col) => col.title === selectedFilters[0] && col.coverImage && !col.coverImage.startsWith("blob:")
-          );
-          if (matchedCollection) {
-            return (
-              <div className="bg-white border-b border-[#e8e8e1]">
-                <div className="max-w-[1400px] mx-auto">
-                  <div className="relative w-full overflow-hidden" style={{ aspectRatio: '3 / 2', maxHeight: '400px' }}>
-                    <Image
-                      src={matchedCollection.coverImage}
-                      alt={matchedCollection.title}
-                      fill
-                      className="object-cover object-center"
-                      sizes="100vw"
-                      unoptimized
-                      priority
-                    />
-                    {/* Gradient overlay for readability */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
-                    {/* Banner text */}
-                    <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
-                      <h2 className="text-2xl md:text-4xl font-serif font-bold text-white drop-shadow-md">
-                        {matchedCollection.title}
-                      </h2>
-                      {matchedCollection.description && (
-                        <p className="text-white/85 text-sm md:text-base mt-1 max-w-xl drop-shadow-sm">
-                          {matchedCollection.description}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            );
-          }
-        }
-        return null;
-      })()}
+      {/* ─── Collection Banner ─── (Removed as requested) */}
 
       {/* ─── Mobile Filter Toggle ─── */}
       <div className="lg:hidden bg-white border-b border-[#e8e8e1]">
