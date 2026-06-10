@@ -25,7 +25,7 @@ interface ApiProduct {
   description: string;
   fabric: string;
   color: string;
-  colorVariants: { name: string; hex: string; image: string }[];
+  colorVariants: { name: string; hex: string; image: string; stock: number }[];
   inStock: boolean;
   stock: number;
   sizes: string[];
@@ -57,7 +57,7 @@ function mapApiToProduct(api: ApiProduct): Product {
     description: api.description,
     fabric: api.fabric,
     color: api.color,
-    colorVariants: (api.colorVariants || []).map(cv => ({ ...cv, image: sanitizeImage(cv.image) })),
+    colorVariants: (api.colorVariants || []).map(cv => ({ ...cv, image: sanitizeImage(cv.image), stock: cv.stock || 0 })),
     inStock: api.inStock,
     stock: api.stock,
     createdAt: api.createdAt,

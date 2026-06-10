@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import {
   computeDashboardStats,
+  type MockOrder,
 } from "@/mockdata/orders";
 import { getOrders } from "@/lib/ordersStore";
 
