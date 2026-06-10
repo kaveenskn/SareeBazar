@@ -500,8 +500,8 @@ export default function ProductView({
                         style={
                           isActive
                             ? {
-                                boxShadow: `0 0 0 2px white, 0 0 0 4px ${variant.hex}, 0 4px 12px ${variant.hex}60`,
-                              }
+                              boxShadow: `0 0 0 2px white, 0 0 0 4px ${variant.hex}, 0 4px 12px ${variant.hex}60`,
+                            }
                             : {}
                         }
                         title={`${variant.name}${isOutOfStock ? " (Out of Stock)" : ` - ${variant.stock} in stock`}`}
