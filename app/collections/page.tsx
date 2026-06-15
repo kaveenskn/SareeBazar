@@ -372,6 +372,41 @@ function CollectionsContent() {
   };
 
   const dynamicCategories = useMemo(() => {
+    const isCategoryMatch = (pCat: string, fCat: string) => {
+      if (!pCat || !fCat) return false;
+      const p = pCat.toLowerCase().trim();
+      const f = fCat.toLowerCase().trim();
+      return p === f || 
+             p + 's' === f || 
+             p === f + 's' || 
+             p.replace(/ sarees?$/, '') === f.replace(/ sarees?$/, '');
+    };
+
+    const baseCategories = [];
+    const saleCount = products.filter(p => p.badge === 'Sale').length;
+    if (saleCount > 0) {
+      baseCategories.push({
+        label: "Today's Offer",
+        slug: "todays-offer",
+        count: saleCount,
+        icon: "✦"
+      });
+    }
+
+    if (apiCollections.length > 0) {
+      const collectionCategories = apiCollections.map(c => {
+        const count = products.filter(p => isCategoryMatch(p.category, c.title)).length;
+        return {
+          label: c.title,
+          slug: c.slug,
+          count: count,
+          icon: "✦"
+        };
+      });
+      return [...baseCategories, ...collectionCategories];
+    }
+
+    // Fallback if collections not loaded yet
     const counts: Record<string, number> = {};
     products.forEach(p => {
       if (!p.category) return;
@@ -385,19 +420,8 @@ function CollectionsContent() {
       icon: "✦"
     }));
 
-    // Add Today's Offer
-    const saleCount = products.filter(p => p.badge === 'Sale').length;
-    if (saleCount > 0) {
-      categories.unshift({
-        label: "Today's Offer",
-        slug: "todays-offer",
-        count: saleCount,
-        icon: "✦"
-      });
-    }
-
-    return categories;
-  }, [products]);
+    return [...baseCategories, ...categories];
+  }, [products, apiCollections]);
 
   useEffect(() => {
     const rawCategory =
@@ -439,12 +463,22 @@ function CollectionsContent() {
     }
 
     if (selectedFilters.length > 0) {
+      const isCategoryMatch = (pCat: string, fCat: string) => {
+        if (!pCat || !fCat) return false;
+        const p = pCat.toLowerCase().trim();
+        const f = fCat.toLowerCase().trim();
+        return p === f || 
+               p + 's' === f || 
+               p === f + 's' || 
+               p.replace(/ sarees?$/, '') === f.replace(/ sarees?$/, '');
+      };
+
       if (selectedFilters.includes("Today's Offer")) {
         result = result.filter(
-          (p) => p.badge === "Sale" || selectedFilters.includes(p.category)
+          (p) => p.badge === "Sale" || selectedFilters.some(f => f !== "Today's Offer" && isCategoryMatch(p.category, f))
         );
       } else {
-        result = result.filter((p) => selectedFilters.includes(p.category));
+        result = result.filter((p) => selectedFilters.some(f => isCategoryMatch(p.category, f)));
       }
     }
 
