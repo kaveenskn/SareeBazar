@@ -72,16 +72,13 @@ function ProductCard({ product }: { product: Product }) {
   const [hovered, setHovered] = useState(false);
   const router = useRouter();
 
-  // For image carousel — filter out empty/falsy URLs
+  // For image carousel — always show product.image first, then product.images[]
   const images = useMemo(() => {
-    const imgs =
-      product.images && product.images.length > 0
-        ? product.images.filter((img) => img && img.trim() !== "")
-        : [];
-    if (imgs.length > 0) return imgs;
-    // Fallback to single image if available
-    if (product.image && product.image.trim() !== "") return [product.image];
-    return [];
+    const mainImage = product.image && product.image.trim() !== "" ? [product.image] : [];
+    const extraImages = (product.images || []).filter(
+      (img) => img && img.trim() !== "" && img !== product.image
+    );
+    return [...mainImage, ...extraImages];
   }, [product.images, product.image]);
 
   const [currentImageIdx, setCurrentImageIdx] = useState(0);
@@ -114,11 +111,10 @@ function ProductCard({ product }: { product: Product }) {
     setCurrentImageIdx((prev) => (prev - 1 + images.length) % images.length);
   };
 
-  const discountPercent = product.originalPrice
-    ? Math.round(
-        ((product.originalPrice - product.price) / product.originalPrice) * 100,
-      )
-    : 0;
+  const discountPercent = product.discountPercent || 0;
+  const salePrice = discountPercent > 0
+    ? Math.round(product.price * (1 - discountPercent / 100) * 100) / 100
+    : product.price;
 
   const currentImageSrc = images.length > 0 ? images[currentImageIdx] : null;
 
@@ -270,12 +266,12 @@ function ProductCard({ product }: { product: Product }) {
         {/* Price Row */}
         <div className="flex items-center gap-1.5 mt-1.5">
           <span className="text-[13px] font-bold text-[#282c3f]">
-            LKR {product.price.toLocaleString("en-LK")}
+            LKR {salePrice.toLocaleString("en-LK")}
           </span>
-          {product.originalPrice && (
+          {discountPercent > 0 && (
             <>
               <span className="text-[12px] text-[#7e818c] line-through font-normal">
-                LKR {product.originalPrice.toLocaleString("en-LK")}
+                LKR {product.price.toLocaleString("en-LK")}
               </span>
               <span className="text-[12px] text-[#ff905a] font-normal">
                 ({discountPercent}% OFF)

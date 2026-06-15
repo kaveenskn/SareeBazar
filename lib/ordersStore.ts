@@ -1,9 +1,11 @@
 /* ─────────────────────────────────────────────
  *  Orders Store (API-backed)
- *  Connects to Express backend at /api/orders.
+ *  Uses Next.js proxy (/api/backend/orders) so
+ *  cookies are sent correctly and CORS is avoided.
  * ───────────────────────────────────────────── */
 
-const API_BASE = "http://localhost:5000/api/orders";
+// Route through Next.js proxy — DO NOT call backend directly from browser
+const API_BASE = "/api/backend/orders";
 
 export interface OrderItem {
   productId: number;
@@ -79,10 +81,9 @@ function normalizeOrder(raw: any): Order {
 /* ─── Auth helper ─── */
 
 function getAuthHeaders(): Record<string, string> {
+  const { getToken } = require("./authStore") as { getToken: () => string | null };
   const token =
-    typeof window !== "undefined"
-      ? localStorage.getItem("accessToken")
-      : null;
+    typeof window !== "undefined" ? getToken() : null;
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };
@@ -126,6 +127,7 @@ export async function placeOrder(
   const response = await fetch(API_BASE, {
     method: "POST",
     headers: getAuthHeaders(),
+    credentials: "include", // send cookies too (belt + suspenders)
     body: JSON.stringify(payload),
   });
 
@@ -145,6 +147,7 @@ export async function confirmPayment(
   const response = await fetch(`${API_BASE}/${orderId}/payment`, {
     method: "PATCH",
     headers: getAuthHeaders(),
+    credentials: "include",
     body: JSON.stringify({
       paymentId,
       paymentStatus: "paid",
@@ -165,6 +168,7 @@ export async function getOrders(): Promise<Order[]> {
     const response = await fetch(API_BASE, {
       method: "GET",
       headers: getAuthHeaders(),
+      credentials: "include",
     });
 
     const data = await response.json();
@@ -186,6 +190,7 @@ export async function getOrder(id: string): Promise<Order | null> {
     const response = await fetch(`${API_BASE}/${id}`, {
       method: "GET",
       headers: getAuthHeaders(),
+      credentials: "include",
     });
 
     const data = await response.json();
@@ -207,6 +212,7 @@ export async function cancelOrder(
   const response = await fetch(`${API_BASE}/${orderId}/cancel`, {
     method: "PATCH",
     headers: getAuthHeaders(),
+    credentials: "include",
     body: JSON.stringify({ reason }),
   });
 

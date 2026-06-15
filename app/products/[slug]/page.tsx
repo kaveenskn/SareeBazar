@@ -28,9 +28,10 @@ export default async function ProductPage({ params }: { params: { slug: string }
   const gallery = product.images && product.images.length > 0 ? product.images : [product.image];
   const video = product.video;
 
-  const discountPercent = product.originalPrice
-    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
-    : 0;
+  const discountPercent = product.discountPercent || 0;
+  const salePrice = discountPercent > 0
+    ? Math.round(product.price * (1 - discountPercent / 100) * 100) / 100
+    : product.price;
 
   return (
     <main className="min-h-screen bg-white pt-[110px]" style={{ fontFamily: "var(--font-figtree), sans-serif" }}>

@@ -43,11 +43,7 @@ interface OfferSlide {
 
 /* ── Convert a Sale-status product into an offer slide ── */
 function productToSlide(product: Product): OfferSlide {
-  const discount = product.discountPercent
-    ? product.discountPercent
-    : product.originalPrice
-      ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
-      : 0;
+  const discount = product.discountPercent || 0;
 
   // Pick a color accent based on category
   const colorMap: Record<string, string> = {

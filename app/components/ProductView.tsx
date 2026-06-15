@@ -35,6 +35,9 @@ export default function ProductView({
   discountPercent,
 }: ProductViewProps) {
   const router = useRouter();
+  const salePrice = discountPercent > 0
+    ? Math.round(product.price * (1 - discountPercent / 100) * 100) / 100
+    : product.price;
   const colorVariants = product.colorVariants;
   const [activeImage, setActiveImage] = useState(gallery[0] || "");
   const [activeColor, setActiveColor] = useState<string | null>(
@@ -73,8 +76,8 @@ export default function ProductView({
     selectedColorHex: activeColorHex,
     selectedColorImage: activeImage,
     quantity,
-    price: product.price,
-    originalPrice: product.originalPrice,
+    price: salePrice,
+    originalPrice: discountPercent > 0 ? product.price : undefined,
     image: gallery[0],
     category: product.category,
     fabric: product.fabric,
@@ -425,12 +428,12 @@ export default function ProductView({
             {/* Price Section */}
             <div className="flex items-baseline gap-3">
               <span className="text-[24px] font-bold text-[#282c3f]">
-                Rs. {product.price.toLocaleString("en-LK")}
+                Rs. {salePrice.toLocaleString("en-LK")}
               </span>
-              {product.originalPrice && (
+              {discountPercent > 0 && (
                 <>
                   <span className="text-[20px] text-[#7e818c] line-through font-normal">
-                    Rs. {product.originalPrice.toLocaleString("en-LK")}
+                    Rs. {product.price.toLocaleString("en-LK")}
                   </span>
                   <span className="text-[20px] font-bold text-[#ff905a]">
                     ({discountPercent}% OFF)
