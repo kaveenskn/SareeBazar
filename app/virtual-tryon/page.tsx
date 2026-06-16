@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect, Suspense, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
-import { Sparkles, RefreshCw, Download, ImageIcon, User, Wand2, Search, X } from "lucide-react";
+import { Sparkles, RefreshCw, Download, ImageIcon, User, Wand2, Search, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { fetchAllProducts } from "@/lib/productApi";
 import { products as staticProducts } from "@/mockdata/collections";
 import type { Product } from "@/mockdata/collections";
@@ -78,8 +78,7 @@ function VirtualTryOnContent() {
     });
   }, [products, modalSearchQuery, selectedCategory]);
 
-  const selectSaree = (prod: Product) => {
-    const imgUrl = prod.images && prod.images.length > 0 ? prod.images[0] : prod.image;
+  const selectSaree = (imgUrl: string) => {
     if (!imgUrl) return;
 
     fetch(imgUrl)
@@ -439,34 +438,9 @@ function VirtualTryOnContent() {
                 </div>
               ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                  {filteredProducts.map((prod) => {
-                    const mainImg = prod.images && prod.images.length > 0 ? prod.images[0] : prod.image;
-                    return (
-                      <div
-                        key={prod.slug}
-                        onClick={() => selectSaree(prod)}
-                        className="group cursor-pointer bg-white border border-gray-100 rounded-2xl p-2.5 hover:shadow-md hover:border-[#a1005b]/30 transition-all duration-200 flex flex-col h-full"
-                      >
-                        <div className="relative aspect-[3/4] w-full rounded-xl overflow-hidden bg-gray-50 mb-3">
-                          {mainImg ? (
-                            <img
-                              src={mainImg}
-                              alt={prod.name}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                            />
-                          ) : (
-                            <div className="absolute inset-0 flex items-center justify-center text-xs text-gray-400 bg-gray-100">
-                              No Image
-                            </div>
-                          )}
-                        </div>
-                        <h4 className="text-xs font-bold text-gray-900 line-clamp-1 leading-tight mb-1">
-                          {prod.name}
-                        </h4>
-                        <p className="text-[10px] text-gray-500 mt-auto">{prod.category}</p>
-                      </div>
-                    );
-                  })}
+                  {filteredProducts.map((prod) => (
+                    <ModalProductCard key={prod.slug} product={prod} onSelect={selectSaree} />
+                  ))}
                 </div>
               )}
             </div>
@@ -800,6 +774,116 @@ function ResultCard({ isReady, isProcessing, hasTriedOn, result, accentColor }: 
         {/* Reflection Effect */}
         <div className="absolute inset-0 pointer-events-none bg-gradient-to-bl from-white/0 via-white/5 to-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   Modal Product Card (with Carousel)
+───────────────────────────────────────────── */
+function ModalProductCard({ product, onSelect }: { product: Product, onSelect: (imgUrl: string) => void }) {
+  const [hovered, setHovered] = useState(false);
+  
+  const images = useMemo(() => {
+    const mainImage = product.image && product.image.trim() !== "" ? [product.image] : [];
+    const extraImages = (product.images || []).filter(
+      (img) => img && img.trim() !== "" && img !== product.image
+    );
+    return [...mainImage, ...extraImages];
+  }, [product.images, product.image]);
+
+  const [currentImageIdx, setCurrentImageIdx] = useState(0);
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (hovered && images.length > 1 && isAutoPlaying) {
+      interval = setInterval(() => {
+        setCurrentImageIdx((prev) => (prev + 1) % images.length);
+      }, 2000);
+    } else if (!hovered) {
+      setCurrentImageIdx(0);
+      setIsAutoPlaying(true);
+    }
+    return () => clearInterval(interval);
+  }, [hovered, images.length, isAutoPlaying]);
+
+  const handleNextImage = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsAutoPlaying(false);
+    setCurrentImageIdx((prev) => (prev + 1) % images.length);
+  };
+
+  const handlePrevImage = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsAutoPlaying(false);
+    setCurrentImageIdx((prev) => (prev - 1 + images.length) % images.length);
+  };
+
+  const currentImageSrc = images.length > 0 ? images[currentImageIdx] : null;
+
+  return (
+    <div
+      onClick={() => currentImageSrc && onSelect(currentImageSrc)}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className="group relative cursor-pointer bg-white border border-gray-100 rounded-2xl p-2.5 hover:shadow-md hover:border-[#a1005b]/30 transition-all duration-200 flex flex-col h-full"
+    >
+      <div className="relative aspect-[3/4] w-full rounded-xl overflow-hidden bg-gray-50 mb-3">
+        {currentImageSrc ? (
+          <>
+            <img
+              src={currentImageSrc}
+              alt={product.name}
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+            {/* Carousel manual controls */}
+            {hovered && images.length > 1 && (
+              <>
+                <button
+                  onClick={handlePrevImage}
+                  className="absolute left-1.5 top-1/2 -translate-y-1/2 bg-white/50 backdrop-blur-md p-1 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:bg-white z-10 shadow-sm border border-white/40"
+                >
+                  <ChevronLeft size={16} className="text-[#a1005b]" />
+                </button>
+                <button
+                  onClick={handleNextImage}
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 bg-white/50 backdrop-blur-md p-1 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:bg-white z-10 shadow-sm border border-white/40"
+                >
+                  <ChevronRight size={16} className="text-[#a1005b]" />
+                </button>
+
+                {/* Carousel dots */}
+                <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1 z-10">
+                  {images.map((_, idx) => (
+                    <div
+                      key={idx}
+                      className={`h-1 rounded-full transition-all ${idx === currentImageIdx ? "w-2.5 bg-[#a1005b]" : "w-1.5 bg-white/70"}`}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+            
+            {/* Try on this color button overlay */}
+            <div className={`absolute bottom-0 left-0 right-0 p-2 transition-all duration-300 ${hovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
+              <div className="w-full py-1.5 bg-[#a1005b]/90 backdrop-blur-sm text-white text-[10px] font-bold uppercase tracking-wider text-center rounded-lg shadow-sm">
+                Try this color
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center text-xs text-gray-400 bg-gray-100">
+            No Image
+          </div>
+        )}
+      </div>
+      <h4 className="text-xs font-bold text-gray-900 line-clamp-1 leading-tight mb-1">
+        {product.name}
+      </h4>
+      <p className="text-[10px] text-gray-500 mt-auto">{product.category}</p>
     </div>
   );
 }

@@ -78,7 +78,7 @@ export default function ProductView({
     quantity,
     price: salePrice,
     originalPrice: discountPercent > 0 ? product.price : undefined,
-    image: gallery[0],
+    image: activeImage,
     category: product.category,
     fabric: product.fabric,
   });
@@ -190,7 +190,7 @@ export default function ProductView({
                     <span className="text-[52px] font-bold leading-none tracking-tight">
                       {(product.rating || 5.0).toFixed(1)}
                     </span>
-                    <Star size={36} className="fill-[#14958f] text-[#14958f]" />
+                    <Star size={36} className="fill-[#a1005b] text-[#a1005b]" />
                   </div>
                   <div className="mt-3">
                     <p className="text-[16px] font-bold text-[#282c3f]">
@@ -205,11 +205,11 @@ export default function ProductView({
                 {/* Right: Star Distribution */}
                 <div className="flex-1 flex flex-col justify-center gap-3 md:border-l-0 md:pl-4 pt-4 md:pt-0">
                   {[
-                    { stars: 5, percent: 75, color: "bg-[#14958f]" },
-                    { stars: 4, percent: 15, color: "bg-[#14958f]" },
-                    { stars: 3, percent: 5, color: "bg-[#ff905a]" },
-                    { stars: 2, percent: 3, color: "bg-[#ff3f6c]" },
-                    { stars: 1, percent: 2, color: "bg-[#ff3f6c]" },
+                    { stars: 5, percent: 75, color: "bg-[#a1005b]" },
+                    { stars: 4, percent: 15, color: "bg-[#c70072]" },
+                    { stars: 3, percent: 5, color: "bg-[#d6007b]" },
+                    { stars: 2, percent: 3, color: "bg-[#e84393]" },
+                    { stars: 1, percent: 2, color: "bg-[#fd79a8]" },
                   ].map((row) => (
                     <div key={row.stars} className="flex items-center gap-3">
                       <div className="flex items-center justify-end gap-1 w-8 text-[14px] font-bold text-[#282c3f]">
@@ -264,7 +264,7 @@ export default function ProductView({
             {/* Header: Tabs & Button */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#eaeaec] pb-3 mb-6">
               <div className="flex items-center gap-6 text-[15px] font-bold">
-                <button className="text-[#ff3f6c] border-b-2 border-[#ff3f6c] pb-3 -mb-[14px]">
+                <button className="text-[#a1005b] border-b-2 border-[#a1005b] pb-3 -mb-[14px]">
                   All Reviews
                 </button>
                 <button className="text-[#535766] hover:text-[#282c3f] pb-3 -mb-[14px]">
@@ -274,7 +274,7 @@ export default function ProductView({
                   Recent
                 </button>
               </div>
-              <button className="bg-[#ff3f6c] text-white px-5 py-2.5 rounded-[4px] font-bold text-[14px] flex items-center gap-2 hover:bg-[#ed315d] transition-colors shadow-sm">
+              <button className="bg-[#a1005b] text-white px-5 py-2.5 rounded-[4px] font-bold text-[14px] flex items-center gap-2 hover:bg-[#8a004d] transition-colors shadow-sm">
                 <PenLine size={16} />
                 WRITE A REVIEW
               </button>
@@ -303,7 +303,7 @@ export default function ProductView({
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1 bg-[#14958f] text-white px-2 py-0.5 rounded-[3px] text-[13px] font-bold">
+                  <div className="flex items-center gap-1 bg-[#a1005b] text-white px-2 py-0.5 rounded-[3px] text-[13px] font-bold">
                     5 <Star size={10} className="fill-white" />
                   </div>
                 </div>
@@ -358,7 +358,7 @@ export default function ProductView({
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1 bg-[#14958f] text-white px-2 py-0.5 rounded-[3px] text-[13px] font-bold">
+                  <div className="flex items-center gap-1 bg-[#a1005b] text-white px-2 py-0.5 rounded-[3px] text-[13px] font-bold">
                     4 <Star size={10} className="fill-white" />
                   </div>
                 </div>
@@ -415,7 +415,7 @@ export default function ProductView({
             <div className="mt-4 inline-flex items-center gap-2 border border-[#eaeaec] rounded-[2px] px-2 py-1 cursor-pointer hover:border-[#282c3f] transition-colors w-max">
               <span className="text-[14px] font-bold text-[#282c3f] flex items-center gap-1">
                 {product.rating}{" "}
-                <Star size={14} className="fill-[#14958f] text-[#14958f]" />
+                <Star size={14} className="fill-[#a1005b] text-[#a1005b]" />
               </span>
               <span className="w-[1px] h-3 bg-[#d4d5d9]"></span>
               <span className="text-[14px] text-[#535766]">
@@ -513,9 +513,9 @@ export default function ProductView({
             )}
 
             {/* Virtual Try-On Highlight */}
-            <div className="mt-5 p-4 rounded-[8px] bg-gradient-to-r from-[#7c3aed]/10 to-[#a855f7]/10 border border-[#a855f7]/30 flex items-center justify-between">
+            <div className="mt-5 p-4 rounded-[8px] bg-gradient-to-r from-[#a1005b]/10 to-[#d6007b]/10 border border-[#a1005b]/30 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#7c3aed] to-[#a855f7] flex items-center justify-center text-white">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#a1005b] to-[#d6007b] flex items-center justify-center text-white">
                   <Bot size={20} />
                 </div>
                 <div>
@@ -528,9 +528,9 @@ export default function ProductView({
                 </div>
               </div>
               <Link
-                href={`/virtual-tryon?saree=${encodeURIComponent(gallery[0])}`}
+                href={`/virtual-tryon?saree=${encodeURIComponent(activeImage)}`}
               >
-                <button className="px-4 py-2 bg-[#282c3f] text-white text-[12px] font-bold uppercase rounded-[4px] hover:bg-black transition-colors">
+                <button className="px-4 py-2 bg-[#a1005b] text-white text-[12px] font-bold uppercase rounded-[4px] hover:bg-[#8a004d] transition-colors">
                   Try Now
                 </button>
               </Link>
@@ -572,8 +572,8 @@ export default function ProductView({
                 onClick={handleAddToBag}
                 disabled={product.stock === 0}
                 className={`flex-1 h-14 rounded-[4px] font-bold text-[15px] uppercase tracking-wide flex items-center justify-center gap-2 shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed ${addedToBag
-                    ? "bg-[#03a685] text-white"
-                    : "bg-[#ff3f6c] text-white hover:bg-[#ed315d]"
+                    ? "bg-[#a1005b] text-white"
+                    : "bg-[#a1005b] text-white hover:bg-[#8a004d]"
                   }`}
               >
                 {addedToBag ? <Check size={20} /> : <ShoppingBag size={20} />}
@@ -582,7 +582,7 @@ export default function ProductView({
               <button
                 onClick={handleBuyNow}
                 disabled={product.stock === 0}
-                className="flex-1 h-14 bg-white border-2 border-[#282c3f] text-[#282c3f] rounded-[4px] font-bold text-[15px] uppercase tracking-wide flex items-center justify-center gap-2 hover:bg-[#282c3f] hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-[#282c3f]"
+                className="flex-1 h-14 bg-white border-2 border-[#a1005b] text-[#a1005b] rounded-[4px] font-bold text-[15px] uppercase tracking-wide flex items-center justify-center gap-2 hover:bg-[#a1005b] hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-[#a1005b]"
               >
                 <CreditCard size={20} /> Buy Now
               </button>

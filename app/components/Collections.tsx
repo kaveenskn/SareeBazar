@@ -168,22 +168,19 @@ export function Collections() {
           From Banarasi brocades to everyday cotton — discover sarees for every occasion.
         </p>
 
-        <div className="w-full flex flex-wrap justify-center gap-12">
+        <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
           {categories.map((cat) => (
             <Link
               href={`/collections?category=${encodeURIComponent(cat.name)}`}
               key={cat.id}
-              className="group relative w-[350px] flex-shrink-0 rounded-3xl overflow-hidden shadow-[0_12px_40px_rgba(0,0,0,0.15)] bg-white border border-white/60 hover:-translate-y-3 hover:shadow-[0_20px_60px_rgba(0,0,0,0.2)] transition-all duration-500 cursor-pointer block"
+              className="group relative w-full rounded-3xl overflow-hidden shadow-[0_12px_40px_rgba(0,0,0,0.15)] bg-white border border-white/60 hover:-translate-y-3 hover:shadow-[0_20px_60px_rgba(0,0,0,0.2)] transition-all duration-500 cursor-pointer block"
             >
-              {/* Image — cover images use 3:2 ratio, product images use taller layout */}
-              <div className={`relative w-full overflow-hidden ${cat.hasCoverImage ? "aspect-[3/2]" : "h-[450px]"}`}>
-                <Image
+              {/* Natural Image Layout */}
+              <div className="relative w-full overflow-hidden flex bg-gray-50">
+                <img
                   src={cat.image}
                   alt={cat.name}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 350px"
-                  className={`object-cover ${cat.hasCoverImage ? "object-center" : "object-top"} group-hover:scale-110 transition-transform duration-700`}
-                  unoptimized
+                  className="w-full h-auto object-contain group-hover:scale-110 transition-transform duration-700"
                 />
                 {/* Gradient overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
@@ -197,10 +194,9 @@ export function Collections() {
                 </div>
               </div>
 
-              {/* Info */}
-              <div className="px-6 pt-5 pb-7 flex flex-col gap-1.5">
-                <h3 className="text-xl font-bold text-gray-900 leading-tight">{cat.name}</h3>
-                <p className="text-sm text-gray-500 font-medium tracking-wide">{cat.subtitle}</p>
+              {/* Minimal Info */}
+              <div className="px-6 py-5 flex items-center justify-center">
+                <h3 className="text-[20px] font-bold text-gray-900 leading-tight text-center">{cat.name}</h3>
               </div>
             </Link>
           ))}

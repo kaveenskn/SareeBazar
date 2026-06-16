@@ -221,12 +221,12 @@ function ProductCard({ product }: { product: Product }) {
         >
           {/* Shop Now + Cart Row */}
           <div className="flex">
-            <button className="flex-1 py-2.5 bg-white/95 backdrop-blur-sm border-t border-r border-[#d4d5d9] text-[#282c3f] text-[12px] font-bold uppercase tracking-wide flex items-center justify-center gap-1.5 hover:bg-[#ff3f6c] hover:text-white transition-all duration-200">
+            <button className="flex-1 py-2.5 bg-white/95 backdrop-blur-sm border-t border-r border-[#d4d5d9] text-[#282c3f] text-[12px] font-bold uppercase tracking-wide flex items-center justify-center gap-1.5 hover:bg-[#a1005b] hover:text-white transition-all duration-200">
               <ShoppingBag size={13} />
               Shop Now
             </button>
             <button
-              className="w-12 py-2.5 bg-white/95 backdrop-blur-sm border-t border-[#d4d5d9] flex items-center justify-center text-[#282c3f] hover:bg-[#ff3f6c] hover:text-white transition-all duration-200"
+              className="w-12 py-2.5 bg-white/95 backdrop-blur-sm border-t border-[#d4d5d9] flex items-center justify-center text-[#282c3f] hover:bg-[#a1005b] hover:text-white transition-all duration-200"
               onClick={(e) => e.preventDefault()}
             >
               <ShoppingCart size={16} />
@@ -241,7 +241,7 @@ function ProductCard({ product }: { product: Product }) {
                 `/virtual-tryon?saree=${encodeURIComponent(images[currentImageIdx])}`,
               );
             }}
-            className="w-full flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-[#7c3aed] to-[#a855f7] text-white hover:from-[#6d28d9] hover:to-[#9333ea] transition-all duration-200"
+            className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#a1005b] text-white hover:bg-[#8a004d] transition-all duration-200"
           >
             <Bot size={14} className="animate-bounce-subtle" />
             <span className="text-[11px] font-semibold uppercase tracking-wider animate-pulse">
