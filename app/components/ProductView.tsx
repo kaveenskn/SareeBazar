@@ -39,7 +39,11 @@ export default function ProductView({
     ? Math.round(product.price * (1 - discountPercent / 100) * 100) / 100
     : product.price;
   const colorVariants = product.colorVariants;
-  const [activeImage, setActiveImage] = useState(gallery[0] || "");
+  const [activeImage, setActiveImage] = useState(
+    colorVariants && colorVariants.length > 0 && colorVariants[0].image
+      ? colorVariants[0].image
+      : gallery[0] || ""
+  );
   const [activeColor, setActiveColor] = useState<string | null>(
     colorVariants && colorVariants.length > 0 ? colorVariants[0].name : null,
   );

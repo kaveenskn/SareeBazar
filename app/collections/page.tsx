@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect, Suspense } from "react";
+import { useState, useMemo, useEffect, Suspense, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -23,6 +23,8 @@ import { products as staticProducts, filterCategories } from "@/mockdata/collect
 import type { Product } from "@/mockdata/collections";
 import { fetchAllProducts } from "@/lib/productApi";
 import { fetchAllCollections, type ApiCollection } from "@/lib/collectionApi";
+import { addToCart } from "@/lib/cartStore";
+import toast from "react-hot-toast";
 
 const ITEMS_PER_PAGE = 12;
 
@@ -83,6 +85,18 @@ function ProductCard({ product }: { product: Product }) {
 
   const [currentImageIdx, setCurrentImageIdx] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    if (product.video && videoRef.current) {
+      if (hovered) {
+        videoRef.current.play().catch(() => {});
+      } else {
+        videoRef.current.pause();
+        videoRef.current.currentTime = 0;
+      }
+    }
+  }, [hovered, product.video]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -143,8 +157,23 @@ function ProductCard({ product }: { product: Product }) {
           </div>
         )}
 
+        {/* Video Overlay */}
+        {product.video && (
+          <video
+            ref={videoRef}
+            src={product.video}
+            className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 z-10 ${
+              hovered ? "opacity-100 scale-105" : "opacity-0 scale-100"
+            }`}
+            loop
+            muted
+            playsInline
+            disablePictureInPicture
+          />
+        )}
+
         {/* Carousel manual controls */}
-        {hovered && images.length > 1 && (
+        {hovered && !product.video && images.length > 1 && (
           <>
             <button
               onClick={handlePrevImage}
@@ -173,7 +202,7 @@ function ProductCard({ product }: { product: Product }) {
 
         {/* Badge */}
         {product.badge && (
-          <div className="absolute top-0 left-0">
+          <div className="absolute top-0 left-0 z-20">
             <span
               className={`inline-block px-2 py-1 text-[10px] font-bold uppercase tracking-wider ${
                 product.badge === "Trending"
@@ -196,7 +225,7 @@ function ProductCard({ product }: { product: Product }) {
             e.preventDefault();
             setWishlisted(!wishlisted);
           }}
-          className={`absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 ${
+          className={`absolute top-2 right-2 z-20 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 ${
             wishlisted
               ? "bg-white shadow-md"
               : hovered
@@ -215,19 +244,50 @@ function ProductCard({ product }: { product: Product }) {
 
         {/* ─── Hover Actions Overlay ─── */}
         <div
-          className={`absolute bottom-0 left-0 right-0 transition-all duration-300 ${
+          className={`absolute bottom-0 left-0 right-0 z-20 transition-all duration-300 ${
             hovered ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"
           }`}
         >
           {/* Shop Now + Cart Row */}
           <div className="flex">
-            <button className="flex-1 py-2.5 bg-white/95 backdrop-blur-sm border-t border-r border-[#d4d5d9] text-[#282c3f] text-[12px] font-bold uppercase tracking-wide flex items-center justify-center gap-1.5 hover:bg-[#a1005b] hover:text-white transition-all duration-200">
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                router.push(`/products/${product.slug}`);
+              }}
+              className="flex-1 py-2.5 bg-white/95 backdrop-blur-sm border-t border-r border-[#d4d5d9] text-[#282c3f] text-[12px] font-bold uppercase tracking-wide flex items-center justify-center gap-1.5 hover:bg-[#a1005b] hover:text-white transition-all duration-200"
+            >
               <ShoppingBag size={13} />
               Shop Now
             </button>
             <button
               className="w-12 py-2.5 bg-white/95 backdrop-blur-sm border-t border-[#d4d5d9] flex items-center justify-center text-[#282c3f] hover:bg-[#a1005b] hover:text-white transition-all duration-200"
-              onClick={(e) => e.preventDefault()}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // fallback to product properties for colors if not array
+                const color = (product as any).colors?.[0]?.name || (product as any).color || "Default";
+                const colorHex = (product as any).colors?.[0]?.hex || "#000000";
+                
+                addToCart({
+                  productId: product.id,
+                  slug: product.slug,
+                  name: product.name,
+                  selectedColor: color,
+                  selectedColorHex: colorHex,
+                  selectedColorImage: product.image || "",
+                  quantity: 1,
+                  price: salePrice,
+                  originalPrice: product.price,
+                  image: product.image || "",
+                  category: product.category,
+                  fabric: product.fabric || "",
+                });
+                
+                toast.success(`${product.name} added to cart!`);
+              }}
             >
               <ShoppingCart size={16} />
             </button>
