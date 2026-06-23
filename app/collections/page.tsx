@@ -372,6 +372,7 @@ function CollectionsContent() {
   const [selectedFilters, setSelectedFilters] = useState<string[]>(
     categoryParam ? [categoryParam] : []
   );
+  const [selectedPriceRanges, setSelectedPriceRanges] = useState<string[]>([]);
   
   useEffect(() => {
     if (categoryParam) {
@@ -422,8 +423,18 @@ function CollectionsContent() {
     setCurrentPage(1);
   };
 
+  const togglePriceFilter = (range: string) => {
+    setSelectedPriceRanges((prev) =>
+      prev.includes(range)
+        ? prev.filter((r) => r !== range)
+        : [...prev, range],
+    );
+    setCurrentPage(1);
+  };
+
   const clearFilters = () => {
     setSelectedFilters([]);
+    setSelectedPriceRanges([]);
     setCurrentPage(1);
   };
 
@@ -538,6 +549,27 @@ function CollectionsContent() {
       }
     }
 
+    if (selectedPriceRanges.length > 0) {
+      result = result.filter((p) => {
+        const priceNum = Number(p.price) || 0;
+        const discountPercent = Number(p.discountPercent) || 0;
+        const salePrice = discountPercent > 0
+          ? Math.round(priceNum * (1 - discountPercent / 100) * 100) / 100
+          : priceNum;
+
+        return selectedPriceRanges.some((range) => {
+          if (range === "0-500") return salePrice < 500;
+          if (range === "500-1000") return salePrice >= 500 && salePrice <= 1000;
+          if (range === "1000-2000") return salePrice >= 1000 && salePrice <= 2000;
+          if (range === "2000-5000") return salePrice >= 2000 && salePrice <= 5000;
+          if (range === "5000-10000") return salePrice >= 5000 && salePrice <= 10000;
+          if (range === "10000+") return salePrice > 10000;
+          if (range === "2000+") return salePrice > 2000;
+          return false;
+        });
+      });
+    }
+
     switch (sortBy) {
       case "price-low":
         result.sort((a, b) => a.price - b.price);
@@ -559,7 +591,7 @@ function CollectionsContent() {
     }
 
     return result;
-  }, [products, selectedFilters, sortBy, searchQuery]);
+  }, [products, selectedFilters, selectedPriceRanges, sortBy, searchQuery]);
 
   /* ─── Pagination ─── */
   const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
@@ -677,6 +709,27 @@ function CollectionsContent() {
                 <X size={12} />
               </button>
             ))}
+            {selectedPriceRanges.map((range) => {
+              const labels: Record<string, string> = {
+                "0-500": "Under LKR 500",
+                "500-1000": "LKR 500 - LKR 1000",
+                "1000-2000": "LKR 1000 - LKR 2000",
+                "2000-5000": "LKR 2000 - LKR 5000",
+                "5000-10000": "LKR 5000 - LKR 10000",
+                "10000+": "Above LKR 10000",
+                "2000+": "Above LKR 2000",
+              };
+              return (
+                <button
+                  key={range}
+                  onClick={() => togglePriceFilter(range)}
+                  className="inline-flex items-center gap-1 px-3 py-1 border border-[#d4d5d9] rounded-full text-[12px] text-[#282c3f] hover:border-[#ff3f6c] hover:text-[#ff3f6c] transition-colors"
+                >
+                  {labels[range] || range}
+                  <X size={12} />
+                </button>
+              );
+            })}
             <button
               onClick={clearFilters}
               className="text-[12px] text-[#ff3f6c] font-semibold ml-2 hover:underline"
@@ -698,9 +751,9 @@ function CollectionsContent() {
           >
             <SlidersHorizontal size={14} />
             Filters
-            {selectedFilters.length > 0 && (
+            {(selectedFilters.length + selectedPriceRanges.length) > 0 && (
               <span className="ml-1 w-5 h-5 rounded-full bg-[#ff3f6c] text-white text-[10px] flex items-center justify-center font-bold">
-                {selectedFilters.length}
+                {selectedFilters.length + selectedPriceRanges.length}
               </span>
             )}
           </button>
@@ -732,7 +785,7 @@ function CollectionsContent() {
               <h3 className="text-[14px] font-bold text-[#282c3f] uppercase tracking-wide">
                 Filters
               </h3>
-              {selectedFilters.length > 0 && (
+              {(selectedFilters.length + selectedPriceRanges.length) > 0 && (
                 <button
                   onClick={clearFilters}
                   className="text-[12px] text-[#ff3f6c] font-semibold hover:underline"
@@ -745,9 +798,10 @@ function CollectionsContent() {
             {/* Category Filter */}
             <FilterSection title="Categories">
               {dynamicCategories.map((cat) => (
-                <label
+                <div
                   key={cat.label}
                   className="flex items-center gap-3 cursor-pointer group/check"
+                  onClick={() => toggleFilter(cat.label)}
                 >
                   <div
                     className={`w-4 h-4 rounded-[3px] border-2 flex items-center justify-center transition-all ${
@@ -755,7 +809,6 @@ function CollectionsContent() {
                         ? "bg-[#ff3f6c] border-[#ff3f6c]"
                         : "border-[#d4d5d9] group-hover/check:border-[#ff3f6c]"
                     }`}
-                    onClick={() => toggleFilter(cat.label)}
                   >
                     {selectedFilters.includes(cat.label) && (
                       <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
@@ -769,10 +822,7 @@ function CollectionsContent() {
                       </svg>
                     )}
                   </div>
-                  <span
-                    className="text-[13px] text-[#282c3f] font-normal"
-                    onClick={() => toggleFilter(cat.label)}
-                  >
+                  <span className="text-[13px] text-[#282c3f] font-normal">
                     {cat.label}
                   </span>
                   {cat.count && (
@@ -780,7 +830,7 @@ function CollectionsContent() {
                       ({cat.count})
                     </span>
                   )}
-                </label>
+                </div>
               ))}
             </FilterSection>
 
@@ -790,17 +840,38 @@ function CollectionsContent() {
                 { label: "Under LKR 500", range: "0-500" },
                 { label: "LKR 500 - LKR 1000", range: "500-1000" },
                 { label: "LKR 1000 - LKR 2000", range: "1000-2000" },
-                { label: "Above LKR 2000", range: "2000+" },
+                { label: "LKR 2000 - LKR 5000", range: "2000-5000" },
+                { label: "LKR 5000 - LKR 10000", range: "5000-10000" },
+                { label: "Above LKR 10000", range: "10000+" },
               ].map((price) => (
-                <label
+                <div
                   key={price.range}
-                  className="flex items-center gap-3 cursor-pointer"
+                  className="flex items-center gap-3 cursor-pointer group/check"
+                  onClick={() => togglePriceFilter(price.range)}
                 >
-                  <div className="w-4 h-4 rounded-[3px] border-2 border-[#d4d5d9] flex items-center justify-center hover:border-[#ff3f6c] transition-colors" />
+                  <div
+                    className={`w-4 h-4 rounded-[3px] border-2 flex items-center justify-center transition-all ${
+                      selectedPriceRanges.includes(price.range)
+                        ? "bg-[#ff3f6c] border-[#ff3f6c]"
+                        : "border-[#d4d5d9] group-hover/check:border-[#ff3f6c]"
+                    }`}
+                  >
+                    {selectedPriceRanges.includes(price.range) && (
+                      <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                        <path
+                          d="M1 4L3.5 6.5L9 1"
+                          stroke="white"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    )}
+                  </div>
                   <span className="text-[13px] text-[#282c3f] font-normal">
                     {price.label}
                   </span>
-                </label>
+                </div>
               ))}
             </FilterSection>
 
@@ -846,9 +917,10 @@ function CollectionsContent() {
               <div className="px-4 pb-20">
                 <FilterSection title="Categories">
                   {dynamicCategories.map((cat) => (
-                    <label
+                    <div
                       key={cat.label}
                       className="flex items-center gap-3 cursor-pointer"
+                      onClick={() => toggleFilter(cat.label)}
                     >
                       <div
                         className={`w-4 h-4 rounded-[3px] border-2 flex items-center justify-center transition-all ${
@@ -856,7 +928,6 @@ function CollectionsContent() {
                             ? "bg-[#ff3f6c] border-[#ff3f6c]"
                             : "border-[#d4d5d9]"
                         }`}
-                        onClick={() => toggleFilter(cat.label)}
                       >
                         {selectedFilters.includes(cat.label) && (
                           <svg
@@ -875,13 +946,51 @@ function CollectionsContent() {
                           </svg>
                         )}
                       </div>
-                      <span
-                        className="text-[13px] text-[#282c3f]"
-                        onClick={() => toggleFilter(cat.label)}
-                      >
+                      <span className="text-[13px] text-[#282c3f]">
                         {cat.label}
                       </span>
-                    </label>
+                    </div>
+                  ))}
+                </FilterSection>
+
+                {/* Price Filter (Mobile) */}
+                <FilterSection title="Price">
+                  {[
+                    { label: "Under LKR 500", range: "0-500" },
+                    { label: "LKR 500 - LKR 1000", range: "500-1000" },
+                    { label: "LKR 1000 - LKR 2000", range: "1000-2000" },
+                    { label: "LKR 2000 - LKR 5000", range: "2000-5000" },
+                    { label: "LKR 5000 - LKR 10000", range: "5000-10000" },
+                    { label: "Above LKR 10000", range: "10000+" },
+                  ].map((price) => (
+                    <div
+                      key={price.range}
+                      className="flex items-center gap-3 cursor-pointer group/check"
+                      onClick={() => togglePriceFilter(price.range)}
+                    >
+                      <div
+                        className={`w-4 h-4 rounded-[3px] border-2 flex items-center justify-center transition-all ${
+                          selectedPriceRanges.includes(price.range)
+                            ? "bg-[#ff3f6c] border-[#ff3f6c]"
+                            : "border-[#d4d5d9]"
+                        }`}
+                      >
+                        {selectedPriceRanges.includes(price.range) && (
+                          <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                            <path
+                              d="M1 4L3.5 6.5L9 1"
+                              stroke="white"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        )}
+                      </div>
+                      <span className="text-[13px] text-[#282c3f]">
+                        {price.label}
+                      </span>
+                    </div>
                   ))}
                 </FilterSection>
               </div>

@@ -1,6 +1,9 @@
-import { Heart, MessageCircle, MoreHorizontal } from "lucide-react";
+"use client";
+
+import { useState } from "react";
+import { Heart, MessageCircle, MoreHorizontal, Plus } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import StudioCreatePost from "./StudioCreatePost";
 
 // Mock data for Studio feed
 const studioPosts = [
@@ -43,6 +46,8 @@ const studioPosts = [
 ];
 
 export default function StudioPage() {
+  const [showCreate, setShowCreate] = useState(false);
+
   return (
     <div className="fixed inset-0 bg-gray-50 font-sans font-normal z-30 flex justify-center">
       <div className="w-full max-w-[500px] bg-white h-full flex flex-col shadow-sm border-x border-gray-100">
@@ -126,7 +131,25 @@ export default function StudioPage() {
           ))}
         </div>
       </div>
+
+        {/* ── Floating Create Button ── */}
+        <button
+          onClick={() => setShowCreate(true)}
+          className="absolute bottom-24 right-4 w-14 h-14 rounded-full 
+                     bg-gradient-to-br from-primary to-primary/80 text-white shadow-lg shadow-primary/30
+                     flex items-center justify-center 
+                     hover:shadow-xl hover:shadow-primary/40 hover:scale-105
+                     active:scale-95 transition-all duration-200 z-40"
+          aria-label="Create new post"
+        >
+          <Plus size={26} strokeWidth={2.5} />
+        </button>
       </div>
+
+      {/* ── Create Post Overlay ── */}
+      {showCreate && (
+        <StudioCreatePost onClose={() => setShowCreate(false)} />
+      )}
     </div>
   );
 }
