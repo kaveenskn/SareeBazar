@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect, Suspense } from "react";
+import { useState, useMemo, useEffect, Suspense, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -23,6 +23,8 @@ import { products as staticProducts, filterCategories } from "@/mockdata/collect
 import type { Product } from "@/mockdata/collections";
 import { fetchAllProducts } from "@/lib/productApi";
 import { fetchAllCollections, type ApiCollection } from "@/lib/collectionApi";
+import { addToCart } from "@/lib/cartStore";
+import toast from "react-hot-toast";
 
 const ITEMS_PER_PAGE = 12;
 
@@ -72,20 +74,29 @@ function ProductCard({ product }: { product: Product }) {
   const [hovered, setHovered] = useState(false);
   const router = useRouter();
 
-  // For image carousel — filter out empty/falsy URLs
+  // For image carousel — always show product.image first, then product.images[]
   const images = useMemo(() => {
-    const imgs =
-      product.images && product.images.length > 0
-        ? product.images.filter((img) => img && img.trim() !== "")
-        : [];
-    if (imgs.length > 0) return imgs;
-    // Fallback to single image if available
-    if (product.image && product.image.trim() !== "") return [product.image];
-    return [];
+    const mainImage = product.image && product.image.trim() !== "" ? [product.image] : [];
+    const extraImages = (product.images || []).filter(
+      (img) => img && img.trim() !== "" && img !== product.image
+    );
+    return [...mainImage, ...extraImages];
   }, [product.images, product.image]);
 
   const [currentImageIdx, setCurrentImageIdx] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    if (product.video && videoRef.current) {
+      if (hovered) {
+        videoRef.current.play().catch(() => {});
+      } else {
+        videoRef.current.pause();
+        videoRef.current.currentTime = 0;
+      }
+    }
+  }, [hovered, product.video]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -114,11 +125,10 @@ function ProductCard({ product }: { product: Product }) {
     setCurrentImageIdx((prev) => (prev - 1 + images.length) % images.length);
   };
 
-  const discountPercent = product.originalPrice
-    ? Math.round(
-        ((product.originalPrice - product.price) / product.originalPrice) * 100,
-      )
-    : 0;
+  const discountPercent = product.discountPercent || 0;
+  const salePrice = discountPercent > 0
+    ? Math.round(product.price * (1 - discountPercent / 100) * 100) / 100
+    : product.price;
 
   const currentImageSrc = images.length > 0 ? images[currentImageIdx] : null;
 
@@ -147,8 +157,23 @@ function ProductCard({ product }: { product: Product }) {
           </div>
         )}
 
+        {/* Video Overlay */}
+        {product.video && (
+          <video
+            ref={videoRef}
+            src={product.video}
+            className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 z-10 ${
+              hovered ? "opacity-100 scale-105" : "opacity-0 scale-100"
+            }`}
+            loop
+            muted
+            playsInline
+            disablePictureInPicture
+          />
+        )}
+
         {/* Carousel manual controls */}
-        {hovered && images.length > 1 && (
+        {hovered && !product.video && images.length > 1 && (
           <>
             <button
               onClick={handlePrevImage}
@@ -177,7 +202,7 @@ function ProductCard({ product }: { product: Product }) {
 
         {/* Badge */}
         {product.badge && (
-          <div className="absolute top-0 left-0">
+          <div className="absolute top-0 left-0 z-20">
             <span
               className={`inline-block px-2 py-1 text-[10px] font-bold uppercase tracking-wider ${
                 product.badge === "Trending"
@@ -200,7 +225,7 @@ function ProductCard({ product }: { product: Product }) {
             e.preventDefault();
             setWishlisted(!wishlisted);
           }}
-          className={`absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 ${
+          className={`absolute top-2 right-2 z-20 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 ${
             wishlisted
               ? "bg-white shadow-md"
               : hovered
@@ -219,19 +244,50 @@ function ProductCard({ product }: { product: Product }) {
 
         {/* ─── Hover Actions Overlay ─── */}
         <div
-          className={`absolute bottom-0 left-0 right-0 transition-all duration-300 ${
+          className={`absolute bottom-0 left-0 right-0 z-20 transition-all duration-300 ${
             hovered ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"
           }`}
         >
           {/* Shop Now + Cart Row */}
           <div className="flex">
-            <button className="flex-1 py-2.5 bg-white/95 backdrop-blur-sm border-t border-r border-[#d4d5d9] text-[#282c3f] text-[12px] font-bold uppercase tracking-wide flex items-center justify-center gap-1.5 hover:bg-[#ff3f6c] hover:text-white transition-all duration-200">
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                router.push(`/products/${product.slug}`);
+              }}
+              className="flex-1 py-2.5 bg-white/95 backdrop-blur-sm border-t border-r border-[#d4d5d9] text-[#282c3f] text-[12px] font-bold uppercase tracking-wide flex items-center justify-center gap-1.5 hover:bg-[#a1005b] hover:text-white transition-all duration-200"
+            >
               <ShoppingBag size={13} />
               Shop Now
             </button>
             <button
-              className="w-12 py-2.5 bg-white/95 backdrop-blur-sm border-t border-[#d4d5d9] flex items-center justify-center text-[#282c3f] hover:bg-[#ff3f6c] hover:text-white transition-all duration-200"
-              onClick={(e) => e.preventDefault()}
+              className="w-12 py-2.5 bg-white/95 backdrop-blur-sm border-t border-[#d4d5d9] flex items-center justify-center text-[#282c3f] hover:bg-[#a1005b] hover:text-white transition-all duration-200"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // fallback to product properties for colors if not array
+                const color = (product as any).colors?.[0]?.name || (product as any).color || "Default";
+                const colorHex = (product as any).colors?.[0]?.hex || "#000000";
+                
+                addToCart({
+                  productId: product.id,
+                  slug: product.slug,
+                  name: product.name,
+                  selectedColor: color,
+                  selectedColorHex: colorHex,
+                  selectedColorImage: product.image || "",
+                  quantity: 1,
+                  price: salePrice,
+                  originalPrice: product.price,
+                  image: product.image || "",
+                  category: product.category,
+                  fabric: product.fabric || "",
+                });
+                
+                toast.success(`${product.name} added to cart!`);
+              }}
             >
               <ShoppingCart size={16} />
             </button>
@@ -245,7 +301,7 @@ function ProductCard({ product }: { product: Product }) {
                 `/virtual-tryon?saree=${encodeURIComponent(images[currentImageIdx])}`,
               );
             }}
-            className="w-full flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-[#7c3aed] to-[#a855f7] text-white hover:from-[#6d28d9] hover:to-[#9333ea] transition-all duration-200"
+            className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#a1005b] text-white hover:bg-[#8a004d] transition-all duration-200"
           >
             <Bot size={14} className="animate-bounce-subtle" />
             <span className="text-[11px] font-semibold uppercase tracking-wider animate-pulse">
@@ -270,12 +326,12 @@ function ProductCard({ product }: { product: Product }) {
         {/* Price Row */}
         <div className="flex items-center gap-1.5 mt-1.5">
           <span className="text-[13px] font-bold text-[#282c3f]">
-            LKR {product.price.toLocaleString("en-LK")}
+            LKR {salePrice.toLocaleString("en-LK")}
           </span>
-          {product.originalPrice && (
+          {discountPercent > 0 && (
             <>
               <span className="text-[12px] text-[#7e818c] line-through font-normal">
-                LKR {product.originalPrice.toLocaleString("en-LK")}
+                LKR {product.price.toLocaleString("en-LK")}
               </span>
               <span className="text-[12px] text-[#ff905a] font-normal">
                 ({discountPercent}% OFF)
@@ -316,6 +372,7 @@ function CollectionsContent() {
   const [selectedFilters, setSelectedFilters] = useState<string[]>(
     categoryParam ? [categoryParam] : []
   );
+  const [selectedPriceRanges, setSelectedPriceRanges] = useState<string[]>([]);
   
   useEffect(() => {
     if (categoryParam) {
@@ -366,12 +423,57 @@ function CollectionsContent() {
     setCurrentPage(1);
   };
 
+  const togglePriceFilter = (range: string) => {
+    setSelectedPriceRanges((prev) =>
+      prev.includes(range)
+        ? prev.filter((r) => r !== range)
+        : [...prev, range],
+    );
+    setCurrentPage(1);
+  };
+
   const clearFilters = () => {
     setSelectedFilters([]);
+    setSelectedPriceRanges([]);
     setCurrentPage(1);
   };
 
   const dynamicCategories = useMemo(() => {
+    const isCategoryMatch = (pCat: string, fCat: string) => {
+      if (!pCat || !fCat) return false;
+      const p = pCat.toLowerCase().trim();
+      const f = fCat.toLowerCase().trim();
+      return p === f || 
+             p + 's' === f || 
+             p === f + 's' || 
+             p.replace(/ sarees?$/, '') === f.replace(/ sarees?$/, '');
+    };
+
+    const baseCategories = [];
+    const saleCount = products.filter(p => p.badge?.toLowerCase() === 'sale' || p.status?.toLowerCase() === 'sale').length;
+    if (saleCount > 0) {
+      baseCategories.push({
+        label: "Today's Offer",
+        slug: "todays-offer",
+        count: saleCount,
+        icon: "✦"
+      });
+    }
+
+    if (apiCollections.length > 0) {
+      const collectionCategories = apiCollections.map(c => {
+        const count = products.filter(p => isCategoryMatch(p.category, c.title)).length;
+        return {
+          label: c.title,
+          slug: c.slug,
+          count: count,
+          icon: "✦"
+        };
+      });
+      return [...baseCategories, ...collectionCategories];
+    }
+
+    // Fallback if collections not loaded yet
     const counts: Record<string, number> = {};
     products.forEach(p => {
       if (!p.category) return;
@@ -385,19 +487,8 @@ function CollectionsContent() {
       icon: "✦"
     }));
 
-    // Add Today's Offer
-    const saleCount = products.filter(p => p.badge === 'Sale').length;
-    if (saleCount > 0) {
-      categories.unshift({
-        label: "Today's Offer",
-        slug: "todays-offer",
-        count: saleCount,
-        icon: "✦"
-      });
-    }
-
-    return categories;
-  }, [products]);
+    return [...baseCategories, ...categories];
+  }, [products, apiCollections]);
 
   useEffect(() => {
     const rawCategory =
@@ -439,13 +530,44 @@ function CollectionsContent() {
     }
 
     if (selectedFilters.length > 0) {
+      const isCategoryMatch = (pCat: string, fCat: string) => {
+        if (!pCat || !fCat) return false;
+        const p = pCat.toLowerCase().trim();
+        const f = fCat.toLowerCase().trim();
+        return p === f || 
+               p + 's' === f || 
+               p === f + 's' || 
+               p.replace(/ sarees?$/, '') === f.replace(/ sarees?$/, '');
+      };
+
       if (selectedFilters.includes("Today's Offer")) {
         result = result.filter(
-          (p) => p.badge === "Sale" || selectedFilters.includes(p.category)
+          (p) => p.badge?.toLowerCase() === "sale" || p.status?.toLowerCase() === "sale" || selectedFilters.some(f => f !== "Today's Offer" && isCategoryMatch(p.category, f))
         );
       } else {
-        result = result.filter((p) => selectedFilters.includes(p.category));
+        result = result.filter((p) => selectedFilters.some(f => isCategoryMatch(p.category, f)));
       }
+    }
+
+    if (selectedPriceRanges.length > 0) {
+      result = result.filter((p) => {
+        const priceNum = Number(p.price) || 0;
+        const discountPercent = Number(p.discountPercent) || 0;
+        const salePrice = discountPercent > 0
+          ? Math.round(priceNum * (1 - discountPercent / 100) * 100) / 100
+          : priceNum;
+
+        return selectedPriceRanges.some((range) => {
+          if (range === "0-500") return salePrice < 500;
+          if (range === "500-1000") return salePrice >= 500 && salePrice <= 1000;
+          if (range === "1000-2000") return salePrice >= 1000 && salePrice <= 2000;
+          if (range === "2000-5000") return salePrice >= 2000 && salePrice <= 5000;
+          if (range === "5000-10000") return salePrice >= 5000 && salePrice <= 10000;
+          if (range === "10000+") return salePrice > 10000;
+          if (range === "2000+") return salePrice > 2000;
+          return false;
+        });
+      });
     }
 
     switch (sortBy) {
@@ -469,7 +591,7 @@ function CollectionsContent() {
     }
 
     return result;
-  }, [products, selectedFilters, sortBy, searchQuery]);
+  }, [products, selectedFilters, selectedPriceRanges, sortBy, searchQuery]);
 
   /* ─── Pagination ─── */
   const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
@@ -486,10 +608,18 @@ function CollectionsContent() {
       className="min-h-screen bg-[#f5f5f6] pt-[100px]"
       style={{ fontFamily: "var(--font-figtree), sans-serif", fontWeight: 400 }}
     >
-      {/* ─── Search Bar ─── */}
+      {/* ─── Top Bar with Back Button & Search ─── */}
       <div className="bg-white border-b border-[#e8e8e1]">
-        <div className="max-w-[1400px] mx-auto px-4 py-3">
-          <div className="relative max-w-2xl mx-auto">
+        <div className="max-w-[1400px] mx-auto px-4 py-3 flex flex-col md:flex-row gap-4 items-center">
+          <button 
+            onClick={() => window.history.back()}
+            className="flex items-center gap-1.5 text-[#535766] hover:text-[#ff3f6c] transition-colors self-start md:self-auto font-semibold text-[14px]"
+          >
+            <ChevronLeft size={18} />
+            Back
+          </button>
+          
+          <div className="relative w-full max-w-2xl mx-auto md:ml-auto md:mr-0">
             <Search
               size={18}
               className="absolute left-4 top-1/2 -translate-y-1/2 text-[#94969f]"
@@ -587,6 +717,27 @@ function CollectionsContent() {
                 <X size={12} />
               </button>
             ))}
+            {selectedPriceRanges.map((range) => {
+              const labels: Record<string, string> = {
+                "0-500": "Under LKR 500",
+                "500-1000": "LKR 500 - LKR 1000",
+                "1000-2000": "LKR 1000 - LKR 2000",
+                "2000-5000": "LKR 2000 - LKR 5000",
+                "5000-10000": "LKR 5000 - LKR 10000",
+                "10000+": "Above LKR 10000",
+                "2000+": "Above LKR 2000",
+              };
+              return (
+                <button
+                  key={range}
+                  onClick={() => togglePriceFilter(range)}
+                  className="inline-flex items-center gap-1 px-3 py-1 border border-[#d4d5d9] rounded-full text-[12px] text-[#282c3f] hover:border-[#ff3f6c] hover:text-[#ff3f6c] transition-colors"
+                >
+                  {labels[range] || range}
+                  <X size={12} />
+                </button>
+              );
+            })}
             <button
               onClick={clearFilters}
               className="text-[12px] text-[#ff3f6c] font-semibold ml-2 hover:underline"
@@ -608,9 +759,9 @@ function CollectionsContent() {
           >
             <SlidersHorizontal size={14} />
             Filters
-            {selectedFilters.length > 0 && (
+            {(selectedFilters.length + selectedPriceRanges.length) > 0 && (
               <span className="ml-1 w-5 h-5 rounded-full bg-[#ff3f6c] text-white text-[10px] flex items-center justify-center font-bold">
-                {selectedFilters.length}
+                {selectedFilters.length + selectedPriceRanges.length}
               </span>
             )}
           </button>
@@ -642,7 +793,7 @@ function CollectionsContent() {
               <h3 className="text-[14px] font-bold text-[#282c3f] uppercase tracking-wide">
                 Filters
               </h3>
-              {selectedFilters.length > 0 && (
+              {(selectedFilters.length + selectedPriceRanges.length) > 0 && (
                 <button
                   onClick={clearFilters}
                   className="text-[12px] text-[#ff3f6c] font-semibold hover:underline"
@@ -655,9 +806,10 @@ function CollectionsContent() {
             {/* Category Filter */}
             <FilterSection title="Categories">
               {dynamicCategories.map((cat) => (
-                <label
+                <div
                   key={cat.label}
                   className="flex items-center gap-3 cursor-pointer group/check"
+                  onClick={() => toggleFilter(cat.label)}
                 >
                   <div
                     className={`w-4 h-4 rounded-[3px] border-2 flex items-center justify-center transition-all ${
@@ -665,7 +817,6 @@ function CollectionsContent() {
                         ? "bg-[#ff3f6c] border-[#ff3f6c]"
                         : "border-[#d4d5d9] group-hover/check:border-[#ff3f6c]"
                     }`}
-                    onClick={() => toggleFilter(cat.label)}
                   >
                     {selectedFilters.includes(cat.label) && (
                       <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
@@ -679,10 +830,7 @@ function CollectionsContent() {
                       </svg>
                     )}
                   </div>
-                  <span
-                    className="text-[13px] text-[#282c3f] font-normal"
-                    onClick={() => toggleFilter(cat.label)}
-                  >
+                  <span className="text-[13px] text-[#282c3f] font-normal">
                     {cat.label}
                   </span>
                   {cat.count && (
@@ -690,7 +838,7 @@ function CollectionsContent() {
                       ({cat.count})
                     </span>
                   )}
-                </label>
+                </div>
               ))}
             </FilterSection>
 
@@ -700,17 +848,38 @@ function CollectionsContent() {
                 { label: "Under LKR 500", range: "0-500" },
                 { label: "LKR 500 - LKR 1000", range: "500-1000" },
                 { label: "LKR 1000 - LKR 2000", range: "1000-2000" },
-                { label: "Above LKR 2000", range: "2000+" },
+                { label: "LKR 2000 - LKR 5000", range: "2000-5000" },
+                { label: "LKR 5000 - LKR 10000", range: "5000-10000" },
+                { label: "Above LKR 10000", range: "10000+" },
               ].map((price) => (
-                <label
+                <div
                   key={price.range}
-                  className="flex items-center gap-3 cursor-pointer"
+                  className="flex items-center gap-3 cursor-pointer group/check"
+                  onClick={() => togglePriceFilter(price.range)}
                 >
-                  <div className="w-4 h-4 rounded-[3px] border-2 border-[#d4d5d9] flex items-center justify-center hover:border-[#ff3f6c] transition-colors" />
+                  <div
+                    className={`w-4 h-4 rounded-[3px] border-2 flex items-center justify-center transition-all ${
+                      selectedPriceRanges.includes(price.range)
+                        ? "bg-[#ff3f6c] border-[#ff3f6c]"
+                        : "border-[#d4d5d9] group-hover/check:border-[#ff3f6c]"
+                    }`}
+                  >
+                    {selectedPriceRanges.includes(price.range) && (
+                      <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                        <path
+                          d="M1 4L3.5 6.5L9 1"
+                          stroke="white"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    )}
+                  </div>
                   <span className="text-[13px] text-[#282c3f] font-normal">
                     {price.label}
                   </span>
-                </label>
+                </div>
               ))}
             </FilterSection>
 
@@ -756,9 +925,10 @@ function CollectionsContent() {
               <div className="px-4 pb-20">
                 <FilterSection title="Categories">
                   {dynamicCategories.map((cat) => (
-                    <label
+                    <div
                       key={cat.label}
                       className="flex items-center gap-3 cursor-pointer"
+                      onClick={() => toggleFilter(cat.label)}
                     >
                       <div
                         className={`w-4 h-4 rounded-[3px] border-2 flex items-center justify-center transition-all ${
@@ -766,7 +936,6 @@ function CollectionsContent() {
                             ? "bg-[#ff3f6c] border-[#ff3f6c]"
                             : "border-[#d4d5d9]"
                         }`}
-                        onClick={() => toggleFilter(cat.label)}
                       >
                         {selectedFilters.includes(cat.label) && (
                           <svg
@@ -785,13 +954,51 @@ function CollectionsContent() {
                           </svg>
                         )}
                       </div>
-                      <span
-                        className="text-[13px] text-[#282c3f]"
-                        onClick={() => toggleFilter(cat.label)}
-                      >
+                      <span className="text-[13px] text-[#282c3f]">
                         {cat.label}
                       </span>
-                    </label>
+                    </div>
+                  ))}
+                </FilterSection>
+
+                {/* Price Filter (Mobile) */}
+                <FilterSection title="Price">
+                  {[
+                    { label: "Under LKR 500", range: "0-500" },
+                    { label: "LKR 500 - LKR 1000", range: "500-1000" },
+                    { label: "LKR 1000 - LKR 2000", range: "1000-2000" },
+                    { label: "LKR 2000 - LKR 5000", range: "2000-5000" },
+                    { label: "LKR 5000 - LKR 10000", range: "5000-10000" },
+                    { label: "Above LKR 10000", range: "10000+" },
+                  ].map((price) => (
+                    <div
+                      key={price.range}
+                      className="flex items-center gap-3 cursor-pointer group/check"
+                      onClick={() => togglePriceFilter(price.range)}
+                    >
+                      <div
+                        className={`w-4 h-4 rounded-[3px] border-2 flex items-center justify-center transition-all ${
+                          selectedPriceRanges.includes(price.range)
+                            ? "bg-[#ff3f6c] border-[#ff3f6c]"
+                            : "border-[#d4d5d9]"
+                        }`}
+                      >
+                        {selectedPriceRanges.includes(price.range) && (
+                          <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                            <path
+                              d="M1 4L3.5 6.5L9 1"
+                              stroke="white"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        )}
+                      </div>
+                      <span className="text-[13px] text-[#282c3f]">
+                        {price.label}
+                      </span>
+                    </div>
                   ))}
                 </FilterSection>
               </div>

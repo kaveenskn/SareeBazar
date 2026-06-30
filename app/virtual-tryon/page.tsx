@@ -2,10 +2,12 @@
 
 import { useState, useRef, useCallback, useEffect, Suspense, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
-import { Sparkles, RefreshCw, Download, ImageIcon, User, Wand2, Search, X } from "lucide-react";
+import { Sparkles, RefreshCw, Download, ImageIcon, User, Wand2, Search, X, ChevronLeft, ChevronRight, LogIn } from "lucide-react";
 import { fetchAllProducts } from "@/lib/productApi";
 import { products as staticProducts } from "@/mockdata/collections";
 import type { Product } from "@/mockdata/collections";
+import { useAuthGate } from "@/lib/useAuthGate";
+import AuthGateModal from "@/app/components/AuthGate";
 
 /* eslint-disable @next/next/no-img-element */
 
@@ -17,6 +19,7 @@ type UploadState = {
 
 function VirtualTryOnContent() {
   const searchParams = useSearchParams();
+  const { isLoggedIn, requireAuth, showGate, dismissGate, gateAction } = useAuthGate();
   const [saree, setSaree] = useState<UploadState>({ file: null, preview: null, isDragging: false });
   const [person, setPerson] = useState<UploadState>({ file: null, preview: null, isDragging: false });
   const [isProcessing, setIsProcessing] = useState(false);
@@ -78,8 +81,7 @@ function VirtualTryOnContent() {
     });
   }, [products, modalSearchQuery, selectedCategory]);
 
-  const selectSaree = (prod: Product) => {
-    const imgUrl = prod.images && prod.images.length > 0 ? prod.images[0] : prod.image;
+  const selectSaree = (imgUrl: string) => {
     if (!imgUrl) return;
 
     fetch(imgUrl)
@@ -162,7 +164,24 @@ function VirtualTryOnContent() {
     [handleFile]
   );
 
+  /* ── Auth-gated wrappers for person upload ── */
+  const gatedPersonFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!requireAuth("upload your photo for virtual try-on")) return;
+    const f = e.target.files?.[0];
+    if (f) handleFile(setPerson, f);
+  };
+  const gatedPersonDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    if (!requireAuth("upload your photo for virtual try-on")) return;
+    handleDrop(setPerson, e);
+  };
+  const gatedPersonBrowse = () => {
+    if (!requireAuth("upload your photo for virtual try-on")) return;
+    personRef.current?.click();
+  };
+
   const handleTryOn = async () => {
+    if (!requireAuth("use the virtual try-on feature")) return;
     if (!saree.preview || !person.preview) return;
     setIsProcessing(true);
     setHasTriedOn(false);
@@ -234,6 +253,14 @@ function VirtualTryOnContent() {
           <p className="text-gray-500 text-base md:text-lg max-w-xl mx-auto leading-relaxed">
             Choose a saree from our collection and upload your photo — our AI drapes it on you instantly. See how it looks before you buy.
           </p>
+
+          {/* Guest banner */}
+          {!isLoggedIn && (
+            <div className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#a1005b]/5 border border-[#a1005b]/15 text-sm text-[#a1005b] font-medium animate-[fadeIn_0.4s_ease]">
+              <LogIn size={15} />
+              Sign in to try on sarees virtually
+            </div>
+          )}
         </div>
       </section>
 
@@ -252,7 +279,7 @@ function VirtualTryOnContent() {
             accentColor="#a1005b"
           />
 
-          {/* === Column 2: Person Upload === */}
+          {/* === Column 2: Person Upload (gated) === */}
           <UploadCard
             id="person-upload"
             label="Your Photo"
@@ -260,16 +287,14 @@ function VirtualTryOnContent() {
             icon={<User size={28} strokeWidth={1.2} />}
             state={person}
             inputRef={personRef}
-            onFileChange={(e) => {
-              const f = e.target.files?.[0];
-              if (f) handleFile(setPerson, f);
-            }}
+            onFileChange={gatedPersonFileChange}
             onDragOver={(e) => { e.preventDefault(); setPerson((p) => ({ ...p, isDragging: true })); }}
             onDragLeave={() => setPerson((p) => ({ ...p, isDragging: false }))}
-            onDrop={(e) => handleDrop(setPerson, e)}
+            onDrop={gatedPersonDrop}
             onClear={() => setPerson({ file: null, preview: null, isDragging: false })}
-            onBrowse={() => personRef.current?.click()}
+            onBrowse={gatedPersonBrowse}
             accentColor="#a1005b"
+            locked={!isLoggedIn}
           />
 
           {/* === Column 3: Result === */}
@@ -368,6 +393,9 @@ function VirtualTryOnContent() {
         </div>
       </section>
 
+      {/* Auth Gate Modal */}
+      <AuthGateModal show={showGate} onDismiss={dismissGate} action={gateAction} />
+
       {/* Collection Selector Modal */}
       {isCollectionModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all duration-300">
@@ -439,34 +467,9 @@ function VirtualTryOnContent() {
                 </div>
               ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                  {filteredProducts.map((prod) => {
-                    const mainImg = prod.images && prod.images.length > 0 ? prod.images[0] : prod.image;
-                    return (
-                      <div
-                        key={prod.slug}
-                        onClick={() => selectSaree(prod)}
-                        className="group cursor-pointer bg-white border border-gray-100 rounded-2xl p-2.5 hover:shadow-md hover:border-[#a1005b]/30 transition-all duration-200 flex flex-col h-full"
-                      >
-                        <div className="relative aspect-[3/4] w-full rounded-xl overflow-hidden bg-gray-50 mb-3">
-                          {mainImg ? (
-                            <img
-                              src={mainImg}
-                              alt={prod.name}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                            />
-                          ) : (
-                            <div className="absolute inset-0 flex items-center justify-center text-xs text-gray-400 bg-gray-100">
-                              No Image
-                            </div>
-                          )}
-                        </div>
-                        <h4 className="text-xs font-bold text-gray-900 line-clamp-1 leading-tight mb-1">
-                          {prod.name}
-                        </h4>
-                        <p className="text-[10px] text-gray-500 mt-auto">{prod.category}</p>
-                      </div>
-                    );
-                  })}
+                  {filteredProducts.map((prod) => (
+                    <ModalProductCard key={prod.slug} product={prod} onSelect={selectSaree} />
+                  ))}
                 </div>
               )}
             </div>
@@ -595,12 +598,13 @@ interface UploadCardProps {
   onClear: () => void;
   onBrowse: () => void;
   accentColor: string;
+  locked?: boolean;
 }
 
 function UploadCard({
   id, label, description, icon,
   state, inputRef, onFileChange, onDragOver, onDragLeave, onDrop,
-  onClear, onBrowse, accentColor,
+  onClear, onBrowse, accentColor, locked,
 }: UploadCardProps) {
   const hasImage = !!state.preview;
 
@@ -668,17 +672,36 @@ function UploadCard({
             <p className="text-sm text-gray-500 mb-4 px-2 leading-relaxed">
               {description}
             </p>
-            <p className="text-[11px] font-medium text-gray-400 mb-4 uppercase tracking-wider">
-              {state.isDragging ? "Drop to upload" : "Drag & drop or"}
-            </p>
-            <button
-              id={`${id}-browse`}
-              onClick={(e) => { e.stopPropagation(); onBrowse(); }}
-              className="px-5 py-2 rounded-full text-xs font-semibold text-white transition-all hover:opacity-90 active:scale-95"
-              style={{ backgroundColor: accentColor }}
-            >
-              Browse Files
-            </button>
+            {locked ? (
+              <>
+                <div className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#a1005b]/5 border border-[#a1005b]/15 text-[11px] font-medium text-[#a1005b] mb-3">
+                  <LogIn size={12} />
+                  Sign in required
+                </div>
+                <button
+                  id={`${id}-browse`}
+                  onClick={(e) => { e.stopPropagation(); onBrowse(); }}
+                  className="px-5 py-2 rounded-full text-xs font-semibold text-white transition-all hover:opacity-90 active:scale-95"
+                  style={{ backgroundColor: accentColor }}
+                >
+                  Sign In & Upload
+                </button>
+              </>
+            ) : (
+              <>
+                <p className="text-[11px] font-medium text-gray-400 mb-4 uppercase tracking-wider">
+                  {state.isDragging ? "Drop to upload" : "Drag & drop or"}
+                </p>
+                <button
+                  id={`${id}-browse`}
+                  onClick={(e) => { e.stopPropagation(); onBrowse(); }}
+                  className="px-5 py-2 rounded-full text-xs font-semibold text-white transition-all hover:opacity-90 active:scale-95"
+                  style={{ backgroundColor: accentColor }}
+                >
+                  Browse Files
+                </button>
+              </>
+            )}
           </div>
         )}
 
@@ -800,6 +823,116 @@ function ResultCard({ isReady, isProcessing, hasTriedOn, result, accentColor }: 
         {/* Reflection Effect */}
         <div className="absolute inset-0 pointer-events-none bg-gradient-to-bl from-white/0 via-white/5 to-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   Modal Product Card (with Carousel)
+───────────────────────────────────────────── */
+function ModalProductCard({ product, onSelect }: { product: Product, onSelect: (imgUrl: string) => void }) {
+  const [hovered, setHovered] = useState(false);
+  
+  const images = useMemo(() => {
+    const mainImage = product.image && product.image.trim() !== "" ? [product.image] : [];
+    const extraImages = (product.images || []).filter(
+      (img) => img && img.trim() !== "" && img !== product.image
+    );
+    return [...mainImage, ...extraImages];
+  }, [product.images, product.image]);
+
+  const [currentImageIdx, setCurrentImageIdx] = useState(0);
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (hovered && images.length > 1 && isAutoPlaying) {
+      interval = setInterval(() => {
+        setCurrentImageIdx((prev) => (prev + 1) % images.length);
+      }, 2000);
+    } else if (!hovered) {
+      setCurrentImageIdx(0);
+      setIsAutoPlaying(true);
+    }
+    return () => clearInterval(interval);
+  }, [hovered, images.length, isAutoPlaying]);
+
+  const handleNextImage = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsAutoPlaying(false);
+    setCurrentImageIdx((prev) => (prev + 1) % images.length);
+  };
+
+  const handlePrevImage = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsAutoPlaying(false);
+    setCurrentImageIdx((prev) => (prev - 1 + images.length) % images.length);
+  };
+
+  const currentImageSrc = images.length > 0 ? images[currentImageIdx] : null;
+
+  return (
+    <div
+      onClick={() => currentImageSrc && onSelect(currentImageSrc)}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className="group relative cursor-pointer bg-white border border-gray-100 rounded-2xl p-2.5 hover:shadow-md hover:border-[#a1005b]/30 transition-all duration-200 flex flex-col h-full"
+    >
+      <div className="relative aspect-[3/4] w-full rounded-xl overflow-hidden bg-gray-50 mb-3">
+        {currentImageSrc ? (
+          <>
+            <img
+              src={currentImageSrc}
+              alt={product.name}
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+            {/* Carousel manual controls */}
+            {hovered && images.length > 1 && (
+              <>
+                <button
+                  onClick={handlePrevImage}
+                  className="absolute left-1.5 top-1/2 -translate-y-1/2 bg-white/50 backdrop-blur-md p-1 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:bg-white z-10 shadow-sm border border-white/40"
+                >
+                  <ChevronLeft size={16} className="text-[#a1005b]" />
+                </button>
+                <button
+                  onClick={handleNextImage}
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 bg-white/50 backdrop-blur-md p-1 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:bg-white z-10 shadow-sm border border-white/40"
+                >
+                  <ChevronRight size={16} className="text-[#a1005b]" />
+                </button>
+
+                {/* Carousel dots */}
+                <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1 z-10">
+                  {images.map((_, idx) => (
+                    <div
+                      key={idx}
+                      className={`h-1 rounded-full transition-all ${idx === currentImageIdx ? "w-2.5 bg-[#a1005b]" : "w-1.5 bg-white/70"}`}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+            
+            {/* Try on this color button overlay */}
+            <div className={`absolute bottom-0 left-0 right-0 p-2 transition-all duration-300 ${hovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
+              <div className="w-full py-1.5 bg-[#a1005b]/90 backdrop-blur-sm text-white text-[10px] font-bold uppercase tracking-wider text-center rounded-lg shadow-sm">
+                Try this color
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center text-xs text-gray-400 bg-gray-100">
+            No Image
+          </div>
+        )}
+      </div>
+      <h4 className="text-xs font-bold text-gray-900 line-clamp-1 leading-tight mb-1">
+        {product.name}
+      </h4>
+      <p className="text-[10px] text-gray-500 mt-auto">{product.category}</p>
     </div>
   );
 }

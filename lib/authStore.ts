@@ -1,4 +1,12 @@
 
+/* ─────────────────────────────────────────────
+ *  Auth Store
+ *  Token stored in localStorage, validated by
+ *  checking JWT expiry on every isLoggedIn call.
+ * ───────────────────────────────────────────── */
+
+// Use Next.js proxy so cookies & CORS work correctly
+
 export const API_BASE = "/api/backend/auth";
 export const AUTH_KEY = "sb_user";
 export const TOKEN_KEY = "accessToken";

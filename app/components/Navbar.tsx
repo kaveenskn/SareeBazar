@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Search, Heart, ShoppingBag, Menu, X, Settings, LogOut, Package, User, BarChart3 } from "lucide-react";
 import { getCartCount } from "@/lib/cartStore";
 
@@ -10,6 +10,11 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
+
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [products, setProducts] = useState<any[]>([]);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState<{name: string, email: string} | null>(null);
@@ -21,6 +26,23 @@ export default function Navbar() {
       .then(data => setShopInfo(data))
       .catch(err => console.error(err));
   }, []);
+
+  useEffect(() => {
+    import("@/lib/productApi").then(module => {
+      module.fetchAllProducts().then(setProducts);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (searchOpen && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [searchOpen]);
+
+  const filteredProducts = products.filter(p => 
+    p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    (p.category && p.category.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
   
   const storeName = shopInfo?.storeName || "SareeBazar";
 
@@ -88,8 +110,14 @@ export default function Navbar() {
 
             {/* Right Actions */}
             <div className="flex items-center space-x-4">
-              <button className="text-gray-700 hover:text-primary transition-colors">
-                <Search size={18} strokeWidth={1.5} />
+              <button 
+                className={`text-gray-700 hover:text-primary transition-colors ${searchOpen ? 'text-primary' : ''}`}
+                onClick={() => {
+                  setSearchOpen(!searchOpen);
+                  if (searchOpen) setSearchQuery("");
+                }}
+              >
+                {searchOpen ? <X size={18} strokeWidth={1.5} /> : <Search size={18} strokeWidth={1.5} />}
               </button>
               <button className="text-gray-700 hover:text-primary transition-colors hidden sm:block">
                 <Heart size={18} strokeWidth={1.5} />
@@ -158,6 +186,64 @@ export default function Navbar() {
               >
                 {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
               </button>
+            </div>
+          </div>
+
+          {/* Expanded Search Bar */}
+          <div className={`overflow-hidden transition-all duration-300 ease-in-out ${searchOpen ? 'max-h-[70vh] opacity-100' : 'max-h-0 opacity-0'}`}>
+            <div className="px-5 pb-4 pt-1">
+              <div className="relative">
+                 <input 
+                   ref={searchInputRef}
+                   type="text" 
+                   placeholder="Search for sarees, lehengas, etc..." 
+                   className="w-full bg-gray-50/80 border border-gray-200 rounded-xl pl-10 pr-10 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-colors"
+                   value={searchQuery}
+                   onChange={(e) => setSearchQuery(e.target.value)}
+                 />
+                 <Search size={16} className="absolute left-3.5 top-3 text-gray-400" />
+                 
+                 {searchQuery && (
+                   <button onClick={() => setSearchQuery("")} className="absolute right-3.5 top-3 text-gray-400 hover:text-gray-600">
+                     <X size={16} />
+                   </button>
+                 )}
+              </div>
+              
+              {/* Search Results */}
+              {searchQuery && (
+                 <div className="mt-2 bg-white/90 backdrop-blur-md rounded-xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
+                   <div className="max-h-[50vh] overflow-y-auto py-2">
+                     {filteredProducts.length > 0 ? (
+                       filteredProducts.map(product => (
+                         <Link 
+                           key={product.id} 
+                           href={`/products/${product.slug}`}
+                           className="flex items-center gap-4 px-4 py-3 hover:bg-primary/5 transition-colors border-b border-gray-50 last:border-0"
+                           onClick={() => {
+                             setSearchOpen(false);
+                             setSearchQuery("");
+                           }}
+                         >
+                           <img src={product.image} alt={product.name} className="w-12 h-12 object-cover rounded-md" />
+                           <div className="flex-col flex flex-1">
+                             <span className="text-sm font-semibold text-gray-800 line-clamp-1">{product.name}</span>
+                             <span className="text-xs text-gray-500 capitalize">{product.category}</span>
+                           </div>
+                           <div className="text-sm font-bold text-gray-900">
+                             ₹{product.price}
+                           </div>
+                         </Link>
+                       ))
+                     ) : (
+                       <div className="px-4 py-8 text-sm text-gray-500 text-center flex flex-col items-center justify-center">
+                         <Search size={24} className="text-gray-300 mb-2" />
+                         No match found for "{searchQuery}"
+                       </div>
+                     )}
+                   </div>
+                 </div>
+              )}
             </div>
           </div>
 

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Trash2, ShoppingBag, ArrowRight, ShieldCheck } from "lucide-react";
+import { Trash2, ShoppingBag, ArrowRight, ShieldCheck, ArrowLeft } from "lucide-react";
 import toast from "react-hot-toast";
 import {
   getCart, removeFromCart, updateCartQty,
@@ -62,6 +62,14 @@ export default function CartPage() {
       <Navbar />
 
       <div className="max-w-[1100px] mx-auto px-4 py-8">
+        <button 
+          onClick={() => router.back()}
+          className="flex items-center gap-1.5 text-[#535766] hover:text-[#ff3f6c] transition-colors font-semibold text-[14px] mb-6"
+        >
+          <ArrowLeft size={18} />
+          Back
+        </button>
+
         <h1 className="text-[22px] font-bold text-[#282c3f] mb-6 flex items-center gap-2">
           <ShoppingBag size={22} className="text-[#ff3f6c]" />
           My Bag

@@ -43,11 +43,7 @@ interface OfferSlide {
 
 /* ── Convert a Sale-status product into an offer slide ── */
 function productToSlide(product: Product): OfferSlide {
-  const discount = product.discountPercent
-    ? product.discountPercent
-    : product.originalPrice
-      ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
-      : 0;
+  const discount = product.discountPercent || 0;
 
   // Pick a color accent based on category
   const colorMap: Record<string, string> = {
@@ -142,12 +138,12 @@ export function Offers() {
   const activeSlide = slides[current] || slides[0];
 
   return (
-    <Section id="offers" align="center" heightClass="h-[150vh]" topClass="top-[15vh]">
+    <Section id="offers" align="center" heightClass="h-[150vh]" topClass="top-[10vh] md:top-[12vh]">
       {/* Two-column layout */}
       <div className="w-full flex flex-col md:flex-row items-center justify-between gap-12 lg:gap-20">
 
 {/* LEFT — Text Content */}
-<div className="w-full md:w-[45%] lg:w-[40%] flex flex-col items-start text-left">
+<div className="w-full md:w-[50%] lg:w-[55%] flex flex-col items-start text-left">
   {/* Tag pill */}
   <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/15 border border-primary/30 mb-3">
     <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
@@ -156,7 +152,7 @@ export function Offers() {
     </span>
   </div>
 
-  <h2 className="text-5xl md:text-[4.5rem] lg:text-[5.5rem] font-serif font-bold mb-4 text-gray-900 leading-[1.05] tracking-tight drop-shadow-[0_2px_15px_rgba(255,255,255,0.9)]">
+  <h2 className="text-5xl md:text-[5rem] lg:text-[6.5rem] font-serif font-bold mb-4 text-gray-900 leading-[1.05] tracking-tight drop-shadow-[0_2px_15px_rgba(255,255,255,0.9)]">
     Today&apos;s{" "}
     <span className="text-primary relative inline-block">
       Offers
@@ -164,7 +160,7 @@ export function Offers() {
     </span>
   </h2>
 
-  <p className="text-base md:text-[17px] font-normal leading-relaxed mb-4 text-gray-700 max-w-xl drop-shadow-[0_2px_15px_rgba(255,255,255,0.9)]">
+  <p className="text-base md:text-[18px] lg:text-[19px] font-normal leading-relaxed mb-6 text-gray-700 max-w-2xl drop-shadow-[0_2px_15px_rgba(255,255,255,0.9)]">
     Embrace the season&apos;s joy with up to{" "}
     <span className="text-primary font-bold">40% off</span> on our
     premium silk and handcrafted collections. Elevate your wardrobe with
@@ -191,8 +187,8 @@ export function Offers() {
 </div>
 
         {/* RIGHT — Image Slider */}
-        <div className="w-full md:w-[55%] lg:w-[60%] flex-shrink-0">
-          <div className="relative w-full aspect-[4/3] rounded-[2rem] overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.20)]">
+        <div className="w-full md:w-[45%] lg:w-[45%] flex-shrink-0 flex justify-center md:justify-end">
+          <div className="relative w-[85%] max-w-[350px] md:w-auto md:max-w-none md:h-[70vh] lg:h-[80vh] aspect-[3/4] rounded-[2rem] overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.20)]">
 
             {/* Slides */}
             <AnimatePresence initial={false} custom={direction}>
