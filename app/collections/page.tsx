@@ -450,7 +450,7 @@ function CollectionsContent() {
     };
 
     const baseCategories = [];
-    const saleCount = products.filter(p => p.badge === 'Sale').length;
+    const saleCount = products.filter(p => p.badge?.toLowerCase() === 'sale' || p.status?.toLowerCase() === 'sale').length;
     if (saleCount > 0) {
       baseCategories.push({
         label: "Today's Offer",
@@ -542,7 +542,7 @@ function CollectionsContent() {
 
       if (selectedFilters.includes("Today's Offer")) {
         result = result.filter(
-          (p) => p.badge === "Sale" || selectedFilters.some(f => f !== "Today's Offer" && isCategoryMatch(p.category, f))
+          (p) => p.badge?.toLowerCase() === "sale" || p.status?.toLowerCase() === "sale" || selectedFilters.some(f => f !== "Today's Offer" && isCategoryMatch(p.category, f))
         );
       } else {
         result = result.filter((p) => selectedFilters.some(f => isCategoryMatch(p.category, f)));
@@ -608,10 +608,18 @@ function CollectionsContent() {
       className="min-h-screen bg-[#f5f5f6] pt-[100px]"
       style={{ fontFamily: "var(--font-figtree), sans-serif", fontWeight: 400 }}
     >
-      {/* ─── Search Bar ─── */}
+      {/* ─── Top Bar with Back Button & Search ─── */}
       <div className="bg-white border-b border-[#e8e8e1]">
-        <div className="max-w-[1400px] mx-auto px-4 py-3">
-          <div className="relative max-w-2xl mx-auto">
+        <div className="max-w-[1400px] mx-auto px-4 py-3 flex flex-col md:flex-row gap-4 items-center">
+          <button 
+            onClick={() => window.history.back()}
+            className="flex items-center gap-1.5 text-[#535766] hover:text-[#ff3f6c] transition-colors self-start md:self-auto font-semibold text-[14px]"
+          >
+            <ChevronLeft size={18} />
+            Back
+          </button>
+          
+          <div className="relative w-full max-w-2xl mx-auto md:ml-auto md:mr-0">
             <Search
               size={18}
               className="absolute left-4 top-1/2 -translate-y-1/2 text-[#94969f]"

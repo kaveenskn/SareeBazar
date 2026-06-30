@@ -2,10 +2,12 @@
 
 import { useState, useRef, useCallback, useEffect, Suspense, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
-import { Sparkles, RefreshCw, Download, ImageIcon, User, Wand2, Search, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { Sparkles, RefreshCw, Download, ImageIcon, User, Wand2, Search, X, ChevronLeft, ChevronRight, LogIn } from "lucide-react";
 import { fetchAllProducts } from "@/lib/productApi";
 import { products as staticProducts } from "@/mockdata/collections";
 import type { Product } from "@/mockdata/collections";
+import { useAuthGate } from "@/lib/useAuthGate";
+import AuthGateModal from "@/app/components/AuthGate";
 
 /* eslint-disable @next/next/no-img-element */
 
@@ -17,6 +19,7 @@ type UploadState = {
 
 function VirtualTryOnContent() {
   const searchParams = useSearchParams();
+  const { isLoggedIn, requireAuth, showGate, dismissGate, gateAction } = useAuthGate();
   const [saree, setSaree] = useState<UploadState>({ file: null, preview: null, isDragging: false });
   const [person, setPerson] = useState<UploadState>({ file: null, preview: null, isDragging: false });
   const [isProcessing, setIsProcessing] = useState(false);
@@ -161,7 +164,24 @@ function VirtualTryOnContent() {
     [handleFile]
   );
 
+  /* ── Auth-gated wrappers for person upload ── */
+  const gatedPersonFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!requireAuth("upload your photo for virtual try-on")) return;
+    const f = e.target.files?.[0];
+    if (f) handleFile(setPerson, f);
+  };
+  const gatedPersonDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    if (!requireAuth("upload your photo for virtual try-on")) return;
+    handleDrop(setPerson, e);
+  };
+  const gatedPersonBrowse = () => {
+    if (!requireAuth("upload your photo for virtual try-on")) return;
+    personRef.current?.click();
+  };
+
   const handleTryOn = async () => {
+    if (!requireAuth("use the virtual try-on feature")) return;
     if (!saree.preview || !person.preview) return;
     setIsProcessing(true);
     setHasTriedOn(false);
@@ -233,6 +253,14 @@ function VirtualTryOnContent() {
           <p className="text-gray-500 text-base md:text-lg max-w-xl mx-auto leading-relaxed">
             Choose a saree from our collection and upload your photo — our AI drapes it on you instantly. See how it looks before you buy.
           </p>
+
+          {/* Guest banner */}
+          {!isLoggedIn && (
+            <div className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#a1005b]/5 border border-[#a1005b]/15 text-sm text-[#a1005b] font-medium animate-[fadeIn_0.4s_ease]">
+              <LogIn size={15} />
+              Sign in to try on sarees virtually
+            </div>
+          )}
         </div>
       </section>
 
@@ -251,7 +279,7 @@ function VirtualTryOnContent() {
             accentColor="#a1005b"
           />
 
-          {/* === Column 2: Person Upload === */}
+          {/* === Column 2: Person Upload (gated) === */}
           <UploadCard
             id="person-upload"
             label="Your Photo"
@@ -259,16 +287,14 @@ function VirtualTryOnContent() {
             icon={<User size={28} strokeWidth={1.2} />}
             state={person}
             inputRef={personRef}
-            onFileChange={(e) => {
-              const f = e.target.files?.[0];
-              if (f) handleFile(setPerson, f);
-            }}
+            onFileChange={gatedPersonFileChange}
             onDragOver={(e) => { e.preventDefault(); setPerson((p) => ({ ...p, isDragging: true })); }}
             onDragLeave={() => setPerson((p) => ({ ...p, isDragging: false }))}
-            onDrop={(e) => handleDrop(setPerson, e)}
+            onDrop={gatedPersonDrop}
             onClear={() => setPerson({ file: null, preview: null, isDragging: false })}
-            onBrowse={() => personRef.current?.click()}
+            onBrowse={gatedPersonBrowse}
             accentColor="#a1005b"
+            locked={!isLoggedIn}
           />
 
           {/* === Column 3: Result === */}
@@ -366,6 +392,9 @@ function VirtualTryOnContent() {
           </div>
         </div>
       </section>
+
+      {/* Auth Gate Modal */}
+      <AuthGateModal show={showGate} onDismiss={dismissGate} action={gateAction} />
 
       {/* Collection Selector Modal */}
       {isCollectionModalOpen && (
@@ -569,12 +598,13 @@ interface UploadCardProps {
   onClear: () => void;
   onBrowse: () => void;
   accentColor: string;
+  locked?: boolean;
 }
 
 function UploadCard({
   id, label, description, icon,
   state, inputRef, onFileChange, onDragOver, onDragLeave, onDrop,
-  onClear, onBrowse, accentColor,
+  onClear, onBrowse, accentColor, locked,
 }: UploadCardProps) {
   const hasImage = !!state.preview;
 
@@ -642,17 +672,36 @@ function UploadCard({
             <p className="text-sm text-gray-500 mb-4 px-2 leading-relaxed">
               {description}
             </p>
-            <p className="text-[11px] font-medium text-gray-400 mb-4 uppercase tracking-wider">
-              {state.isDragging ? "Drop to upload" : "Drag & drop or"}
-            </p>
-            <button
-              id={`${id}-browse`}
-              onClick={(e) => { e.stopPropagation(); onBrowse(); }}
-              className="px-5 py-2 rounded-full text-xs font-semibold text-white transition-all hover:opacity-90 active:scale-95"
-              style={{ backgroundColor: accentColor }}
-            >
-              Browse Files
-            </button>
+            {locked ? (
+              <>
+                <div className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#a1005b]/5 border border-[#a1005b]/15 text-[11px] font-medium text-[#a1005b] mb-3">
+                  <LogIn size={12} />
+                  Sign in required
+                </div>
+                <button
+                  id={`${id}-browse`}
+                  onClick={(e) => { e.stopPropagation(); onBrowse(); }}
+                  className="px-5 py-2 rounded-full text-xs font-semibold text-white transition-all hover:opacity-90 active:scale-95"
+                  style={{ backgroundColor: accentColor }}
+                >
+                  Sign In & Upload
+                </button>
+              </>
+            ) : (
+              <>
+                <p className="text-[11px] font-medium text-gray-400 mb-4 uppercase tracking-wider">
+                  {state.isDragging ? "Drop to upload" : "Drag & drop or"}
+                </p>
+                <button
+                  id={`${id}-browse`}
+                  onClick={(e) => { e.stopPropagation(); onBrowse(); }}
+                  className="px-5 py-2 rounded-full text-xs font-semibold text-white transition-all hover:opacity-90 active:scale-95"
+                  style={{ backgroundColor: accentColor }}
+                >
+                  Browse Files
+                </button>
+              </>
+            )}
           </div>
         )}
 

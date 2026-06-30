@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { ShieldCheck, Truck, Package, ChevronRight, Loader2, CreditCard, BadgeCheck } from "lucide-react";
+import { ShieldCheck, Truck, Package, ChevronRight, Loader2, CreditCard, BadgeCheck, ArrowLeft } from "lucide-react";
 import toast from "react-hot-toast";
 import { getCheckoutItems, clearCheckoutItems, type CheckoutVariant } from "@/lib/cartStore";
 import { placeOrder, type ShippingDetails, type OrderPayload } from "@/lib/ordersStore";
@@ -160,6 +160,14 @@ export default function CheckoutPage() {
       )}
 
       <div className="max-w-[1100px] mx-auto px-4 py-8">
+        <button 
+          onClick={() => router.back()}
+          className="flex items-center gap-1.5 text-[#535766] hover:text-[#ff3f6c] transition-colors font-semibold text-[14px] mb-6"
+        >
+          <ArrowLeft size={18} />
+          Back
+        </button>
+
         {/* ─── Progress Bar ─── */}
         <div className="flex items-center gap-2 mb-8 text-[13px] font-semibold">
           {["summary", "shipping", "payment"].map((s, idx) => (

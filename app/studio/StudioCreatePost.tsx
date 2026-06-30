@@ -252,7 +252,7 @@ export default function StudioCreatePost({
   }, []);
 
   return (
-    <div className="fixed inset-0 bg-gray-50 z-50 flex justify-center">
+    <div className="fixed inset-0 bg-gray-50 z-[100] flex justify-center">
       <div className="w-full max-w-[500px] bg-white h-full flex flex-col shadow-sm border-x border-gray-100">
         {/* ── Header ── */}
         <div className="shrink-0 bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between">

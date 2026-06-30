@@ -168,19 +168,19 @@ export function Collections() {
           From Banarasi brocades to everyday cotton — discover sarees for every occasion.
         </p>
 
-        <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+        <div className="w-full flex flex-wrap justify-center gap-8">
           {categories.map((cat) => (
             <Link
               href={`/collections?category=${encodeURIComponent(cat.name)}`}
               key={cat.id}
-              className="group relative w-full rounded-3xl overflow-hidden shadow-[0_12px_40px_rgba(0,0,0,0.15)] bg-white border border-white/60 hover:-translate-y-3 hover:shadow-[0_20px_60px_rgba(0,0,0,0.2)] transition-all duration-500 cursor-pointer block"
+              className="group relative w-full sm:w-[calc(50%-1rem)] md:w-[calc(33.333%-1.333rem)] lg:w-[calc(33.333%-1.333rem)] max-w-[420px] rounded-3xl overflow-hidden shadow-[0_12px_40px_rgba(0,0,0,0.15)] bg-white border border-white/60 hover:-translate-y-3 hover:shadow-[0_20px_60px_rgba(0,0,0,0.2)] transition-all duration-500 cursor-pointer block"
             >
               {/* Natural Image Layout */}
               <div className="relative w-full overflow-hidden flex bg-gray-50">
                 <img
                   src={cat.image}
                   alt={cat.name}
-                  className="w-full h-auto object-contain group-hover:scale-110 transition-transform duration-700"
+                  className="w-full h-auto object-cover group-hover:scale-110 transition-transform duration-700"
                 />
                 {/* Gradient overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
