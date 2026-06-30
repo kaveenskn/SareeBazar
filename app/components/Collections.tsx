@@ -7,25 +7,7 @@ import { fetchAllProducts } from "@/lib/productApi";
 import { fetchAllCollections, type ApiCollection } from "@/lib/collectionApi";
 import type { Product } from "@/mockdata/collections";
 
-/* ── Static fallback categories ── */
-const defaultCategories = [
-  {
-    id: "kanjivaram",
-    name: "Kanjivaram Silk Saree",
-    subtitle: "Traditional Temple Weaves",
-    items: "120+ Styles",
-    image: "/images/collections/kanjivaram-silk.png",
-    accent: "#7B3FA0",
-  },
-  {
-    id: "silk",
-    name: "Silk Sarees",
-    subtitle: "Kanjivaram & Banarasi",
-    items: "240+ Styles",
-    image: "/images/collections/silk_saree.png",
-    accent: "#A0153E",
-  },
-];
+
 
 const accentColors: Record<string, string> = {
   "Silk Sarees": "#A0153E",
@@ -58,7 +40,7 @@ export function Collections() {
 
   // Build category cards — prefer API collections with cover images
   const categories = useMemo(() => {
-    if (apiCollections.length === 0 && apiProducts.length === 0) return defaultCategories;
+    if (apiCollections.length === 0 && apiProducts.length === 0) return [];
 
     // Build a map of product images per category as fallback
     const productImageMap: Record<string, string> = {};
@@ -140,13 +122,11 @@ export function Collections() {
       });
 
       if (apiCategories.length > 0) {
-        const apiCategoryNames = new Set(apiCategories.map(c => c.name));
-        const uniqueDefaults = defaultCategories.map(c => ({ ...c, hasCoverImage: false })).filter(c => !apiCategoryNames.has(c.name));
-        return [...apiCategories, ...uniqueDefaults];
+        return apiCategories;
       }
     }
 
-    return defaultCategories.map(c => ({ ...c, hasCoverImage: false }));
+    return [];
   }, [apiProducts, apiCollections]);
 
   return (

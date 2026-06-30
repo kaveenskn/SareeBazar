@@ -19,7 +19,6 @@ import {
   Bot,
 } from "lucide-react";
 
-import { products as staticProducts, filterCategories } from "@/mockdata/collections";
 import type { Product } from "@/mockdata/collections";
 import { fetchAllProducts } from "@/lib/productApi";
 import { fetchAllCollections, type ApiCollection } from "@/lib/collectionApi";
@@ -403,15 +402,8 @@ function CollectionsContent() {
     });
   }, []);
 
-  // Merge static products with API products (API products take priority)
   const products = useMemo(() => {
-    if (apiProducts.length > 0) {
-      // Combine: API products first, then static ones not duplicated by slug
-      const apiSlugs = new Set(apiProducts.map(p => p.slug));
-      const uniqueStatic = staticProducts.filter(p => !apiSlugs.has(p.slug));
-      return [...apiProducts, ...uniqueStatic];
-    }
-    return staticProducts;
+    return apiProducts;
   }, [apiProducts]);
 
   const toggleFilter = (category: string) => {

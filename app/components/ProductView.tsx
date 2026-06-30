@@ -64,6 +64,7 @@ export default function ProductView({
       setActiveColorHex(variant.hex);
       setActiveImage(variant.image);
       setAddedToBag(false);
+      setQuantity(1);
       setTimeout(() => {
         setIsTransitioning(false);
         setPrevImage(null);
@@ -451,13 +452,23 @@ export default function ProductView({
 
             {product.stock !== undefined && (
               <p
-                className={`text-[14px] font-bold mt-2 ${product.stock === 0 ? "text-[#ff3e6c]" : product.stock <= 5 ? "text-[#ff905a]" : "text-[#388e3c]"}`}
+                className={`text-[14px] font-bold mt-2 ${
+                  (() => {
+                    const activeVariantStock = colorVariants?.find(cv => cv.name === activeColor)?.stock;
+                    const displayStock = activeVariantStock !== undefined ? activeVariantStock : product.stock;
+                    if (displayStock === 0) return "text-[#ff3e6c]";
+                    if (displayStock <= 5) return "text-[#ff905a]";
+                    return "text-[#388e3c]";
+                  })()
+                }`}
               >
-                {product.stock === 0
-                  ? "Out of Stock"
-                  : product.stock <= 5
-                    ? `Only ${product.stock} left in stock`
-                    : "In Stock"}
+                {(() => {
+                  const activeVariantStock = colorVariants?.find(cv => cv.name === activeColor)?.stock;
+                  const displayStock = activeVariantStock !== undefined ? activeVariantStock : product.stock;
+                  if (displayStock === 0) return "Out of Stock";
+                  if (displayStock <= 5) return `Only ${displayStock} left in stock`;
+                  return `In Stock (${displayStock} available)`;
+                })()}
               </p>
             )}
 
@@ -479,15 +490,18 @@ export default function ProductView({
                 <div className="flex items-start gap-3 overflow-x-auto py-3 px-2 -mx-2 scrollbar-hide">
                   {colorVariants.map((variant) => {
                     const isActive = activeColor === variant.name;
+                    const isOutOfStock = variant.stock === 0;
                     return (
                       <button
                         key={variant.name}
-                        onClick={() => handleColorClick(variant)}
+                        onClick={() => !isOutOfStock && handleColorClick(variant)}
                         className={`
                           group/swatch relative flex-shrink-0 focus:outline-none rounded-[14px] p-[3px] transition-all duration-300 ease-out
-                          ${isActive
-                            ? "shadow-sm active-swatch"
-                            : "border border-transparent hover:border-[#d4d5d9]"
+                          ${isOutOfStock ? "opacity-50 cursor-not-allowed" : ""}
+                          ${
+                            isActive
+                              ? "shadow-sm active-swatch"
+                              : "border border-transparent hover:border-[#d4d5d9]"
                           }
                         `}
                         style={
@@ -497,17 +511,33 @@ export default function ProductView({
                             }
                             : {}
                         }
-                        title={variant.name}
+                        title={`${variant.name}${isOutOfStock ? " (Out of Stock)" : ` - ${variant.stock} in stock`}`}
+                        disabled={isOutOfStock}
                       >
                         <div className="relative w-[65px] h-[85px] rounded-[10px] overflow-hidden bg-[#f5f5f6]">
                           <Image
                             src={variant.image}
                             alt={variant.name}
                             fill
-                            className={`object-cover transition-transform duration-500 ${isActive ? "" : "group-hover/swatch:scale-105"}`}
+                            className={`object-cover transition-transform duration-500 ${isActive ? "" : "group-hover/swatch:scale-105"} ${isOutOfStock ? "grayscale" : ""}`}
                             sizes="65px"
                             unoptimized
                           />
+                          {isOutOfStock && (
+                            <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
+                              <span className="text-[9px] font-bold text-red-500 bg-white/90 px-1.5 py-0.5 rounded-full">
+                                Out
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        {/* Stock count label */}
+                        <div className="mt-1 text-center">
+                          <span className={`text-[10px] font-semibold ${
+                            isOutOfStock ? "text-red-400" : variant.stock <= 5 ? "text-amber-500" : "text-[#388e3c]"
+                          }`}>
+                            {isOutOfStock ? "Out" : `${variant.stock} left`}
+                          </span>
                         </div>
                       </button>
                     );
@@ -541,56 +571,64 @@ export default function ProductView({
             </div>
 
             {/* Quantity Selector */}
-            <div className="mt-6 flex items-center gap-4">
-              <span className="text-[14px] font-semibold text-[#535766] uppercase tracking-wide">
-                Qty:
-              </span>
-              <div className="flex items-center border border-[#d4d5d9] rounded-[4px] overflow-hidden">
-                <button
-                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                  disabled={product.stock === 0}
-                  className="w-9 h-9 flex items-center justify-center text-[#282c3f] hover:bg-[#f5f5f6] transition-colors text-[18px] font-bold disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  −
-                </button>
-                <span className="w-10 h-9 flex items-center justify-center text-[15px] font-bold text-[#282c3f] border-x border-[#d4d5d9]">
-                  {quantity}
-                </span>
-                <button
-                  onClick={() =>
-                    setQuantity((q) => Math.min(product.stock || 1, q + 1))
-                  }
-                  disabled={
-                    product.stock === 0 || quantity >= (product.stock || 1)
-                  }
-                  className="w-9 h-9 flex items-center justify-center text-[#282c3f] hover:bg-[#f5f5f6] transition-colors text-[18px] font-bold disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  +
-                </button>
-              </div>
-            </div>
+            {(() => {
+              const currentStock = colorVariants?.find(cv => cv.name === activeColor)?.stock ?? product.stock ?? 0;
+              return (
+                <>
+                  <div className="mt-6 flex items-center gap-4">
+                    <span className="text-[14px] font-semibold text-[#535766] uppercase tracking-wide">
+                      Qty:
+                    </span>
+                    <div className="flex items-center border border-[#d4d5d9] rounded-[4px] overflow-hidden">
+                      <button
+                        onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                        disabled={currentStock === 0}
+                        className="w-9 h-9 flex items-center justify-center text-[#282c3f] hover:bg-[#f5f5f6] transition-colors text-[18px] font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        −
+                      </button>
+                      <span className="w-10 h-9 flex items-center justify-center text-[15px] font-bold text-[#282c3f] border-x border-[#d4d5d9]">
+                        {quantity}
+                      </span>
+                      <button
+                        onClick={() =>
+                          setQuantity((q) => Math.min(currentStock || 1, q + 1))
+                        }
+                        disabled={
+                          currentStock === 0 || quantity >= (currentStock || 1)
+                        }
+                        className="w-9 h-9 flex items-center justify-center text-[#282c3f] hover:bg-[#f5f5f6] transition-colors text-[18px] font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
 
-            {/* Actions */}
-            <div className="mt-4 flex gap-4">
-              <button
-                onClick={handleAddToBag}
-                disabled={product.stock === 0}
-                className={`flex-1 h-14 rounded-[4px] font-bold text-[15px] uppercase tracking-wide flex items-center justify-center gap-2 shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed ${addedToBag
-                    ? "bg-[#a1005b] text-white"
-                    : "bg-[#a1005b] text-white hover:bg-[#8a004d]"
-                  }`}
-              >
-                {addedToBag ? <Check size={20} /> : <ShoppingBag size={20} />}
-                {addedToBag ? "Added!" : "Add to Bag"}
-              </button>
-              <button
-                onClick={handleBuyNow}
-                disabled={product.stock === 0}
-                className="flex-1 h-14 bg-white border-2 border-[#a1005b] text-[#a1005b] rounded-[4px] font-bold text-[15px] uppercase tracking-wide flex items-center justify-center gap-2 hover:bg-[#a1005b] hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-[#a1005b]"
-              >
-                <CreditCard size={20} /> Buy Now
-              </button>
-            </div>
+                  {/* Actions */}
+                  <div className="mt-4 flex gap-4">
+                    <button
+                      onClick={handleAddToBag}
+                      disabled={currentStock === 0}
+                      className={`flex-1 h-14 rounded-[4px] font-bold text-[15px] uppercase tracking-wide flex items-center justify-center gap-2 shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+                        addedToBag
+                          ? "bg-[#03a685] text-white"
+                          : "bg-[#ff3f6c] text-white hover:bg-[#ed315d]"
+                      }`}
+                    >
+                      {addedToBag ? <Check size={20} /> : <ShoppingBag size={20} />}
+                      {addedToBag ? "Added!" : "Add to Bag"}
+                    </button>
+                    <button
+                      onClick={handleBuyNow}
+                      disabled={currentStock === 0}
+                      className="flex-1 h-14 bg-white border-2 border-[#282c3f] text-[#282c3f] rounded-[4px] font-bold text-[15px] uppercase tracking-wide flex items-center justify-center gap-2 hover:bg-[#282c3f] hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-[#282c3f]"
+                    >
+                      <CreditCard size={20} /> Buy Now
+                    </button>
+                  </div>
+                </>
+              );
+            })()}
 
             {/* Wishlist */}
             <button className="mt-3 w-full h-10 bg-transparent border border-[#d4d5d9] text-[#535766] rounded-[4px] font-semibold text-[14px] uppercase tracking-wide flex items-center justify-center gap-2 hover:border-[#282c3f] hover:text-[#282c3f] transition-colors">
