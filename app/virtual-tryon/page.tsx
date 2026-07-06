@@ -8,6 +8,7 @@ import { products as staticProducts } from "@/mockdata/collections";
 import type { Product } from "@/mockdata/collections";
 import { useAuthGate } from "@/lib/useAuthGate";
 import AuthGateModal from "@/app/components/AuthGate";
+import toast from "react-hot-toast";
 
 /* eslint-disable @next/next/no-img-element */
 
@@ -187,7 +188,6 @@ function VirtualTryOnContent() {
     setHasTriedOn(false);
     setResult(null);
     setErrorMessage(null);
-    setStatusMessage("⏳ Sending images to Gemini AI... this may take 15–40 seconds");
 
     try {
       const API_BASE = process.env.NEXT_PUBLIC_API_URL || "/api/backend";
@@ -207,12 +207,14 @@ function VirtualTryOnContent() {
         setHasTriedOn(true);
         setStatusMessage(`✅ Done in ${data.processingTime || "~30s"}! Click Download to save.`);
       } else {
-        setErrorMessage(data.message || "Gemini did not return an image. Try different photos.");
+        toast.error("Quota limit reached, model cannot generate.");
+        setErrorMessage(null);
         setStatusMessage(null);
       }
     } catch (err) {
       console.error("Virtual try-on error:", err);
-      setErrorMessage("Failed to connect to the server. Make sure the backend is running on port 5000.");
+      toast.error("Quota limit reached, model cannot generate.");
+      setErrorMessage(null);
       setStatusMessage(null);
     } finally {
       setIsProcessing(false);
@@ -231,18 +233,17 @@ function VirtualTryOnContent() {
   const isReady = !!saree.preview && !!person.preview;
 
   return (
-    <main className="min-h-screen">
+    <main
+      className="min-h-screen"
+      style={{
+        backgroundImage: "url('/images/virtual-tryon-bg.png')",
+        backgroundSize: "cover",
+        backgroundPosition: "top center",
+        backgroundRepeat: "no-repeat"
+      }}
+    >
       {/* Hero Banner */}
-      <section className="relative pt-[100px] pb-16 overflow-hidden">
-        {/* Decorative background blobs */}
-        <div
-          className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full opacity-[0.06] pointer-events-none"
-          style={{ background: "radial-gradient(circle, #a1005b 0%, transparent 70%)", transform: "translate(30%, -30%)" }}
-        />
-        <div
-          className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full opacity-[0.04] pointer-events-none"
-          style={{ background: "radial-gradient(circle, #a1005b 0%, transparent 70%)", transform: "translate(-30%, 30%)" }}
-        />
+      <section className="relative pt-[100px] pb-16 overflow-hidden z-10">
 
         <div className="max-w-5xl mx-auto px-6 text-center relative">
 
@@ -369,7 +370,7 @@ function VirtualTryOnContent() {
 
         {/* Info Note */}
         <p className="text-center text-xs text-gray-400 mt-6">
-          Supports JPG, PNG, WebP · Max 10 MB per image · Your images are not stored · Powered by Google Gemini AI
+          Supports JPG, PNG, WebP · Max 10 MB per image · Your images are not stored · 3 Images per Day
         </p>
       </section>
 
@@ -633,7 +634,7 @@ function UploadCard({
             <img
               src={state.preview!}
               alt={`${label} preview`}
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-110"
               style={{ minHeight: "320px", maxHeight: "400px" }}
             />
             {/* Overlay Controls */}
@@ -760,8 +761,8 @@ function ResultCard({ isReady, isProcessing, hasTriedOn, result, accentColor }: 
               </div>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-serif font-bold text-gray-900 mb-2">AI is working its magic…</p>
-              <p className="text-sm text-gray-500">Draping the saree on your photo</p>
+              <p className="text-2xl font-serif font-bold text-gray-900 mb-2">Loading...</p>
+              <p className="text-sm text-gray-500">Generating</p>
             </div>
             {/* Progress dots */}
             <div className="flex gap-1.5">
@@ -780,7 +781,7 @@ function ResultCard({ isReady, isProcessing, hasTriedOn, result, accentColor }: 
             <img
               src={result}
               alt="Virtual try-on result"
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-110"
               style={{ minHeight: "320px", maxHeight: "400px" }}
             />
             {/* Result Badge */}
@@ -832,7 +833,7 @@ function ResultCard({ isReady, isProcessing, hasTriedOn, result, accentColor }: 
 ───────────────────────────────────────────── */
 function ModalProductCard({ product, onSelect }: { product: Product, onSelect: (imgUrl: string) => void }) {
   const [hovered, setHovered] = useState(false);
-  
+
   const images = useMemo(() => {
     const mainImage = product.image && product.image.trim() !== "" ? [product.image] : [];
     const extraImages = (product.images || []).filter(
@@ -915,7 +916,7 @@ function ModalProductCard({ product, onSelect }: { product: Product, onSelect: (
                 </div>
               </>
             )}
-            
+
             {/* Try on this color button overlay */}
             <div className={`absolute bottom-0 left-0 right-0 p-2 transition-all duration-300 ${hovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
               <div className="w-full py-1.5 bg-[#a1005b]/90 backdrop-blur-sm text-white text-[10px] font-bold uppercase tracking-wider text-center rounded-lg shadow-sm">

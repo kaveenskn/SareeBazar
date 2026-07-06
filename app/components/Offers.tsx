@@ -138,7 +138,7 @@ export function Offers() {
   const activeSlide = slides[current] || slides[0];
 
   return (
-    <Section id="offers" align="center" heightClass="h-[150vh]" topClass="top-[10vh] md:top-[12vh]">
+    <Section id="offers" align="center" heightClass="h-[150vh]" topClass="top-[2vh] md:top-[4vh]">
       {/* Two-column layout */}
       <div className="w-full flex flex-col md:flex-row items-center justify-between gap-12 lg:gap-20">
 
