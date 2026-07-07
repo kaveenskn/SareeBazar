@@ -38,10 +38,10 @@ export const products: Product[] = [
       "/images/products/kanjivaram-silk-saree/saree1_red.jpeg"
     ],
     colorVariants: [
-      { name: "Royal Blue", hex: "#1e40af", image: "/images/products/kanjivaram-silk-saree/saree1_blue.jpeg" },
-      { name: "Emerald Green", hex: "#16a34a", image: "/images/products/kanjivaram-silk-saree/saree1_green.jpeg" },
-      { name: "Purple", hex: "#7c3aed", image: "/images/products/kanjivaram-silk-saree/saree1_purple.jpeg" },
-      { name: "Red", hex: "#dc2626", image: "/images/products/kanjivaram-silk-saree/saree1_red.jpeg" },
+      { name: "Royal Blue", hex: "#1e40af", image: "/images/products/kanjivaram-silk-saree/saree1_blue.jpeg", stock: 10 },
+      { name: "Emerald Green", hex: "#16a34a", image: "/images/products/kanjivaram-silk-saree/saree1_green.jpeg", stock: 10 },
+      { name: "Purple", hex: "#7c3aed", image: "/images/products/kanjivaram-silk-saree/saree1_purple.jpeg", stock: 10 },
+      { name: "Red", hex: "#dc2626", image: "/images/products/kanjivaram-silk-saree/saree1_red.jpeg", stock: 10 },
     ],
     video: "/images/products/kanjivaram-silk-saree/0517.mp4",
   },
