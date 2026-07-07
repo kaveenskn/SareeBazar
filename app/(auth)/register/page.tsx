@@ -69,9 +69,9 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="w-full max-w-[440px] mx-auto space-y-8">
-        <div>
-          <h2 className="text-[32px] font-semibold text-gray-900 tracking-tight mb-2">
+    <div className="w-full max-w-[440px] mx-auto space-y-6 sm:space-y-8">
+        <div className="text-center sm:text-left">
+          <h2 className="text-2xl sm:text-[32px] font-semibold text-gray-900 tracking-tight mb-2">
             Create an account
           </h2>
           <p className="text-[15px] text-gray-500">
