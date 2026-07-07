@@ -16,9 +16,12 @@ function OrderSuccessContent() {
   useEffect(() => {
     const id = params.get("id");
     if (!id) { router.replace("/"); return; }
-    const found = getOrder(id);
-    if (!found) { router.replace("/"); return; }
-    setOrder(found);
+    const fetchOrder = async () => {
+      const found = await getOrder(id);
+      if (!found) { router.replace("/"); return; }
+      setOrder(found);
+    };
+    fetchOrder();
   }, [params, router]);
 
   if (!order) return null;
@@ -31,6 +34,14 @@ function OrderSuccessContent() {
       <Navbar />
 
       <div className="max-w-[720px] mx-auto px-4 py-10">
+        <button 
+          onClick={() => router.back()}
+          className="flex items-center gap-1.5 text-[#535766] hover:text-[#ff3f6c] transition-colors font-semibold text-[14px] mb-6"
+        >
+          <ArrowRight size={18} className="rotate-180" />
+          Back
+        </button>
+
         {/* ── Success Banner ── */}
         <div className="bg-white rounded-2xl p-8 text-center shadow-sm border border-[#eaeaec] mb-6">
           <div className="w-20 h-20 rounded-full bg-[#f0fdf4] border-4 border-[#86efac] flex items-center justify-center mx-auto mb-4">

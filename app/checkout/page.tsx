@@ -3,13 +3,32 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { ShieldCheck, Truck, Package, ChevronRight, Loader2, CreditCard, BadgeCheck } from "lucide-react";
+import { ShieldCheck, Truck, Package, ChevronRight, Loader2, CreditCard, BadgeCheck, ArrowLeft } from "lucide-react";
 import toast from "react-hot-toast";
 import { getCheckoutItems, clearCheckoutItems, type CheckoutVariant } from "@/lib/cartStore";
-import { saveOrder, generateOrderId, type ShippingDetails } from "@/lib/ordersStore";
+import { placeOrder, type ShippingDetails, type OrderPayload } from "@/lib/ordersStore";
+import { isLoggedIn } from "@/lib/authStore";
 import Navbar from "@/app/components/Navbar";
 
-const SHIPPING_FEE = 350;
+interface ShippingCosts {
+  cardPayment: number;
+  cashOnDelivery: number;
+}
+
+const SRI_LANKA_REGIONS: Record<string, string[]> = {
+  "Central": ["Kandy", "Matale", "Nuwara Eliya"],
+  "Eastern": ["Ampara", "Batticaloa", "Trincomalee"],
+  "North Central": ["Anuradhapura", "Polonnaruwa"],
+  "Northern": ["Jaffna", "Kilinochchi", "Mannar", "Mullaitivu", "Vavuniya"],
+  "North Western": ["Kurunegala", "Puttalam"],
+  "Sabaragamuwa": ["Kegalle", "Ratnapura"],
+  "Southern": ["Galle", "Hambantota", "Matara"],
+  "Uva": ["Badulla", "Moneragala"],
+  "Western": ["Colombo", "Gampaha", "Kalutara"]
+};
+
+const SRI_LANKA_PROVINCES = Object.keys(SRI_LANKA_REGIONS);
+
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -22,15 +41,57 @@ export default function CheckoutPage() {
   });
   const [payMethod, setPayMethod] = useState<"card" | "cod">("card");
   const [card, setCard] = useState({ number: "", expiry: "", cvv: "", name: "" });
+  const [shippingCosts, setShippingCosts] = useState<ShippingCosts>({ cardPayment: 0, cashOnDelivery: 0 });
+  const [loadingShipping, setLoadingShipping] = useState(true);
+
+  const handleShippingChange = (key: keyof ShippingDetails, value: string) => {
+    setShipping((prev) => {
+      const next = { ...prev, [key]: value };
+      
+      if (key === "state" && prev.state !== value) {
+        next.city = ""; // Reset district if province changes
+      }
+      
+      if (key === "city") {
+        for (const [province, districts] of Object.entries(SRI_LANKA_REGIONS)) {
+          if (districts.includes(value)) {
+            next.state = province;
+            break;
+          }
+        }
+      }
+      return next;
+    });
+  };
 
   useEffect(() => {
+    if (!isLoggedIn()) {
+      toast.error("Please login to place an order.");
+      router.replace("/login?redirect=/checkout");
+      return;
+    }
     const data = getCheckoutItems();
     if (!data.length) { router.replace("/collections"); return; }
     setItems(data);
+
+    // Fetch dynamic shipping costs from admin settings
+    fetch("/api/backend/shop-info/shipping-costs")
+      .then((res) => res.json())
+      .then((data) => {
+        setShippingCosts({
+          cardPayment: data.cardPayment ?? 0,
+          cashOnDelivery: data.cashOnDelivery ?? 0,
+        });
+      })
+      .catch(() => {
+        console.error("Failed to fetch shipping costs, using defaults");
+      })
+      .finally(() => setLoadingShipping(false));
   }, [router]);
 
   const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0);
-  const total = subtotal + SHIPPING_FEE;
+  const currentShippingFee = payMethod === "cod" ? shippingCosts.cashOnDelivery : shippingCosts.cardPayment;
+  const total = subtotal + currentShippingFee;
 
   const isShippingValid = () =>
     shipping.fullName && shipping.email && shipping.phone &&
@@ -45,25 +106,40 @@ export default function CheckoutPage() {
       return;
     }
     setStep("processing");
-    // Simulate gateway delay
-    await new Promise((r) => setTimeout(r, 2200));
 
-    const orderId = generateOrderId();
-    saveOrder({
-      id: orderId,
-      items: items.map((i) => ({ ...i })),
-      shipping,
-      subtotal,
-      shippingFee: SHIPPING_FEE,
-      discount: 0,
-      total,
-      paymentId: `PAY-${Date.now()}`,
-      paymentMethod: payMethod === "card" ? "Credit/Debit Card" : "Cash on Delivery",
-      status: "confirmed",
-      createdAt: new Date().toISOString(),
-    });
-    clearCheckoutItems();
-    router.push(`/order-success?id=${orderId}`);
+    try {
+      const payload: OrderPayload = {
+        items: items.map((i) => ({
+          productId: i.productId,
+          slug: i.slug,
+          name: i.name,
+          selectedColor: i.selectedColor,
+          selectedColorHex: i.selectedColorHex,
+          selectedColorImage: i.selectedColorImage,
+          quantity: i.quantity,
+          price: i.price,
+          originalPrice: i.originalPrice ?? i.price,
+          image: i.image,
+          category: i.category,
+          fabric: i.fabric ?? "",
+        })),
+        shipping,
+        subtotal,
+        shippingFee: currentShippingFee,
+        discount: 0,
+        total,
+        paymentMethod: payMethod === "card" ? "Razorpay" : "Cash on Delivery",
+        paymentId: payMethod === "card" ? "" : undefined,
+      };
+
+      const data = await placeOrder(payload);
+      clearCheckoutItems();
+      router.push(`/order-success?id=${data.order.orderId}`);
+    } catch (error: unknown) {
+      setStep("payment");
+      const message = error instanceof Error ? error.message : "Failed to place order";
+      toast.error(message);
+    }
   };
 
   if (!items.length) return null;
@@ -84,6 +160,14 @@ export default function CheckoutPage() {
       )}
 
       <div className="max-w-[1100px] mx-auto px-4 py-8">
+        <button 
+          onClick={() => router.back()}
+          className="flex items-center gap-1.5 text-[#535766] hover:text-[#ff3f6c] transition-colors font-semibold text-[14px] mb-6"
+        >
+          <ArrowLeft size={18} />
+          Back
+        </button>
+
         {/* ─── Progress Bar ─── */}
         <div className="flex items-center gap-2 mb-8 text-[13px] font-semibold">
           {["summary", "shipping", "payment"].map((s, idx) => (
@@ -172,28 +256,51 @@ export default function CheckoutPage() {
               {step === "shipping" && (
                 <div className="p-6">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {[
-                      { key: "fullName", label: "Full Name", span: false },
-                      { key: "email", label: "Email Address", span: false },
-                      { key: "phone", label: "Phone Number", span: false },
-                      { key: "addressLine1", label: "Address Line 1", span: true },
-                      { key: "addressLine2", label: "Address Line 2 (optional)", span: true },
-                      { key: "city", label: "City", span: false },
-                      { key: "state", label: "State / Province", span: false },
-                      { key: "postalCode", label: "Postal Code", span: false },
-                      { key: "country", label: "Country", span: false },
-                    ].map(({ key, label, span }) => (
-                      <div key={key} className={span ? "sm:col-span-2" : ""}>
-                        <label className="block text-[12px] font-semibold text-[#535766] uppercase tracking-wide mb-1.5">{label}</label>
-                        <input
-                          type={key === "email" ? "email" : "text"}
-                          value={shipping[key as keyof ShippingDetails] || ""}
-                          onChange={(e) => setShipping((prev) => ({ ...prev, [key]: e.target.value }))}
-                          className="w-full px-4 py-3 border border-[#d4d5d9] rounded-xl text-[14px] text-[#282c3f] focus:outline-none focus:border-[#ff3f6c] focus:ring-2 focus:ring-[#ff3f6c]/10 transition-all"
-                          placeholder={label}
-                        />
-                      </div>
-                    ))}
+                    {(() => {
+                      const availableDistricts = shipping.state 
+                        ? SRI_LANKA_REGIONS[shipping.state] 
+                        : Object.values(SRI_LANKA_REGIONS).flat().sort();
+
+                      return [
+                        { key: "fullName", label: "Full Name", span: false },
+                        { key: "email", label: "Email Address", span: false },
+                        { key: "phone", label: "Phone Number", span: false },
+                        { key: "addressLine1", label: "Address Line 1", span: true },
+                        { key: "addressLine2", label: "Address Line 2 (optional)", span: true },
+                        { key: "state", label: "Province", span: false, type: "select", options: SRI_LANKA_PROVINCES },
+                        { key: "city", label: "District", span: false, type: "select", options: availableDistricts },
+                        { key: "postalCode", label: "Postal Code", span: false },
+                        { key: "country", label: "Country", span: false, disabled: true },
+                      ].map(({ key, label, span, type, options, disabled }) => (
+                        <div key={key} className={span ? "sm:col-span-2" : ""}>
+                          <label className="block text-[12px] font-semibold text-[#535766] uppercase tracking-wide mb-1.5">{label}</label>
+                          {type === "select" ? (
+                            <div className="relative">
+                              <select
+                                value={shipping[key as keyof ShippingDetails] || ""}
+                                onChange={(e) => handleShippingChange(key as keyof ShippingDetails, e.target.value)}
+                                className="w-full px-4 py-3 border border-[#d4d5d9] rounded-xl text-[14px] text-[#282c3f] bg-white focus:outline-none focus:border-[#ff3f6c] focus:ring-2 focus:ring-[#ff3f6c]/10 transition-all appearance-none cursor-pointer"
+                              >
+                                <option value="" disabled>Select {label}</option>
+                                {options?.map(opt => (
+                                  <option key={opt} value={opt as string}>{opt as string}</option>
+                                ))}
+                              </select>
+                              <ChevronRight size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 rotate-90 pointer-events-none" />
+                            </div>
+                          ) : (
+                            <input
+                              type={key === "email" ? "email" : "text"}
+                              value={shipping[key as keyof ShippingDetails] || ""}
+                              onChange={(e) => handleShippingChange(key as keyof ShippingDetails, e.target.value)}
+                              className={`w-full px-4 py-3 border border-[#d4d5d9] rounded-xl text-[14px] text-[#282c3f] focus:outline-none focus:border-[#ff3f6c] focus:ring-2 focus:ring-[#ff3f6c]/10 transition-all ${disabled ? "bg-gray-100 text-gray-500 cursor-not-allowed" : ""}`}
+                              placeholder={label as string}
+                              disabled={disabled}
+                            />
+                          )}
+                        </div>
+                      ));
+                    })()}
                   </div>
 
                   <button
@@ -299,8 +406,13 @@ export default function CheckoutPage() {
                   )}
 
                   {payMethod === "cod" && (
-                    <div className="p-4 rounded-xl bg-[#f0fdf4] border border-[#86efac] text-[14px] text-[#16a34a] font-medium">
-                      You will pay <strong>LKR {total.toLocaleString("en-LK")}</strong> in cash when your order is delivered.
+                    <div className="p-4 rounded-xl bg-[#f0fdf4] border border-[#86efac] text-[14px] text-[#16a34a] font-medium space-y-1">
+                      <p>You will pay <strong>LKR {total.toLocaleString("en-LK")}</strong> in cash when your order is delivered.</p>
+                      {shippingCosts.cashOnDelivery > 0 && (
+                        <p className="text-[12px] text-[#15803d]">
+                          Includes COD shipping charge of LKR {shippingCosts.cashOnDelivery.toLocaleString("en-LK")}
+                        </p>
+                      )}
                     </div>
                   )}
 
@@ -350,8 +462,13 @@ export default function CheckoutPage() {
                   <span>LKR {subtotal.toLocaleString("en-LK")}</span>
                 </div>
                 <div className="flex justify-between text-[13px] text-[#535766]">
-                  <span>Shipping</span>
-                  <span>LKR {SHIPPING_FEE.toLocaleString("en-LK")}</span>
+                  <span className="flex items-center gap-1">
+                    Shipping
+                    <span className="text-[11px] px-1.5 py-0.5 rounded-full bg-[#f5f5f6] text-[#94969f] font-medium">
+                      {payMethod === "cod" ? "COD" : "Card"}
+                    </span>
+                  </span>
+                  <span>{currentShippingFee === 0 ? <span className="text-[#03a685] font-semibold">FREE</span> : `LKR ${currentShippingFee.toLocaleString("en-LK")}`}</span>
                 </div>
                 <div className="flex justify-between text-[16px] font-bold text-[#282c3f] border-t border-[#eaeaec] pt-3 mt-2">
                   <span>Total</span>

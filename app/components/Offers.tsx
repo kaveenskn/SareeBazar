@@ -3,33 +3,91 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
+import Link from "next/link";
 import { Section } from "./Section";
+import { fetchSaleProducts } from "@/lib/productApi";
+import type { Product } from "@/mockdata/collections";
 
-const slides = [
+/* ── Default static slides (fallback when no Sale products exist) ── */
+const defaultSlides = [
   {
     src: "/images/offers/offer_saree_1.png",
     label: "Kanjivaram Silk",
     badge: "40% OFF",
     color: "#B88E52",
+    link: "/collections",
   },
   {
     src: "/images/offers/offer_saree_2.png",
     label: "Banarasi Elegance",
     badge: "35% OFF",
     color: "#5B7FBE",
+    link: "/collections",
   },
   {
     src: "/images/offers/offer_saree_3.png",
     label: "Chanderi Collection",
     badge: "30% OFF",
     color: "#4A7C59",
+    link: "/collections",
   },
 ];
+
+interface OfferSlide {
+  src: string;
+  label: string;
+  badge: string;
+  color: string;
+  link: string;
+}
+
+/* ── Convert a Sale-status product into an offer slide ── */
+function productToSlide(product: Product): OfferSlide {
+  const discount = product.discountPercent || 0;
+
+  // Pick a color accent based on category
+  const colorMap: Record<string, string> = {
+    "Silk Sarees": "#B88E52",
+    "Cotton Sarees": "#4A7C59",
+    "Handloom": "#5B7FBE",
+    "Bridal": "#A0153E",
+    "Daily Wear": "#6B8E23",
+    "Georgette": "#9370DB",
+    "Designer": "#D93097",
+    "Party Wear": "#FF6347",
+  };
+
+  let safeImage = product.image;
+  // If the image is a local blob from the admin panel, it won't work in the user app
+  if (!safeImage || safeImage.startsWith("blob:")) {
+    safeImage = "/images/offers/offer_saree_1.png";
+  }
+
+  return {
+    src: safeImage,
+    label: product.name,
+    badge: discount > 0 ? `${discount}% OFF` : "SALE",
+    color: colorMap[product.category] || "#B88E52",
+    link: `/products/${product.slug}`,
+  };
+}
 
 export function Offers() {
   const [current, setCurrent] = useState(0);
   const [direction, setDirection] = useState(1);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [slides, setSlides] = useState<OfferSlide[]>(defaultSlides);
+
+  // Fetch Sale products from the backend
+  useEffect(() => {
+    fetchSaleProducts().then((saleProducts) => {
+      if (saleProducts.length > 0) {
+        const saleSlides = saleProducts.map(productToSlide);
+        // Combine sale products with defaults for a richer carousel
+        setSlides([...saleSlides, ...defaultSlides.slice(0, Math.max(0, 3 - saleSlides.length))]);
+      }
+    });
+  }, []);
 
   const goTo = (index: number, dir: number) => {
     setDirection(dir);
@@ -50,7 +108,7 @@ export function Offers() {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, []);
+  }, [slides.length]);
 
   const handleDot = (idx: number) => {
     if (timerRef.current) clearInterval(timerRef.current);
@@ -76,13 +134,16 @@ export function Offers() {
     }),
   };
 
+  // Guard against empty slides
+  const activeSlide = slides[current] || slides[0];
+
   return (
-    <Section align="center" heightClass="h-[150vh]" topClass="top-[15vh]">
+    <Section id="offers" align="center" heightClass="h-[150vh]" topClass="top-[2vh] md:top-[4vh]">
       {/* Two-column layout */}
       <div className="w-full flex flex-col md:flex-row items-center justify-between gap-12 lg:gap-20">
 
 {/* LEFT — Text Content */}
-<div className="w-full md:w-[45%] lg:w-[40%] flex flex-col items-start text-left">
+<div className="w-full md:w-[50%] lg:w-[55%] flex flex-col items-start text-left">
   {/* Tag pill */}
   <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/15 border border-primary/30 mb-3">
     <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
@@ -91,15 +152,15 @@ export function Offers() {
     </span>
   </div>
 
-  <h2 className="text-5xl md:text-[4.5rem] lg:text-[5.5rem] font-serif font-bold mb-4 text-gray-900 leading-[1.05] tracking-tight drop-shadow-[0_2px_15px_rgba(255,255,255,0.9)]">
-    Exclusive{" "}
+  <h2 className="text-5xl md:text-[5rem] lg:text-[6.5rem] font-serif font-bold mb-4 text-gray-900 leading-[1.05] tracking-tight drop-shadow-[0_2px_15px_rgba(255,255,255,0.9)]">
+    Today&apos;s{" "}
     <span className="text-primary relative inline-block">
       Offers
       <span className="absolute -bottom-2 left-0 w-full h-1 bg-gradient-to-r from-primary to-transparent rounded-full" />
     </span>
   </h2>
 
-  <p className="text-base md:text-[17px] font-normal leading-relaxed mb-4 text-gray-700 max-w-xl drop-shadow-[0_2px_15px_rgba(255,255,255,0.9)]">
+  <p className="text-base md:text-[18px] lg:text-[19px] font-normal leading-relaxed mb-6 text-gray-700 max-w-2xl drop-shadow-[0_2px_15px_rgba(255,255,255,0.9)]">
     Embrace the season&apos;s joy with up to{" "}
     <span className="text-primary font-bold">40% off</span> on our
     premium silk and handcrafted collections. Elevate your wardrobe with
@@ -118,14 +179,16 @@ export function Offers() {
     ))}
   </div>
 
-  <button className="px-8 py-3.5 text-[15px] font-semibold tracking-wide rounded-xl transition-all duration-300 transform hover:-translate-y-1 bg-primary hover:bg-primary/90 text-white shadow-[0_8px_30px_rgba(161,0,91,0.35)] hover:shadow-[0_8px_30px_rgba(161,0,91,0.55)]">
-    Explore Offers
-  </button>
+  <Link href="/collections?category=Today's Offer">
+    <button className="px-8 py-3.5 text-[15px] font-semibold tracking-wide rounded-xl transition-all duration-300 transform hover:-translate-y-1 bg-primary hover:bg-primary/90 text-white shadow-[0_8px_30px_rgba(161,0,91,0.35)] hover:shadow-[0_8px_30px_rgba(161,0,91,0.55)]">
+      Explore Today's Offers
+    </button>
+  </Link>
 </div>
 
         {/* RIGHT — Image Slider */}
-        <div className="w-full md:w-[55%] lg:w-[60%] flex-shrink-0">
-          <div className="relative w-full aspect-[4/3] rounded-[2rem] overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.20)]">
+        <div className="w-full md:w-[45%] lg:w-[45%] flex-shrink-0 flex justify-center md:justify-end">
+          <div className="relative w-[85%] max-w-[350px] md:w-auto md:max-w-none md:h-[70vh] lg:h-[80vh] aspect-[3/4] rounded-[2rem] overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.20)]">
 
             {/* Slides */}
             <AnimatePresence initial={false} custom={direction}>
@@ -139,29 +202,41 @@ export function Offers() {
                 transition={{ duration: 0.55, ease: [0.4, 0, 0.2, 1] }}
                 className="absolute inset-0"
               >
-                <Image
-                  src={slides[current].src}
-                  alt={slides[current].label}
-                  fill
-                  className="object-cover"
-                  priority
-                />
+                {activeSlide.link ? (
+                  <Link href={activeSlide.link} className="block w-full h-full">
+                    <Image
+                      src={activeSlide.src}
+                      alt={activeSlide.label}
+                      fill
+                      className="object-cover"
+                      priority
+                    />
+                  </Link>
+                ) : (
+                  <Image
+                    src={activeSlide.src}
+                    alt={activeSlide.label}
+                    fill
+                    className="object-cover"
+                    priority
+                  />
+                )}
 
                 {/* Gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
 
                 {/* Badge */}
                 <div
                   className="absolute top-5 right-5 px-3 py-1.5 rounded-full text-white text-sm font-bold shadow-lg"
-                  style={{ backgroundColor: slides[current].color }}
+                  style={{ backgroundColor: activeSlide.color }}
                 >
-                  {slides[current].badge}
+                  {activeSlide.badge}
                 </div>
 
                 {/* Bottom label */}
-                <div className="absolute bottom-0 left-0 right-0 px-6 pb-14 pt-4">
+                <div className="absolute bottom-0 left-0 right-0 px-6 pb-14 pt-4 pointer-events-none">
                   <p className="text-white font-semibold text-lg tracking-wide">
-                    {slides[current].label}
+                    {activeSlide.label}
                   </p>
                 </div>
               </motion.div>

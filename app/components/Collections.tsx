@@ -1,54 +1,134 @@
 "use client";
 
+import { useEffect, useState, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ShoppingCart } from "lucide-react";
-import { Section } from "./Section";
+import { fetchAllProducts } from "@/lib/productApi";
+import { fetchAllCollections, type ApiCollection } from "@/lib/collectionApi";
+import type { Product } from "@/mockdata/collections";
 
-const categories = [
-  {
-    id: "silk",
-    name: "Silk Sarees",
-    subtitle: "Kanjivaram & Banarasi",
-    items: "240+ Styles",
-    image: "/images/collections/silk_saree.png",
-    accent: "#7B3FA0",
-  },
-  {
-    id: "cotton",
-    name: "Cotton Sarees",
-    subtitle: "Breathable & Elegant",
-    items: "180+ Styles",
-    image: "/images/collections/cotton_saree.png",
-    accent: "#2E86AB",
-  },
-  {
-    id: "handloom",
-    name: "Handloom",
-    subtitle: "Artisan Crafted",
-    items: "150+ Styles",
-    image: "/images/collections/handloom_saree.png",
-    accent: "#C45E1B",
-  },
-  {
-    id: "bridal",
-    name: "Bridal",
-    subtitle: "Wedding Collections",
-    items: "120+ Styles",
-    image: "/images/collections/bridal_saree.png",
-    accent: "#B8112A",
-  },
-  {
-    id: "dailywear",
-    name: "Daily Wear",
-    subtitle: "Comfort & Style",
-    items: "300+ Styles",
-    image: "/images/collections/dailywear_saree.png",
-    accent: "#2D7A5F",
-  },
-];
+
+
+const accentColors: Record<string, string> = {
+  "Silk Sarees": "#A0153E",
+  "Kanjivaram Silk Saree": "#7B3FA0",
+  "Cotton Sarees": "#4A7C59",
+  "Handloom": "#5B7FBE",
+  "Bridal": "#D4175C",
+  "Daily Wear": "#6B8E23",
+  "Georgette": "#9370DB",
+  "Designer": "#D93097",
+  "Party Wear": "#FF6347",
+};
 
 export function Collections() {
+  const [apiProducts, setApiProducts] = useState<Product[]>([]);
+  const [apiCollections, setApiCollections] = useState<ApiCollection[]>([]);
+
+  useEffect(() => {
+    fetchAllProducts().then((data) => {
+      if (data.length > 0) {
+        setApiProducts(data);
+      }
+    });
+    fetchAllCollections().then((data) => {
+      if (data.length > 0) {
+        setApiCollections(data);
+      }
+    });
+  }, []);
+
+  // Build category cards — prefer API collections with cover images
+  const categories = useMemo(() => {
+    if (apiCollections.length === 0 && apiProducts.length === 0) return [];
+
+    // Build a map of product images per category as fallback
+    const productImageMap: Record<string, string> = {};
+    apiProducts.forEach((p) => {
+      if (!productImageMap[p.category] && p.image && !p.image.startsWith("blob:")) {
+        productImageMap[p.category] = p.image;
+      }
+    });
+
+    // Build a map of product counts per category
+    const productCountMap: Record<string, number> = {};
+    apiProducts.forEach((p) => {
+      productCountMap[p.category] = (productCountMap[p.category] || 0) + 1;
+    });
+
+    // If we have API collections, use them
+    if (apiCollections.length > 0) {
+      const collectionCards = apiCollections.map((col) => {
+        // Use coverImage if available, otherwise fallback to first product image in that category
+        let safeImage = col.coverImage || "";
+        if (!safeImage || safeImage.startsWith("blob:")) {
+          safeImage = productImageMap[col.title] || "/images/collections/kanjivaram-silk.png";
+        }
+
+        const productCount = col.productCount || productCountMap[col.title] || 0;
+
+        return {
+          id: col.slug || col.title.toLowerCase().replace(/\s+/g, "-"),
+          name: col.title,
+          subtitle: col.description || `${productCount} product${productCount !== 1 ? "s" : ""} available`,
+          items: `${productCount}+ Styles`,
+          image: safeImage,
+          accent: accentColors[col.title] || "#7B3FA0",
+          hasCoverImage: !!col.coverImage && !col.coverImage.startsWith("blob:"),
+        };
+      });
+
+      // Add any product categories not covered by collections
+      const collectionNames = new Set(apiCollections.map(c => c.title));
+      const extraCategories = Object.entries(productCountMap)
+        .filter(([cat]) => !collectionNames.has(cat))
+        .map(([category, count]) => ({
+          id: category.toLowerCase().replace(/\s+/g, "-"),
+          name: category,
+          subtitle: `${count} product${count > 1 ? "s" : ""} available`,
+          items: `${count}+ Styles`,
+          image: productImageMap[category] || "/images/collections/kanjivaram-silk.png",
+          accent: accentColors[category] || "#7B3FA0",
+          hasCoverImage: false,
+        }));
+
+      const all = [...collectionCards, ...extraCategories];
+      if (all.length > 0) return all;
+    }
+
+    // Fallback: group products by category (original behavior)
+    if (apiProducts.length > 0) {
+      const grouped: Record<string, Product[]> = {};
+      apiProducts.forEach((p) => {
+        if (!grouped[p.category]) grouped[p.category] = [];
+        grouped[p.category].push(p);
+      });
+
+      const apiCategories = Object.entries(grouped).map(([category, products]) => {
+        let safeImage = products[0].image;
+        if (!safeImage || safeImage.startsWith("blob:")) {
+          safeImage = "/images/collections/kanjivaram-silk.png";
+        }
+
+        return {
+          id: category.toLowerCase().replace(/\s+/g, "-"),
+          name: category,
+          subtitle: `${products.length} product${products.length > 1 ? "s" : ""} available`,
+          items: `${products.length}+ Styles`,
+          image: safeImage,
+          accent: accentColors[category] || "#7B3FA0",
+          hasCoverImage: false,
+        };
+      });
+
+      if (apiCategories.length > 0) {
+        return apiCategories;
+      }
+    }
+
+    return [];
+  }, [apiProducts, apiCollections]);
+
   return (
     <section className="relative w-full py-24 bg-[var(--background)] overflow-hidden">
       {/* Decorative Background Shape */}
@@ -68,21 +148,19 @@ export function Collections() {
           From Banarasi brocades to everyday cotton — discover sarees for every occasion.
         </p>
 
-        <div className="w-full flex flex-wrap justify-center gap-12">
+        <div className="w-full flex flex-wrap justify-center gap-8">
           {categories.map((cat) => (
             <Link
               href={`/collections?category=${encodeURIComponent(cat.name)}`}
               key={cat.id}
-              className="group relative w-[350px] flex-shrink-0 rounded-3xl overflow-hidden shadow-[0_12px_40px_rgba(0,0,0,0.15)] bg-white border border-white/60 hover:-translate-y-3 hover:shadow-[0_20px_60px_rgba(0,0,0,0.2)] transition-all duration-500 cursor-pointer block"
+              className="group relative w-full sm:w-[calc(50%-1rem)] md:w-[calc(33.333%-1.333rem)] lg:w-[calc(33.333%-1.333rem)] max-w-[420px] rounded-3xl overflow-hidden shadow-[0_12px_40px_rgba(0,0,0,0.15)] bg-white border border-white/60 hover:-translate-y-3 hover:shadow-[0_20px_60px_rgba(0,0,0,0.2)] transition-all duration-500 cursor-pointer block"
             >
-              {/* Image */}
-              <div className="relative w-full h-[450px] overflow-hidden">
-                <Image
+              {/* Natural Image Layout */}
+              <div className="relative w-full overflow-hidden flex bg-gray-50">
+                <img
                   src={cat.image}
                   alt={cat.name}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 350px"
-                  className="object-cover object-top group-hover:scale-110 transition-transform duration-700"
+                  className="w-full h-auto object-cover group-hover:scale-110 transition-transform duration-700"
                 />
                 {/* Gradient overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
@@ -96,10 +174,9 @@ export function Collections() {
                 </div>
               </div>
 
-              {/* Info */}
-              <div className="px-6 pt-5 pb-7 flex flex-col gap-1.5">
-                <h3 className="text-xl font-bold text-gray-900 leading-tight">{cat.name}</h3>
-                <p className="text-sm text-gray-500 font-medium tracking-wide">{cat.subtitle}</p>
+              {/* Minimal Info */}
+              <div className="px-6 py-5 flex items-center justify-center">
+                <h3 className="text-[20px] font-bold text-gray-900 leading-tight text-center">{cat.name}</h3>
               </div>
             </Link>
           ))}

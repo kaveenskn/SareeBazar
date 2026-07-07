@@ -9,14 +9,16 @@ export function Section({
   heightClass = "h-[150vh]",
   isFirst = false,
   topClass = "top-1/3",
-  className = ""
+  className = "",
+  id
 }: {
   children: React.ReactNode,
   align?: "left" | "center" | "right",
   heightClass?: string,
   isFirst?: boolean,
   topClass?: string,
-  className?: string
+  className?: string,
+  id?: string
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
@@ -33,7 +35,7 @@ export function Section({
   if (align === "right") alignmentClass = "items-end text-right";
 
   return (
-    <section ref={ref} className={`${heightClass} relative ${isFirst ? "bg-transparent" : ""} ${className}`}>
+    <section id={id} ref={ref} className={`${heightClass} relative ${isFirst ? "bg-transparent" : ""} ${className}`}>
       <div className="sticky top-[68px] w-full h-[calc(100vh-68px)] pointer-events-none px-8">
         <motion.div
           style={{ opacity, y }}

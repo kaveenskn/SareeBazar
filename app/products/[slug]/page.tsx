@@ -1,26 +1,37 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { products } from "@/mockdata/collections";
+import { products as staticProducts } from "@/mockdata/collections";
 import Navbar from "@/app/components/Navbar";
 import ProductView from "@/app/components/ProductView";
-import ProductReviews from "@/app/components/ProductReviews";
+
+import { fetchProductBySlug } from "@/lib/productApi";
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default async function ProductPage({ params }: { params: { slug: string } }) {
   const { slug } = await params;
   
-  const product = products.find((p) => p.slug === slug);
-
+  // Try fetching from backend API first, fallback to static data
+  let product = await fetchProductBySlug(slug);
+  
   if (!product) {
-    notFound();
+    // Fallback to static mock data
+    const staticProduct = staticProducts.find((p) => p.slug === slug);
+    if (!staticProduct) {
+      notFound();
+    }
+    product = staticProduct;
   }
 
   // Fallback to a single image if the gallery array is not provided
   const gallery = product.images && product.images.length > 0 ? product.images : [product.image];
   const video = product.video;
 
-  const discountPercent = product.originalPrice
-    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
-    : 0;
+  const discountPercent = product.discountPercent || 0;
+  const salePrice = discountPercent > 0
+    ? Math.round(product.price * (1 - discountPercent / 100) * 100) / 100
+    : product.price;
 
   return (
     <main className="min-h-screen bg-white pt-[110px]" style={{ fontFamily: "var(--font-figtree), sans-serif" }}>
@@ -42,8 +53,6 @@ export default async function ProductPage({ params }: { params: { slug: string }
         discountPercent={discountPercent}
       />
 
-      {/* Customer Reviews Section */}
-      <ProductReviews product={product} />
     </main>
   );
 }

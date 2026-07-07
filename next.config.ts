@@ -7,7 +7,23 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'images.unsplash.com',
       },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+      },
+      {
+        protocol: 'https',
+        hostname: '**',
+      },
     ],
+  },
+  async rewrites() {
+    return [
+      {
+        source: "/api/backend/:path*",
+        destination: "http://localhost:5000/api/:path*",
+      },
+    ];
   },
 };
 

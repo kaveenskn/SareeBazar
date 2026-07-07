@@ -49,16 +49,11 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} ${figtree.variable} ${playfair.variable} ${quicksand.variable} h-full antialiased light`}
     >
-
-      <body className="min-h-full flex flex-col bg-white text-black">
+      <body className="min-h-full flex flex-col bg-white text-black relative">
         <Providers>
           <NavbarWrapper />
-          <div className="flex-1">
-            {children}
-          </div>
-          <FooterWrapper />
+          {children}
         </Providers>
-
       </body>
     </html>
   );

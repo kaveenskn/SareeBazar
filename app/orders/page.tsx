@@ -3,8 +3,10 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Package, ChevronRight, ShoppingBag } from "lucide-react";
-import { getOrders, type Order } from "@/lib/ordersStore";
+import { useRouter } from "next/navigation";
+import { Package, ChevronRight, ShoppingBag, X } from "lucide-react";
+import { getOrders, cancelOrder, type Order } from "@/lib/ordersStore";
+import { isLoggedIn } from "@/lib/authStore";
 import Navbar from "@/app/components/Navbar";
 
 const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
@@ -17,14 +19,46 @@ const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
 };
 
 export default function OrdersPage() {
+  const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
+  const [cancellingOrder, setCancellingOrder] = useState<string | null>(null);
+  const [cancelReason, setCancelReason] = useState("");
+  const [isCancelling, setIsCancelling] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setOrders(getOrders());
-    const sync = () => setOrders(getOrders());
-    window.addEventListener("storage", sync);
-    return () => window.removeEventListener("storage", sync);
-  }, []);
+    if (!isLoggedIn()) {
+      router.replace("/login?redirect=/orders");
+      return;
+    }
+    fetchOrders();
+  }, [router]);
+
+  const fetchOrders = async () => {
+    const data = await getOrders();
+    setOrders(data);
+  };
+
+  const handleCancelOrder = async () => {
+    if (!cancellingOrder || !cancelReason.trim()) return;
+
+    try {
+      setIsCancelling(true);
+      setError(null);
+      await cancelOrder(cancellingOrder, cancelReason);
+      
+      // Update local state to reflect cancellation
+      setOrders(orders.map(o => (o.orderId || o.id) === cancellingOrder ? { ...o, status: "cancelled" } : o));
+      
+      // Close modal and reset state
+      setCancellingOrder(null);
+      setCancelReason("");
+    } catch (err: any) {
+      setError(err.message || "Failed to cancel order");
+    } finally {
+      setIsCancelling(false);
+    }
+  };
 
   return (
     <main className="min-h-screen bg-[#f7f0f4] pt-[90px]" style={{ fontFamily: "var(--font-figtree), sans-serif" }}>
@@ -55,13 +89,16 @@ export default function OrdersPage() {
           <div className="space-y-4">
             {orders.map((order) => {
               const sc = STATUS_COLORS[order.status] ?? { bg: "bg-gray-50", text: "text-gray-700" };
+              // Allow cancellation if order is not already cancelled, shipped, or delivered
+              const canCancel = !["cancelled", "shipped", "delivered"].includes(order.status);
+
               return (
-                <div key={order.id} className="bg-white rounded-2xl shadow-sm border border-[#eaeaec] overflow-hidden">
+                <div key={order.orderId || order.id} className="bg-white rounded-2xl shadow-sm border border-[#eaeaec] overflow-hidden">
                   {/* Order Header */}
                   <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-4 border-b border-[#eaeaec] bg-[#fdf6fb]">
                     <div>
                       <p className="text-[12px] text-[#535766] uppercase tracking-wide font-semibold">Order ID</p>
-                      <p className="text-[14px] font-bold text-[#ff3f6c] tracking-wide">{order.id}</p>
+                      <p className="text-[14px] font-bold text-[#ff3f6c] tracking-wide">{order.orderId || order.id}</p>
                     </div>
                     <div>
                       <p className="text-[12px] text-[#535766] uppercase tracking-wide font-semibold">Date</p>
@@ -128,12 +165,22 @@ export default function OrdersPage() {
                       <span className="font-semibold text-[#282c3f]">{order.paymentMethod}</span>
                       {" · "}Payment ID: <span className="font-mono text-[11px]">{order.paymentId}</span>
                     </div>
-                    <Link
-                      href={`/order-success?id=${order.id}`}
-                      className="flex items-center gap-1.5 text-[13px] font-bold text-[#ff3f6c] hover:underline"
-                    >
-                      View Details <ChevronRight size={14} />
-                    </Link>
+                    <div className="flex items-center gap-4">
+                      {canCancel && (
+                        <button
+                          onClick={() => setCancellingOrder(order.orderId || order.id)}
+                          className="text-[13px] font-bold text-red-600 hover:text-red-700 transition-colors"
+                        >
+                          Cancel Order
+                        </button>
+                      )}
+                      <Link
+                        href={`/order-success?id=${order.orderId || order.id}`}
+                        className="flex items-center gap-1.5 text-[13px] font-bold text-[#ff3f6c] hover:underline"
+                      >
+                        View Details <ChevronRight size={14} />
+                      </Link>
+                    </div>
                   </div>
                 </div>
               );
@@ -141,6 +188,56 @@ export default function OrdersPage() {
           </div>
         )}
       </div>
+
+      {/* Cancel Order Modal */}
+      {cancellingOrder && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl w-full max-w-md p-6 relative">
+            <button
+              onClick={() => {
+                setCancellingOrder(null);
+                setCancelReason("");
+                setError(null);
+              }}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+            >
+              <X size={20} />
+            </button>
+            <h3 className="text-[18px] font-bold text-[#282c3f] mb-4">Cancel Order</h3>
+            <p className="text-[14px] text-[#535766] mb-4">
+              Please provide a reason for cancelling order <span className="font-bold text-[#ff3f6c]">{cancellingOrder}</span>.
+            </p>
+            <textarea
+              className="w-full border border-[#eaeaec] rounded-xl p-3 text-[14px] text-[#282c3f] focus:outline-none focus:border-[#ff3f6c] resize-none mb-4"
+              rows={4}
+              placeholder="E.g., Changed my mind, found a better price, etc."
+              value={cancelReason}
+              onChange={(e) => setCancelReason(e.target.value)}
+            />
+            {error && <p className="text-red-600 text-[12px] mb-4">{error}</p>}
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setCancellingOrder(null);
+                  setCancelReason("");
+                  setError(null);
+                }}
+                className="px-4 py-2 rounded-xl text-[14px] font-bold text-[#535766] hover:bg-gray-50"
+                disabled={isCancelling}
+              >
+                Keep Order
+              </button>
+              <button
+                onClick={handleCancelOrder}
+                disabled={!cancelReason.trim() || isCancelling}
+                className="px-4 py-2 rounded-xl text-[14px] font-bold text-white bg-red-600 hover:bg-red-700 disabled:opacity-50"
+              >
+                {isCancelling ? "Cancelling..." : "Confirm Cancellation"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

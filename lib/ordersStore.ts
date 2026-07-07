@@ -1,7 +1,11 @@
 /* ─────────────────────────────────────────────
- *  Orders Store (localStorage-based demo)
- *  Replace with real API calls when backend ready.
+ *  Orders Store (API-backed)
+ *  Uses Next.js proxy (/api/backend/orders) so
+ *  cookies are sent correctly and CORS is avoided.
  * ───────────────────────────────────────────── */
+
+// Route through Next.js proxy — DO NOT call backend directly from browser
+const API_BASE = "/api/backend/orders";
 
 export interface OrderItem {
   productId: number;
@@ -40,6 +44,7 @@ export type OrderStatus =
 
 export interface Order {
   id: string;
+  orderId?: string;
   items: OrderItem[];
   shipping: ShippingDetails;
   subtotal: number;
@@ -48,34 +53,172 @@ export interface Order {
   total: number;
   paymentId: string;
   paymentMethod: string;
+  paymentStatus: string;
   status: OrderStatus;
   createdAt: string;
 }
 
-const ORDERS_KEY = "sb_orders";
+/* ─── Normalize backend order → frontend Order ─── */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function normalizeOrder(raw: any): Order {
+  return {
+    id: raw.orderId || raw._id || raw.id || "",
+    orderId: raw.orderId,
+    items: raw.items || [],
+    shipping: raw.shipping || {},
+    subtotal: raw.subtotal || 0,
+    shippingFee: raw.shippingFee || 0,
+    discount: raw.discount || 0,
+    total: raw.total || 0,
+    paymentId: raw.paymentId || "",
+    paymentMethod: raw.paymentMethod || "",
+    paymentStatus: raw.paymentStatus || "pending",
+    status: raw.status || "pending",
+    createdAt: raw.createdAt || new Date().toISOString(),
+  };
+}
 
-export function getOrders(): Order[] {
-  if (typeof window === "undefined") return [];
+/* ─── Auth helper ─── */
+
+function getAuthHeaders(): Record<string, string> {
+  const { getToken } = require("./authStore") as { getToken: () => string | null };
+  const token =
+    typeof window !== "undefined" ? getToken() : null;
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+  return headers;
+}
+
+/* ─── API Payload (matches backend schema exactly) ─── */
+
+export interface OrderPayload {
+  items: Array<{
+    productId: number;
+    slug: string;
+    name: string;
+    selectedColor: string;
+    selectedColorHex: string;
+    selectedColorImage: string;
+    quantity: number;
+    price: number;
+    originalPrice: number;
+    image: string;
+    category: string;
+    fabric: string;
+  }>;
+  shipping: ShippingDetails;
+  subtotal: number;
+  shippingFee: number;
+  discount: number;
+  total: number;
+  paymentMethod: string;
+  paymentId?: string;
+}
+
+/* ─── Place Order (POST) ─── */
+
+export async function placeOrder(
+  payload: OrderPayload
+): Promise<{ order: Order & { orderId: string } }> {
+  const response = await fetch(API_BASE, {
+    method: "POST",
+    headers: getAuthHeaders(),
+    credentials: "include", // send cookies too (belt + suspenders)
+    body: JSON.stringify(payload),
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.message || "Failed to place order");
+  }
+  return data;
+}
+
+/* ─── Confirm Payment (PATCH) ─── */
+
+export async function confirmPayment(
+  orderId: string,
+  paymentId: string
+): Promise<Order> {
+  const response = await fetch(`${API_BASE}/${orderId}/payment`, {
+    method: "PATCH",
+    headers: getAuthHeaders(),
+    credentials: "include",
+    body: JSON.stringify({
+      paymentId,
+      paymentStatus: "paid",
+    }),
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.message || "Failed to confirm payment");
+  }
+  return data;
+}
+
+/* ─── Get All Orders (GET) ─── */
+
+export async function getOrders(): Promise<Order[]> {
   try {
-    const raw = localStorage.getItem(ORDERS_KEY);
-    return raw ? (JSON.parse(raw) as Order[]) : [];
+    const response = await fetch(API_BASE, {
+      method: "GET",
+      headers: getAuthHeaders(),
+      credentials: "include",
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to fetch orders");
+    }
+    // Backend may return { orders: [...] } or an array directly
+    const rawOrders = Array.isArray(data) ? data : (data.orders ?? []);
+    return rawOrders.map(normalizeOrder);
   } catch {
     return [];
   }
 }
 
-export function getOrder(id: string): Order | null {
-  return getOrders().find((o) => o.id === id) ?? null;
+/* ─── Get Single Order (GET) ─── */
+
+export async function getOrder(id: string): Promise<Order | null> {
+  try {
+    const response = await fetch(`${API_BASE}/${id}`, {
+      method: "GET",
+      headers: getAuthHeaders(),
+      credentials: "include",
+    });
+
+    const data = await response.json();
+    if (!response.ok) return null;
+    // Backend may return { order: {...} } or the order directly
+    const raw = data.order ?? data;
+    return normalizeOrder(raw);
+  } catch {
+    return null;
+  }
 }
 
-export function saveOrder(order: Order): void {
-  const orders = getOrders();
-  orders.unshift(order); // newest first
-  localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
-}
+/* ─── Cancel Order (PATCH) ─── */
 
-export function generateOrderId(): string {
-  const ts = Date.now().toString(36).toUpperCase();
-  const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
-  return `SB-${ts}-${rand}`;
+export async function cancelOrder(
+  orderId: string,
+  reason: string
+): Promise<Order> {
+  const response = await fetch(`${API_BASE}/${orderId}/cancel`, {
+    method: "PATCH",
+    headers: getAuthHeaders(),
+    credentials: "include",
+    body: JSON.stringify({ reason }),
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.message || "Failed to cancel order");
+  }
+  return data;
 }

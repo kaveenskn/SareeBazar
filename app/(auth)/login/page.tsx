@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { Eye, EyeOff } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -18,6 +19,15 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 export default function LoginPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [redirectUrl, setRedirectUrl] = useState('/');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      setRedirectUrl(params.get('redirect') || '/');
+    }
+  }, []);
 
   const {
     register,
@@ -30,12 +40,24 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
     try {
-      // Simulate network request
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(data),
+      });
+      const result = await response.json();
       
-      toast.success('Validation passed. (Pure UI Mode)');
-      // Simulate redirect
-      router.push('/profile');
+      if (!response.ok) {
+        toast.error(result.message || 'Login failed');
+        return;
+      }
+      
+      const { loginUser } = await import('@/lib/authStore');
+      loginUser(result.user, result.accessToken);
+      
+      toast.success('Logged in successfully');
+      router.push(redirectUrl);
     } catch (error: any) {
       toast.error('An unexpected error occurred');
     } finally {
@@ -75,12 +97,19 @@ export default function LoginPage() {
             <div className="relative">
               <input
                 id="password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 autoComplete="current-password"
-                className={`block w-full rounded-xl border-0 bg-gray-100/80 px-4 py-4 text-[15px] text-gray-900 placeholder:text-gray-500 focus:bg-white focus:ring-2 focus:ring-inset focus:ring-primary-500 transition-all ${errors.password ? 'ring-2 ring-inset ring-red-500' : ''}`}
+                className={`block w-full rounded-xl border-0 bg-gray-100/80 px-4 py-4 pr-12 text-[15px] text-gray-900 placeholder:text-gray-500 focus:bg-white focus:ring-2 focus:ring-inset focus:ring-primary transition-all ${errors.password ? 'ring-2 ring-inset ring-red-500' : ''}`}
                 placeholder="Password"
                 {...register('password')}
               />
+              <button
+                type="button"
+                className="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 hover:text-gray-600 transition-colors"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
             </div>
             {errors.password && (
               <p className="mt-1.5 text-xs text-red-500">{errors.password.message}</p>
@@ -97,7 +126,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="flex w-full justify-center rounded-xl bg-primary-500 px-4 py-4 text-[15px] font-semibold text-white hover:bg-primary-600 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+              className="flex w-full justify-center rounded-xl bg-primary px-4 py-4 text-[15px] font-semibold text-white hover:bg-[#85004B] shadow-lg shadow-primary/20 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {isLoading ? 'Signing in...' : 'Sign in'}
             </button>
@@ -140,7 +169,10 @@ export default function LoginPage() {
           
           <div className="text-center pt-2">
             <span className="text-[15px] text-gray-500">Don't have an account? </span>
-            <Link href="/register" className="text-[15px] font-medium text-primary-600 hover:text-primary-700 underline underline-offset-4 decoration-primary-600/30">
+            <Link 
+              href={redirectUrl !== '/' ? `/register?redirect=${encodeURIComponent(redirectUrl)}` : '/register'} 
+              className="text-[15px] font-medium text-primary-600 hover:text-primary-700 underline underline-offset-4 decoration-primary-600/30"
+            >
               Sign up
             </Link>
           </div>
