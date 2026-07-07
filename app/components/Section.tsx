@@ -36,7 +36,7 @@ export function Section({
 
   return (
     <section id={id} ref={ref} className={`${heightClass} relative ${isFirst ? "bg-transparent" : ""} ${className}`}>
-      <div className="sticky top-[68px] w-full h-[calc(100vh-68px)] pointer-events-none px-8">
+      <div className="relative md:sticky top-[68px] w-full min-h-[calc(100vh-68px)] md:h-[calc(100vh-68px)] pointer-events-none px-4 md:px-8 md:overflow-hidden">
         <motion.div
           style={{ opacity, y }}
           className={`relative ${topClass} flex flex-col w-full max-w-6xl mx-auto ${alignmentClass} pointer-events-auto`}
