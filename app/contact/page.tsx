@@ -102,20 +102,7 @@ export default function ContactPage() {
           </div>
         </div>
 
-        {/* FAQ Link */}
-        <div className="mt-8 rounded-2xl border border-[#dfc7a5]/40 bg-white/70 p-6">
-          <p className="text-[14px] text-gray-600">
-            Prefer a quick answer? Visit the FAQ for common questions.
-          </p>
-          <div className="mt-4">
-            <Link
-              href="/faq"
-              className="inline-flex items-center rounded-xl border border-primary/20 px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/5"
-            >
-              Visit FAQ
-            </Link>
-          </div>
-        </div>
+
       </div>
     </main>
   );

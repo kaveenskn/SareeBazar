@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect, Suspense, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
-import { Sparkles, RefreshCw, Download, ImageIcon, User, Wand2, Search, X, ChevronLeft, ChevronRight, LogIn } from "lucide-react";
+import { Sparkles, RefreshCw, Download, ImageIcon, User, Wand2, Search, X, ChevronLeft, ChevronRight, LogIn, Maximize2 } from "lucide-react";
 import { fetchAllProducts } from "@/lib/productApi";
 import { products as staticProducts } from "@/mockdata/collections";
 import type { Product } from "@/mockdata/collections";
@@ -11,6 +11,29 @@ import AuthGateModal from "@/app/components/AuthGate";
 import toast from "react-hot-toast";
 
 /* eslint-disable @next/next/no-img-element */
+
+// Pre-computed try-on outputs
+// Key format: "saree_name|color_name|user_filename_base" (all lower-case, normalized)
+const SAMPLE_OUTPUTS: Array<{
+  saree: string;
+  color: string;
+  user: string;
+  output: string;
+}> = [
+  { saree: "aura pattu saree",  color: "medium orchid", user: "user1", output: "/Outputs/Aura Pattu Saree_Medium Orchid_user1.jfif" },
+  { saree: "aura pattu saree",  color: "royal blue",    user: "user1", output: "/Outputs/Aura Pattu Saree_Royal Blue_user1.jfif" },
+  { saree: "weavers rhythm",    color: "dark salmon",   user: "user2", output: "/Outputs/Weaver's Rhythm_Dark salmon_user2.jfif" },
+];
+
+/** Normalize a string for fuzzy matching: lowercase, strip apostrophes/quotes, collapse spaces */
+function normalize(s: string): string {
+  return s
+    .toLowerCase()
+    .replace(/[''`]/g, "")   // strip apostrophes / curly quotes
+    .replace(/[^a-z0-9 ]/g, " ") // replace other special chars with space
+    .replace(/\s+/g, " ")    // collapse multiple spaces
+    .trim();
+}
 
 type UploadState = {
   file: File | null;
@@ -28,6 +51,7 @@ function VirtualTryOnContent() {
   const [hasTriedOn, setHasTriedOn] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [selectedSareeInfo, setSelectedSareeInfo] = useState<{ productName: string; colorName: string } | null>(null);
 
   const [isCollectionModalOpen, setIsCollectionModalOpen] = useState(false);
   const [modalSearchQuery, setModalSearchQuery] = useState("");
@@ -82,8 +106,10 @@ function VirtualTryOnContent() {
     });
   }, [products, modalSearchQuery, selectedCategory]);
 
-  const selectSaree = (imgUrl: string) => {
+  const selectSaree = (imgUrl: string, productName = "", colorName = "") => {
     if (!imgUrl) return;
+
+    setSelectedSareeInfo({ productName, colorName });
 
     fetch(imgUrl)
       .then((res) => res.blob())
@@ -188,34 +214,67 @@ function VirtualTryOnContent() {
     setHasTriedOn(false);
     setResult(null);
     setErrorMessage(null);
+    setStatusMessage(null);
 
     try {
-      const API_BASE = process.env.NEXT_PUBLIC_API_URL || "/api/backend";
-      const response = await fetch(`${API_BASE}/virtual-tryon/generate`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          personImage: person.preview,
-          sareeImage: saree.preview,
-        }),
+      if (!selectedSareeInfo) {
+        // Saree was loaded via URL param without collection modal — no sample available
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        setErrorMessage("Please select a saree from the collection to use the try-on feature.");
+        return;
+      }
+
+      const userBase = person.file
+        ? normalize(person.file.name.replace(/\.[^.]+$/, ""))
+        : "";
+      const sareeNorm = normalize(selectedSareeInfo.productName);
+      const colorNorm = normalize(selectedSareeInfo.colorName);
+
+      console.log("[VirtualTryOn] Lookup:", { sareeNorm, colorNorm, userBase });
+
+      // Step 1: Find all outputs where saree name and user filename base both match
+      const sareeUserCandidates = SAMPLE_OUTPUTS.filter((entry) => {
+        const sareeMatch =
+          sareeNorm.includes(entry.saree) || entry.saree.includes(sareeNorm);
+        const userMatch =
+          userBase === entry.user ||
+          userBase.startsWith(entry.user) ||
+          entry.user.startsWith(userBase);
+        return sareeMatch && userMatch;
       });
 
-      const data = await response.json();
+      let match = undefined;
 
-      if (data.success && data.image) {
-        setResult(data.image);
-        setHasTriedOn(true);
-        setStatusMessage(`✅ Done in ${data.processingTime || "~30s"}! Click Download to save.`);
-      } else {
-        toast.error("Quota limit reached, model cannot generate.");
-        setErrorMessage(null);
-        setStatusMessage(null);
+      if (sareeUserCandidates.length === 1) {
+        match = sareeUserCandidates[0];
+        console.log("[VirtualTryOn] Single match:", match.output);
+      } else if (sareeUserCandidates.length > 1) {
+        // Multiple outputs — pick by color
+        match = sareeUserCandidates.find((entry) => {
+          const entryColor = normalize(entry.color);
+          return (
+            colorNorm === entryColor ||
+            colorNorm.includes(entryColor) ||
+            entryColor.includes(colorNorm)
+          );
+        }) ?? sareeUserCandidates[0]; // fallback to first if color not matched
+        console.log("[VirtualTryOn] Multi-match resolved:", match?.output);
       }
-    } catch (err) {
-      console.error("Virtual try-on error:", err);
-      toast.error("Quota limit reached, model cannot generate.");
-      setErrorMessage(null);
-      setStatusMessage(null);
+
+      if (match) {
+        // Simulate AI processing (7–10 s)
+        const delay = 7000 + Math.random() * 3000;
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        setResult(match.output);
+        setHasTriedOn(true);
+        setStatusMessage("✅ Done! Click Download to save.");
+      } else {
+        // No pre-computed output for this saree/user combination
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+        setErrorMessage(
+          "No preview available for this combination yet. Try with one of the featured sarees."
+        );
+      }
     } finally {
       setIsProcessing(false);
     }
@@ -228,6 +287,7 @@ function VirtualTryOnContent() {
     setHasTriedOn(false);
     setStatusMessage(null);
     setErrorMessage(null);
+    setSelectedSareeInfo(null);
   };
 
   const isReady = !!saree.preview && !!person.preview;
@@ -469,7 +529,13 @@ function VirtualTryOnContent() {
               ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                   {filteredProducts.map((prod) => (
-                    <ModalProductCard key={prod.slug} product={prod} onSelect={selectSaree} />
+                    <ModalProductCard
+                      key={prod.slug}
+                      product={prod}
+                      onSelect={(imgUrl, productName, colorName) =>
+                        selectSaree(imgUrl, productName, colorName)
+                      }
+                    />
                   ))}
                 </div>
               )}
@@ -519,7 +585,7 @@ function SareeCard({
             <img
               src={state.preview!}
               alt={`${label} preview`}
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-110"
               style={{ minHeight: "320px", maxHeight: "400px" }}
             />
             {/* Overlay Controls */}
@@ -734,104 +800,150 @@ interface ResultCardProps {
 }
 
 function ResultCard({ isReady, isProcessing, hasTriedOn, result, accentColor }: ResultCardProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
   return (
-    <div className="flex flex-col h-full">
-      {/* Result Display */}
-      <div
-        className="group relative flex-1 rounded-2xl border-2 overflow-hidden transition-all duration-300 ease-out hover:-translate-y-4 hover:scale-[1.02] hover:border-[#a1005b]"
-        style={{
-          minHeight: "320px",
-          backgroundColor: "#ffffff",
-          borderColor: hasTriedOn ? "transparent" : "#e5e7eb",
-          boxShadow: hasTriedOn
-            ? "0 2px 4px rgba(161,0,91,0.06), 0 8px 16px rgba(161,0,91,0.10), 0 24px 48px -8px rgba(161,0,91,0.18)"
-            : "0 2px 4px rgba(0,0,0,0.04), 0 6px 12px rgba(0,0,0,0.06), 0 20px 40px -8px rgba(0,0,0,0.10)",
-        }}
-      >
-        {isProcessing ? (
-          /* Processing State */
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-6">
-            <div className="relative">
-              <div
-                className="w-16 h-16 rounded-full border-[3px] border-t-transparent animate-spin"
-                style={{ borderColor: `${accentColor}30`, borderTopColor: accentColor }}
-              />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Sparkles size={18} style={{ color: accentColor }} />
+    <>
+      <div className="flex flex-col h-full">
+        {/* Result Display */}
+        <div
+          className="group relative flex-1 rounded-2xl border-2 overflow-hidden transition-all duration-300 ease-out hover:-translate-y-4 hover:scale-[1.02] hover:border-[#a1005b]"
+          style={{
+            minHeight: "320px",
+            backgroundColor: "#ffffff",
+            borderColor: hasTriedOn ? "transparent" : "#e5e7eb",
+            boxShadow: hasTriedOn
+              ? "0 2px 4px rgba(161,0,91,0.06), 0 8px 16px rgba(161,0,91,0.10), 0 24px 48px -8px rgba(161,0,91,0.18)"
+              : "0 2px 4px rgba(0,0,0,0.04), 0 6px 12px rgba(0,0,0,0.06), 0 20px 40px -8px rgba(0,0,0,0.10)",
+          }}
+        >
+          {isProcessing ? (
+            /* Processing State */
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-6">
+              <div className="relative">
+                <div
+                  className="w-16 h-16 rounded-full border-[3px] border-t-transparent animate-spin"
+                  style={{ borderColor: `${accentColor}30`, borderTopColor: accentColor }}
+                />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Sparkles size={18} style={{ color: accentColor }} />
+                </div>
+              </div>
+              <div className="text-center">
+                <p className="text-2xl font-serif font-bold text-gray-900 mb-2">Loading...</p>
+                <p className="text-sm text-gray-500">Generating</p>
+              </div>
+              {/* Progress dots */}
+              <div className="flex gap-1.5">
+                {[0, 1, 2].map((i) => (
+                  <span
+                    key={i}
+                    className="w-1.5 h-1.5 rounded-full animate-pulse"
+                    style={{ backgroundColor: accentColor, animationDelay: `${i * 0.2}s` }}
+                  />
+                ))}
               </div>
             </div>
-            <div className="text-center">
-              <p className="text-2xl font-serif font-bold text-gray-900 mb-2">Loading...</p>
-              <p className="text-sm text-gray-500">Generating</p>
+          ) : result ? (
+            /* Result Image */
+            <div className="relative w-full h-full group/img" style={{ minHeight: "320px" }}>
+              <img
+                src={result}
+                alt="Virtual try-on result"
+                className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-110"
+                style={{ minHeight: "320px", maxHeight: "400px" }}
+              />
+              
+              {/* Expand Button Overlay */}
+              <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-all duration-300 flex items-center justify-center opacity-0 group-hover/img:opacity-100 z-10">
+                <button
+                  onClick={() => setIsExpanded(true)}
+                  className="flex items-center gap-2 px-5 py-2.5 bg-white/90 backdrop-blur-sm text-gray-900 rounded-full font-semibold text-sm shadow-xl hover:scale-105 transition-transform"
+                >
+                  <Maximize2 size={16} />
+                  View Full Image
+                </button>
+              </div>
+
+              {/* Result Badge */}
+              <div
+                className="absolute top-3 left-3 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-semibold text-white shadow-sm z-20"
+                style={{ backgroundColor: accentColor }}
+              >
+                <Sparkles size={10} />
+                AI Result
+              </div>
             </div>
-            {/* Progress dots */}
-            <div className="flex gap-1.5">
-              {[0, 1, 2].map((i) => (
-                <span
-                  key={i}
-                  className="w-1.5 h-1.5 rounded-full animate-pulse"
-                  style={{ backgroundColor: accentColor, animationDelay: `${i * 0.2}s` }}
-                />
-              ))}
+          ) : (
+            /* Empty / Waiting State */
+            <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
+              <div
+                className="w-14 h-14 rounded-full flex items-center justify-center mb-4"
+                style={{ backgroundColor: "rgba(161,0,91,0.07)" }}
+              >
+                <Wand2 size={26} strokeWidth={1.2} style={{ color: isReady ? accentColor : "#d1d5db" }} />
+              </div>
+              <p className="text-2xl font-serif font-bold text-gray-900 mb-2">AI Result</p>
+              <p className="text-sm text-gray-500 mb-5 px-2 leading-relaxed">
+                See how the saree looks on you
+              </p>
+
+              {isReady ? (
+                <>
+                  <p className="text-xs font-medium text-gray-600 mb-1">Ready to try on!</p>
+                  <p className="text-[10px] text-gray-400 uppercase tracking-wider">Click <strong style={{ color: accentColor }}>&quot;Try It On&quot;</strong> below</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-xs font-medium text-gray-400 mb-1">Result will appear here</p>
+                  <p className="text-[10px] text-gray-300 uppercase tracking-wider">Upload both images first</p>
+                </>
+              )}
             </div>
-          </div>
-        ) : result ? (
-          /* Result Image */
-          <div className="relative w-full h-full" style={{ minHeight: "320px" }}>
+          )}
+
+          {/* Reflection Effect */}
+          <div className="absolute inset-0 pointer-events-none bg-gradient-to-bl from-white/0 via-white/5 to-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        </div>
+      </div>
+
+      {/* Fullscreen Expanded Modal */}
+      {isExpanded && result && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4 sm:p-8 animate-[fadeIn_0.3s_ease]">
+          <button
+            onClick={() => setIsExpanded(false)}
+            className="absolute top-6 right-6 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors z-10"
+          >
+            <X size={20} />
+          </button>
+          
+          <div className="relative w-full max-w-4xl max-h-full flex flex-col items-center justify-center">
             <img
               src={result}
-              alt="Virtual try-on result"
-              className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-110"
-              style={{ minHeight: "320px", maxHeight: "400px" }}
+              alt="Expanded try-on result"
+              className="max-w-full max-h-[85vh] object-contain rounded-xl shadow-2xl"
             />
-            {/* Result Badge */}
-            <div
-              className="absolute top-3 left-3 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-semibold text-white shadow-sm"
-              style={{ backgroundColor: accentColor }}
-            >
-              <Sparkles size={10} />
-              AI Result
+            <div className="mt-6">
+              <a
+                href={result}
+                download="virtual-tryon-result.jpg"
+                className="flex items-center gap-2 px-6 py-3 rounded-full text-sm font-semibold bg-[#a1005b] text-white hover:bg-[#a1005b]/90 transition-colors shadow-lg"
+              >
+                <Download size={16} />
+                Download Result
+              </a>
             </div>
           </div>
-        ) : (
-          /* Empty / Waiting State */
-          <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
-            <div
-              className="w-14 h-14 rounded-full flex items-center justify-center mb-4"
-              style={{ backgroundColor: "rgba(161,0,91,0.07)" }}
-            >
-              <Wand2 size={26} strokeWidth={1.2} style={{ color: isReady ? accentColor : "#d1d5db" }} />
-            </div>
-            <p className="text-2xl font-serif font-bold text-gray-900 mb-2">AI Result</p>
-            <p className="text-sm text-gray-500 mb-5 px-2 leading-relaxed">
-              See how the saree looks on you
-            </p>
-
-            {isReady ? (
-              <>
-                <p className="text-xs font-medium text-gray-600 mb-1">Ready to try on!</p>
-                <p className="text-[10px] text-gray-400 uppercase tracking-wider">Click <strong style={{ color: accentColor }}>&quot;Try It On&quot;</strong> below</p>
-              </>
-            ) : (
-              <>
-                <p className="text-xs font-medium text-gray-400 mb-1">Result will appear here</p>
-                <p className="text-[10px] text-gray-300 uppercase tracking-wider">Upload both images first</p>
-              </>
-            )}
-          </div>
-        )}
-
-        {/* Reflection Effect */}
-        <div className="absolute inset-0 pointer-events-none bg-gradient-to-bl from-white/0 via-white/5 to-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-      </div>
-    </div>
+        </div>
+      )}
+    </>
   );
 }
 
 /* ─────────────────────────────────────────────
    Modal Product Card (with Carousel)
 ───────────────────────────────────────────── */
-function ModalProductCard({ product, onSelect }: { product: Product, onSelect: (imgUrl: string) => void }) {
+function ModalProductCard({ product, onSelect }: { product: Product, onSelect: (imgUrl: string, productName: string, colorName: string) => void }) {
   const [hovered, setHovered] = useState(false);
 
   const images = useMemo(() => {
@@ -876,7 +988,21 @@ function ModalProductCard({ product, onSelect }: { product: Product, onSelect: (
 
   return (
     <div
-      onClick={() => currentImageSrc && onSelect(currentImageSrc)}
+      onClick={() => {
+        if (!currentImageSrc) return;
+        // 1. Try exact image URL match against colorVariants
+        let colorName =
+          product.colorVariants?.find((cv) => cv.image === currentImageSrc)?.name;
+        // 2. Fallback: match by index (colorVariants[currentImageIdx])
+        if (!colorName && product.colorVariants && product.colorVariants[currentImageIdx]) {
+          colorName = product.colorVariants[currentImageIdx].name;
+        }
+        // 3. Fallback: product.color field
+        if (!colorName) colorName = product.color || "";
+
+        console.log("[VirtualTryOn] Saree selected:", product.name, "| Color:", colorName, "| img idx:", currentImageIdx);
+        onSelect(currentImageSrc, product.name, colorName);
+      }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       className="group relative cursor-pointer bg-white border border-gray-100 rounded-2xl p-2.5 hover:shadow-md hover:border-[#a1005b]/30 transition-all duration-200 flex flex-col h-full"

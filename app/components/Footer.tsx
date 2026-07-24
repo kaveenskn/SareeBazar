@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { FooterModals, ModalType } from "./FooterModals";
 import {
   ShieldCheck,
   Truck,
@@ -93,6 +94,7 @@ interface ShopInfo {
 
 export default function Footer() {
   const [shopInfo, setShopInfo] = useState<ShopInfo | null>(null);
+  const [activeModal, setActiveModal] = useState<ModalType>(null);
 
   useEffect(() => {
     fetch("/api/backend/shop-info")
@@ -117,6 +119,7 @@ export default function Footer() {
 
   return (
     <footer className="bg-[#fbeff6] pt-16 pb-8 border-t border-[#dfc7a5]/30">
+      <FooterModals activeModal={activeModal} onClose={() => setActiveModal(null)} shopInfo={shopInfo} />
       <div className="max-w-7xl mx-auto px-6 md:px-8">
         {/* Main Footer Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8 mb-16">
@@ -203,7 +206,7 @@ export default function Footer() {
             </h3>
             <ul className="space-y-4">
               <FooterLink href="/">Home</FooterLink>
-              <FooterLink href="/about">About Us</FooterLink>
+              <FooterLink onClick={() => setActiveModal("about")}>About Us</FooterLink>
               <FooterLink href="/collections">Shop Sarees</FooterLink>
               <FooterLink href="/collections?category=bridal#filters">
                 Bridal Collection
@@ -217,9 +220,9 @@ export default function Footer() {
               Support
             </h3>
             <ul className="space-y-4">
-              <FooterLink href="/faq">FAQs</FooterLink>
-              <FooterLink href="/shipping">Shipping Info</FooterLink>
-              <FooterLink href="/returns">Returns & Refunds</FooterLink>
+              <FooterLink onClick={() => setActiveModal("faq")}>FAQs</FooterLink>
+              <FooterLink onClick={() => setActiveModal("shipping")}>Shipping Info</FooterLink>
+              <FooterLink onClick={() => setActiveModal("returns")}>Returns & Refunds</FooterLink>
               <FooterLink href="#contact-email">Contact Us</FooterLink>
             </ul>
           </div>
@@ -297,19 +300,40 @@ export default function Footer() {
 // Subcomponents for cleaner code
 function FooterLink({
   href,
+  onClick,
   children,
 }: {
-  href: string;
+  href?: string;
+  onClick?: () => void;
   children: React.ReactNode;
 }) {
+  const content = (
+    <>
+      <span className="w-0 h-0.5 bg-primary mr-0 group-hover:w-2 group-hover:mr-2 transition-all duration-300 ease-out"></span>
+      {children}
+    </>
+  );
+
+  if (onClick) {
+    return (
+      <li>
+        <button
+          onClick={onClick}
+          className="text-[14px] text-gray-600 hover:text-primary transition-colors flex items-center group w-full text-left"
+        >
+          {content}
+        </button>
+      </li>
+    );
+  }
+
   return (
     <li>
       <Link
-        href={href}
+        href={href || "#"}
         className="text-[14px] text-gray-600 hover:text-primary transition-colors flex items-center group"
       >
-        <span className="w-0 h-0.5 bg-primary mr-0 group-hover:w-2 group-hover:mr-2 transition-all duration-300 ease-out"></span>
-        {children}
+        {content}
       </Link>
     </li>
   );

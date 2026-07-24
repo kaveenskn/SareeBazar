@@ -73,6 +73,7 @@ export default function Navbar() {
 
   const navLinks = [
     { href: "/collections", label: "COLLECTIONS" },
+    { href: "/#offers", label: "TODAY'S OFFERS" },
     { href: "/virtual-tryon", label: "VIRTUAL TRY-ON" },
     { href: "/studio", label: "STUDIO" },
   ];
@@ -260,23 +261,6 @@ export default function Navbar() {
                   {link.label}
                 </Link>
               ))}
-              <div className="pt-3 mt-1 border-t border-gray-100 flex flex-col space-y-3">
-                {!isLoggedIn ? (
-                  <>
-                    <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="text-[13px] font-semibold text-primary">Login / Sign Up</Link>
-                  </>
-                ) : (
-                  <>
-                    <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} className="text-[13px] font-semibold text-primary">Dashboard</Link>
-                    <Link href="/orders" onClick={() => setMobileMenuOpen(false)} className="text-[13px] font-semibold text-gray-700">My Orders</Link>
-                    <Link href="/profile" onClick={() => setMobileMenuOpen(false)} className="text-[13px] font-semibold text-gray-700">My Profile</Link>
-                    <button className="text-[13px] font-semibold text-red-600 text-left" onClick={() => {
-                      setMobileMenuOpen(false);
-                      import('@/lib/authStore').then((module) => module.logoutUser());
-                    }}>Logout</button>
-                  </>
-                )}
-              </div>
             </div>
           )}
         </nav>

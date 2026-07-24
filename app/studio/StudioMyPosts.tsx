@@ -45,7 +45,7 @@ const MOCK_MY_POSTS: StudioPost[] = [
   {
     id: "post-1",
     image:
-      "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=600&h=750&fit=crop",
+      "/images/studio/saree_girl_1.png",
     mediaType: "image",
     caption:
       "Draped in elegance ✨ The perfect Banarasi silk for this festive season. Absolutely loved how the zari work caught the light!",
@@ -59,14 +59,14 @@ const MOCK_MY_POSTS: StudioPost[] = [
       id: "p1",
       name: "Banarasi Silk Saree – Royal Blue",
       image:
-        "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=300&h=300&fit=crop",
+        "/images/studio/saree_girl_1.png",
     },
     status: "published",
   },
   {
     id: "post-2",
     image:
-      "https://images.unsplash.com/photo-1583391733958-d15fa6937185?w=600&h=750&fit=crop",
+      "/images/studio/saree_girl_2.png",
     mediaType: "image",
     caption:
       "Keeping it classic with pastel cotton sarees today. Perfect for office wear! #OOTD #SareeLove",
@@ -80,14 +80,14 @@ const MOCK_MY_POSTS: StudioPost[] = [
       id: "p3",
       name: "Chanderi Cotton – Mint Green",
       image:
-        "https://images.unsplash.com/photo-1610116306796-6fea9f4fae38?w=300&h=300&fit=crop",
+        "/images/studio/saree_girl_3.png",
     },
     status: "published",
   },
   {
     id: "post-3",
     image:
-      "https://images.unsplash.com/photo-1610116306796-6fea9f4fae38?w=600&h=750&fit=crop",
+      "/images/studio/saree_girl_3.png",
     mediaType: "image",
     caption:
       "Bold colors and bold choices 🔥 Loving this Kanjivaram for the wedding season!",
@@ -101,14 +101,14 @@ const MOCK_MY_POSTS: StudioPost[] = [
       id: "p2",
       name: "Kanjivaram Silk – Deep Maroon",
       image:
-        "https://images.unsplash.com/photo-1583391733958-d15fa6937185?w=300&h=300&fit=crop",
+        "/images/studio/saree_girl_2.png",
     },
     status: "published",
   },
   {
     id: "post-4",
     image:
-      "https://images.unsplash.com/photo-1614093302611-8efc4de12964?w=600&h=750&fit=crop",
+      "/images/studio/saree_girl_4.png",
     mediaType: "image",
     caption:
       "Golden hour in a golden saree ☀️ This Mysore silk drapes like a dream.",
@@ -122,7 +122,7 @@ const MOCK_MY_POSTS: StudioPost[] = [
       id: "p4",
       name: "Mysore Silk – Golden Yellow",
       image:
-        "https://images.unsplash.com/photo-1614093302611-8efc4de12964?w=300&h=300&fit=crop",
+        "/images/studio/saree_girl_4.png",
     },
     status: "pending",
   },
