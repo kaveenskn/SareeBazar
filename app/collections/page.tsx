@@ -780,7 +780,7 @@ function CollectionsContent() {
           id="filters"
           className="hidden lg:block w-[250px] flex-shrink-0 bg-white border-r border-[#e8e8e1] min-h-[calc(100vh-180px)]"
         >
-          <div className="sticky top-[70px] p-4 overflow-y-auto max-h-[calc(100vh-70px)]">
+          <div className="sticky top-[110px] p-4 overflow-y-auto max-h-[calc(100vh-110px)]">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-[14px] font-bold text-[#282c3f] uppercase tracking-wide">
                 Filters
