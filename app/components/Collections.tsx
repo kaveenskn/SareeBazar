@@ -71,7 +71,7 @@ export function Collections() {
           id: col.slug || col.title.toLowerCase().replace(/\s+/g, "-"),
           name: col.title,
           subtitle: col.description || `${productCount} product${productCount !== 1 ? "s" : ""} available`,
-          items: `${productCount}+ Styles`,
+          items: productCount > 0 ? `${productCount}+ Styles` : "0 Styles",
           image: safeImage,
           accent: accentColors[col.title] || "#7B3FA0",
           hasCoverImage: !!col.coverImage && !col.coverImage.startsWith("blob:"),
@@ -86,7 +86,7 @@ export function Collections() {
           id: category.toLowerCase().replace(/\s+/g, "-"),
           name: category,
           subtitle: `${count} product${count > 1 ? "s" : ""} available`,
-          items: `${count}+ Styles`,
+          items: count > 0 ? `${count}+ Styles` : "0 Styles",
           image: productImageMap[category] || "/images/collections/kanjivaram-silk.png",
           accent: accentColors[category] || "#7B3FA0",
           hasCoverImage: false,
@@ -114,7 +114,7 @@ export function Collections() {
           id: category.toLowerCase().replace(/\s+/g, "-"),
           name: category,
           subtitle: `${products.length} product${products.length > 1 ? "s" : ""} available`,
-          items: `${products.length}+ Styles`,
+          items: products.length > 0 ? `${products.length}+ Styles` : "0 Styles",
           image: safeImage,
           accent: accentColors[category] || "#7B3FA0",
           hasCoverImage: false,
@@ -166,12 +166,14 @@ export function Collections() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
 
                 {/* Items badge */}
-                <div
-                  className="absolute top-4 left-4 px-3 py-1.5 rounded-full text-white text-[12px] font-bold tracking-wider"
-                  style={{ backgroundColor: cat.accent }}
-                >
-                  {cat.items}
-                </div>
+                {cat.items !== "0 Styles" && (
+                  <div
+                    className="absolute top-4 left-4 px-3 py-1.5 rounded-full text-white text-[12px] font-bold tracking-wider"
+                    style={{ backgroundColor: cat.accent }}
+                  >
+                    {cat.items}
+                  </div>
+                )}
               </div>
 
               {/* Minimal Info */}
