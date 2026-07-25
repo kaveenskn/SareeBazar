@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
+import { useStudio } from "./studioStore";
 import {
   Heart,
   MessageCircle,
@@ -39,94 +40,7 @@ export interface StudioPost {
   status: "published" | "pending" | "rejected";
 }
 
-/* ─── Mock Data ─── */
-
-const MOCK_MY_POSTS: StudioPost[] = [
-  {
-    id: "post-1",
-    image:
-      "/images/studio/saree_girl_1.png",
-    mediaType: "image",
-    caption:
-      "Draped in elegance ✨ The perfect Banarasi silk for this festive season. Absolutely loved how the zari work caught the light!",
-    likes: 1243,
-    comments: 45,
-    views: 3420,
-    createdAt: "2026-06-24T10:30:00Z",
-    occasion: "Festival",
-    drapingStyle: "Nivi",
-    taggedProduct: {
-      id: "p1",
-      name: "Banarasi Silk Saree – Royal Blue",
-      image:
-        "/images/studio/saree_girl_1.png",
-    },
-    status: "published",
-  },
-  {
-    id: "post-2",
-    image:
-      "/images/studio/saree_girl_2.png",
-    mediaType: "image",
-    caption:
-      "Keeping it classic with pastel cotton sarees today. Perfect for office wear! #OOTD #SareeLove",
-    likes: 856,
-    comments: 22,
-    views: 2150,
-    createdAt: "2026-06-20T14:15:00Z",
-    occasion: "Office",
-    drapingStyle: "Bengali",
-    taggedProduct: {
-      id: "p3",
-      name: "Chanderi Cotton – Mint Green",
-      image:
-        "/images/studio/saree_girl_3.png",
-    },
-    status: "published",
-  },
-  {
-    id: "post-3",
-    image:
-      "/images/studio/saree_girl_3.png",
-    mediaType: "image",
-    caption:
-      "Bold colors and bold choices 🔥 Loving this Kanjivaram for the wedding season!",
-    likes: 3421,
-    comments: 128,
-    views: 8900,
-    createdAt: "2026-06-15T09:00:00Z",
-    occasion: "Wedding",
-    drapingStyle: "Nivi",
-    taggedProduct: {
-      id: "p2",
-      name: "Kanjivaram Silk – Deep Maroon",
-      image:
-        "/images/studio/saree_girl_2.png",
-    },
-    status: "published",
-  },
-  {
-    id: "post-4",
-    image:
-      "/images/studio/saree_girl_4.png",
-    mediaType: "image",
-    caption:
-      "Golden hour in a golden saree ☀️ This Mysore silk drapes like a dream.",
-    likes: 0,
-    comments: 0,
-    views: 0,
-    createdAt: "2026-06-26T08:00:00Z",
-    occasion: "Casual",
-    drapingStyle: "Maharashtrian",
-    taggedProduct: {
-      id: "p4",
-      name: "Mysore Silk – Golden Yellow",
-      image:
-        "/images/studio/saree_girl_4.png",
-    },
-    status: "pending",
-  },
-];
+/* ─── Mock Data removed – posts now come from StudioContext in page.tsx ─── */
 
 /* ─── Helpers ─── */
 
@@ -161,11 +75,18 @@ const DRAPING_STYLES = [
 /* ─── Component ─── */
 
 export default function StudioMyPosts() {
-  const [posts, setPosts] = useState<StudioPost[]>(MOCK_MY_POSTS);
+  // Posts come from shared context so new posts from StudioCreatePost appear here
+  const { myPosts: contextPosts } = useStudio();
+  const [posts, setPosts] = useState<StudioPost[]>(contextPosts);
   const [editingPost, setEditingPost] = useState<StudioPost | null>(null);
   const [deletingPost, setDeletingPost] = useState<StudioPost | null>(null);
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  // Sync when context updates (e.g. new post added via StudioCreatePost)
+  useEffect(() => {
+    setPosts(contextPosts);
+  }, [contextPosts]);
 
   // Close menu on outside click
   useEffect(() => {
