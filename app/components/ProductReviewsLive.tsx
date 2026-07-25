@@ -16,7 +16,6 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { isLoggedIn, logoutUser } from "@/lib/authStore";
-import { getCart } from "@/lib/cartStore";
 
 const API_BASE = "/api/backend/reviews";
 
@@ -108,7 +107,6 @@ export default function ProductReviewsLive({
 
   // Eligibility state
   const [hasOrdered, setHasOrdered] = useState(false);
-  const [inCart, setInCart] = useState(false);
   const [hasReviewed, setHasReviewed] = useState(false);
   const [eligibilityChecked, setEligibilityChecked] = useState(false);
 
@@ -196,18 +194,7 @@ export default function ProductReviewsLive({
     }
   }, [productId, fetchReviews, checkEligibility]);
 
-  /* ─── Check Cart ─── */
-  useEffect(() => {
-    if (!productId) return;
-    const checkCart = () => {
-      const cart = getCart();
-      const found = cart.some(item => String(item.productId) === String(productId));
-      setInCart(found);
-    };
-    checkCart();
-    window.addEventListener("cart-updated", checkCart);
-    return () => window.removeEventListener("cart-updated", checkCart);
-  }, [productId]);
+
 
   /* ─── Submit Review ─── */
   const handleSubmitReview = async (e: React.FormEvent) => {
@@ -264,9 +251,9 @@ export default function ProductReviewsLive({
       toast("You've already reviewed this product", { icon: "✅" });
       return;
     }
-    if (!hasOrdered && !inCart) {
-      toast("Add this product to your bag to write a review", {
-        icon: "🛍️",
+    if (!hasOrdered) {
+      toast("You can review after your order is delivered", {
+        icon: "📦",
       });
       return;
     }
@@ -300,7 +287,7 @@ export default function ProductReviewsLive({
     if (!eligibilityChecked) return { label: "WRITE A REVIEW", disabled: false };
     if (!isLoggedIn()) return { label: "LOGIN TO REVIEW", disabled: false };
     if (hasReviewed) return { label: "ALREADY REVIEWED", disabled: true };
-    if (!hasOrdered && !inCart) return { label: "ADD TO BAG TO REVIEW", disabled: true };
+    if (!hasOrdered) return { label: "ORDER TO REVIEW", disabled: true };
     return { label: "WRITE A REVIEW", disabled: false };
   };
 
@@ -413,9 +400,9 @@ export default function ProductReviewsLive({
                 <Check size={14} /> You reviewed this product
               </span>
             )}
-            {eligibilityChecked && isLoggedIn() && !hasOrdered && !inCart && !hasReviewed && (
+            {eligibilityChecked && isLoggedIn() && !hasOrdered && !hasReviewed && (
               <span className="text-[12px] text-[#535766] flex items-center gap-1">
-                <PackageCheck size={14} /> Add to bag to review
+                <PackageCheck size={14} /> Order to review
               </span>
             )}
             <button
