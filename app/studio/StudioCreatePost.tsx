@@ -49,7 +49,7 @@ const MOCK_RECENT_ORDERS: RecentOrderCard[] = [
     productId: "p1",
     productName: "Banarasi Silk Saree – Royal Blue",
     productImage:
-      "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=300&h=300&fit=crop",
+      "/images/studio/banarasi_silk_blue.png",
     orderDate: "18 Jun 2026",
   },
   {
@@ -57,7 +57,7 @@ const MOCK_RECENT_ORDERS: RecentOrderCard[] = [
     productId: "p2",
     productName: "Kanjivaram Silk – Deep Maroon",
     productImage:
-      "https://images.unsplash.com/photo-1583391733958-d15fa6937185?w=300&h=300&fit=crop",
+      "/images/studio/kanjivaram_silk_maroon.png",
     orderDate: "12 Jun 2026",
   },
   {
@@ -65,7 +65,7 @@ const MOCK_RECENT_ORDERS: RecentOrderCard[] = [
     productId: "p3",
     productName: "Chanderi Cotton – Mint Green",
     productImage:
-      "https://images.unsplash.com/photo-1610116306796-6fea9f4fae38?w=300&h=300&fit=crop",
+      "/images/studio/chanderi_cotton_mint.png",
     orderDate: "5 Jun 2026",
   },
   {
@@ -73,7 +73,7 @@ const MOCK_RECENT_ORDERS: RecentOrderCard[] = [
     productId: "p4",
     productName: "Mysore Silk – Golden Yellow",
     productImage:
-      "https://images.unsplash.com/photo-1614093302611-8efc4de12964?w=300&h=300&fit=crop",
+      "/images/studio/mysore_silk_yellow.png",
     orderDate: "28 May 2026",
   },
   {
@@ -81,22 +81,22 @@ const MOCK_RECENT_ORDERS: RecentOrderCard[] = [
     productId: "p5",
     productName: "Linen Saree – Off White",
     productImage:
-      "https://images.unsplash.com/photo-1595341888016-a392ef81b7de?w=300&h=300&fit=crop",
+      "/images/studio/linen_saree_white.png",
     orderDate: "20 May 2026",
   },
 ];
 
 const MOCK_CATALOG: MockProduct[] = [
-  { id: "p1", name: "Banarasi Silk Saree – Royal Blue", image: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=300&h=300&fit=crop", category: "Silk" },
-  { id: "p2", name: "Kanjivaram Silk – Deep Maroon", image: "https://images.unsplash.com/photo-1583391733958-d15fa6937185?w=300&h=300&fit=crop", category: "Silk" },
-  { id: "p3", name: "Chanderi Cotton – Mint Green", image: "https://images.unsplash.com/photo-1610116306796-6fea9f4fae38?w=300&h=300&fit=crop", category: "Cotton" },
-  { id: "p4", name: "Mysore Silk – Golden Yellow", image: "https://images.unsplash.com/photo-1614093302611-8efc4de12964?w=300&h=300&fit=crop", category: "Silk" },
-  { id: "p5", name: "Linen Saree – Off White", image: "https://images.unsplash.com/photo-1595341888016-a392ef81b7de?w=300&h=300&fit=crop", category: "Linen" },
-  { id: "p6", name: "Patola Silk – Red & Gold", image: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=300&h=300&fit=crop", category: "Silk" },
-  { id: "p7", name: "Tussar Silk – Beige", image: "https://images.unsplash.com/photo-1583391733958-d15fa6937185?w=300&h=300&fit=crop", category: "Silk" },
-  { id: "p8", name: "Georgette Saree – Pastel Pink", image: "https://images.unsplash.com/photo-1610116306796-6fea9f4fae38?w=300&h=300&fit=crop", category: "Georgette" },
-  { id: "p9", name: "Chiffon Saree – Lavender", image: "https://images.unsplash.com/photo-1614093302611-8efc4de12964?w=300&h=300&fit=crop", category: "Chiffon" },
-  { id: "p10", name: "Organza Saree – Peach", image: "https://images.unsplash.com/photo-1595341888016-a392ef81b7de?w=300&h=300&fit=crop", category: "Organza" },
+  { id: "p1", name: "Banarasi Silk Saree – Royal Blue", image: "/images/studio/banarasi_silk_blue.png", category: "Silk" },
+  { id: "p2", name: "Kanjivaram Silk – Deep Maroon", image: "/images/studio/kanjivaram_silk_maroon.png", category: "Silk" },
+  { id: "p3", name: "Chanderi Cotton – Mint Green", image: "/images/studio/chanderi_cotton_mint.png", category: "Cotton" },
+  { id: "p4", name: "Mysore Silk – Golden Yellow", image: "/images/studio/mysore_silk_yellow.png", category: "Silk" },
+  { id: "p5", name: "Linen Saree – Off White", image: "/images/studio/linen_saree_white.png", category: "Linen" },
+  { id: "p6", name: "Patola Silk – Red & Gold", image: "/images/studio/banarasi_silk_blue.png", category: "Silk" },
+  { id: "p7", name: "Tussar Silk – Beige", image: "/images/studio/kanjivaram_silk_maroon.png", category: "Silk" },
+  { id: "p8", name: "Georgette Saree – Pastel Pink", image: "/images/studio/chanderi_cotton_mint.png", category: "Georgette" },
+  { id: "p9", name: "Chiffon Saree – Lavender", image: "/images/studio/mysore_silk_yellow.png", category: "Chiffon" },
+  { id: "p10", name: "Organza Saree – Peach", image: "/images/studio/linen_saree_white.png", category: "Organza" },
 ];
 
 const OCCASIONS = ["Wedding", "Festival", "Casual", "Office", "Puja"];

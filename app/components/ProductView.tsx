@@ -612,7 +612,7 @@ export default function ProductView({
                       className={`flex-1 h-14 rounded-[4px] font-bold text-[15px] uppercase tracking-wide flex items-center justify-center gap-2 shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
                         addedToBag
                           ? "bg-[#03a685] text-white"
-                          : "bg-[#ff3f6c] text-white hover:bg-[#ed315d]"
+                          : "bg-primary text-white hover:opacity-90"
                       }`}
                     >
                       {addedToBag ? <Check size={20} /> : <ShoppingBag size={20} />}
@@ -621,7 +621,7 @@ export default function ProductView({
                     <button
                       onClick={handleBuyNow}
                       disabled={currentStock === 0}
-                      className="flex-1 h-14 bg-white border-2 border-[#282c3f] text-[#282c3f] rounded-[4px] font-bold text-[15px] uppercase tracking-wide flex items-center justify-center gap-2 hover:bg-[#282c3f] hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-[#282c3f]"
+                      className="flex-1 h-14 bg-white border-2 border-primary text-primary rounded-[4px] font-bold text-[15px] uppercase tracking-wide flex items-center justify-center gap-2 hover:bg-primary hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-primary"
                     >
                       <CreditCard size={20} /> Buy Now
                     </button>

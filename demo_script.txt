@@ -1,0 +1,22 @@
+SareeBazar - Client Demo Script
+
+[Scene 1: Introduction - Homepage]
+"Hello, and welcome to SareeBazar. Today we're going to show you how our platform is revolutionizing the way customers discover and shop for traditional Indian wear."
+
+"This is our homepage. We've designed it to be visually stunning and intuitive, highlighting our beautiful collection of sarees right from the start."
+
+[Scene 2: Shopping Experience - Product Page & Checkout]
+"Let's look at the shopping experience. Customers can browse through various collections, like Kanjivaram or Banarasi silks. When a customer finds a saree they love, the checkout process is seamless and fast."
+
+[Scene 3: The 'Studio' Feature - Social Commerce]
+"But what truly sets SareeBazar apart is our 'Studio' feature. It's a social commerce space right within the app."
+
+"After purchasing or wearing a saree, customers can create a post. They just upload a photo or a reel, write a caption, and most importantly—tag the exact product they bought from their recent orders."
+
+"This builds a community where shoppers can see how sarees look in real life on real people, driving engagement and trust."
+
+[Scene 4: Admin Panel]
+"Finally, behind the scenes, we have a powerful Admin Dashboard. Store owners can easily manage the product catalog, process incoming orders, and track sales performance in real-time."
+
+[Scene 5: Closing]
+"In summary, SareeBazar isn't just an e-commerce store; it's a community-driven platform that blends a premium shopping experience with social engagement. Thank you for your time!"

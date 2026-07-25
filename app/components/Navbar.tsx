@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { Search, Heart, ShoppingBag, Menu, X, Settings, LogOut, Package, User, BarChart3 } from "lucide-react";
 import { getCartCount } from "@/lib/cartStore";
 
 export default function Navbar() {
+  const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
@@ -98,15 +100,23 @@ export default function Navbar() {
 
             {/* Desktop Nav */}
             <div className="hidden lg:flex items-center space-x-8">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.label}
-                  href={link.href}
-                  className="text-[11px] font-semibold tracking-[0.15em] transition-colors text-gray-700 hover:text-primary"
-                >
-                  {link.label}
-                </Link>
-              ))}
+              {navLinks.map((link) => {
+                const basePath = link.href.split('#')[0] || '/';
+                const isActive = basePath === '/' ? pathname === '/' : pathname.startsWith(basePath);
+                
+                return (
+                  <Link
+                    key={link.label}
+                    href={link.href}
+                    className="relative group py-2"
+                  >
+                    <span className={`text-[11px] font-semibold tracking-[0.15em] transition-colors ${isActive ? 'text-primary' : 'text-gray-700 group-hover:text-primary'}`}>
+                      {link.label}
+                    </span>
+                    <span className={`absolute bottom-0 left-0 w-full h-[2px] bg-primary transition-transform duration-300 origin-left ${isActive ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}`} />
+                  </Link>
+                );
+              })}
             </div>
 
             {/* Right Actions */}
@@ -251,16 +261,24 @@ export default function Navbar() {
           {/* Mobile Menu — inside the pill */}
           {mobileMenuOpen && (
             <div className="lg:hidden mt-2 mx-3 mb-1 rounded-xl bg-white/60 backdrop-blur-sm border border-white/60 py-4 px-5 flex flex-col space-y-4">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.label}
-                  href={link.href}
-                  className="text-[11px] font-semibold tracking-[0.15em] text-gray-700 hover:text-primary"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  {link.label}
-                </Link>
-              ))}
+              {navLinks.map((link) => {
+                const basePath = link.href.split('#')[0] || '/';
+                const isActive = basePath === '/' ? pathname === '/' : pathname.startsWith(basePath);
+                
+                return (
+                  <Link
+                    key={link.label}
+                    href={link.href}
+                    className="relative group inline-block w-max pb-1"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <span className={`text-[11px] font-semibold tracking-[0.15em] transition-colors ${isActive ? 'text-primary' : 'text-gray-700 group-hover:text-primary'}`}>
+                      {link.label}
+                    </span>
+                    <span className={`absolute bottom-0 left-0 w-full h-[2px] bg-primary transition-transform duration-300 origin-left ${isActive ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}`} />
+                  </Link>
+                );
+              })}
             </div>
           )}
         </nav>

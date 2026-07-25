@@ -152,7 +152,7 @@ export default function CheckoutPage() {
       {step === "processing" && (
         <div className="fixed inset-0 z-[999] bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center gap-5">
           <div className="bg-white rounded-2xl p-10 flex flex-col items-center gap-4 shadow-2xl">
-            <Loader2 className="w-12 h-12 text-[#ff3f6c] animate-spin" />
+            <Loader2 className="w-12 h-12 text-primary animate-spin" />
             <p className="text-[18px] font-bold text-[#282c3f]">Processing Payment…</p>
             <p className="text-[14px] text-[#535766]">Please do not close this window.</p>
           </div>
@@ -162,7 +162,7 @@ export default function CheckoutPage() {
       <div className="max-w-[1100px] mx-auto px-4 py-8">
         <button 
           onClick={() => router.back()}
-          className="flex items-center gap-1.5 text-[#535766] hover:text-[#ff3f6c] transition-colors font-semibold text-[14px] mb-6"
+          className="flex items-center gap-1.5 text-[#535766] hover:text-primary transition-colors font-semibold text-[14px] mb-6"
         >
           <ArrowLeft size={18} />
           Back
@@ -173,7 +173,7 @@ export default function CheckoutPage() {
           {["summary", "shipping", "payment"].map((s, idx) => (
             <div key={s} className="flex items-center gap-2">
               <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[12px] font-bold transition-colors ${
-                step === s ? "bg-[#ff3f6c] text-white" :
+                step === s ? "bg-primary text-white" :
                 (["summary","shipping","payment"].indexOf(step) > idx) ? "bg-[#03a685] text-white" :
                 "bg-[#e8e8e1] text-[#94969f]"
               }`}>{idx + 1}</div>
@@ -194,9 +194,9 @@ export default function CheckoutPage() {
                 className="w-full flex items-center justify-between px-6 py-4 border-b border-[#eaeaec]"
               >
                 <h2 className="text-[15px] font-bold text-[#282c3f] uppercase tracking-wide flex items-center gap-2">
-                  <Package size={18} className="text-[#ff3f6c]" /> Order Summary
+                  <Package size={18} className="text-primary" /> Order Summary
                 </h2>
-                {step !== "summary" && <span className="text-[12px] text-[#ff3f6c] font-semibold">Edit</span>}
+                {step !== "summary" && <span className="text-[12px] text-primary font-semibold">Edit</span>}
               </button>
 
               {step === "summary" && (
@@ -233,7 +233,7 @@ export default function CheckoutPage() {
 
                   <button
                     onClick={() => setStep("shipping")}
-                    className="w-full h-12 bg-[#ff3f6c] text-white rounded-xl font-bold text-[14px] uppercase tracking-wider hover:bg-[#ed315d] transition-colors mt-2"
+                    className="w-full h-12 bg-primary text-white rounded-xl font-bold text-[14px] uppercase tracking-wider hover:opacity-90 transition-colors mt-2"
                   >
                     Continue to Shipping
                   </button>
@@ -248,9 +248,9 @@ export default function CheckoutPage() {
                 className="w-full flex items-center justify-between px-6 py-4 border-b border-[#eaeaec]"
               >
                 <h2 className="text-[15px] font-bold text-[#282c3f] uppercase tracking-wide flex items-center gap-2">
-                  <Truck size={18} className="text-[#ff3f6c]" /> Shipping Details
+                  <Truck size={18} className="text-primary" /> Shipping Details
                 </h2>
-                {step === "payment" && <span className="text-[12px] text-[#ff3f6c] font-semibold">Edit</span>}
+                {step === "payment" && <span className="text-[12px] text-primary font-semibold">Edit</span>}
               </button>
 
               {step === "shipping" && (
@@ -279,7 +279,7 @@ export default function CheckoutPage() {
                               <select
                                 value={shipping[key as keyof ShippingDetails] || ""}
                                 onChange={(e) => handleShippingChange(key as keyof ShippingDetails, e.target.value)}
-                                className="w-full px-4 py-3 border border-[#d4d5d9] rounded-xl text-[14px] text-[#282c3f] bg-white focus:outline-none focus:border-[#ff3f6c] focus:ring-2 focus:ring-[#ff3f6c]/10 transition-all appearance-none cursor-pointer"
+                                className="w-full px-4 py-3 border border-[#d4d5d9] rounded-xl text-[14px] text-[#282c3f] bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all appearance-none cursor-pointer"
                               >
                                 <option value="" disabled>Select {label}</option>
                                 {options?.map(opt => (
@@ -293,7 +293,7 @@ export default function CheckoutPage() {
                               type={key === "email" ? "email" : "text"}
                               value={shipping[key as keyof ShippingDetails] || ""}
                               onChange={(e) => handleShippingChange(key as keyof ShippingDetails, e.target.value)}
-                              className={`w-full px-4 py-3 border border-[#d4d5d9] rounded-xl text-[14px] text-[#282c3f] focus:outline-none focus:border-[#ff3f6c] focus:ring-2 focus:ring-[#ff3f6c]/10 transition-all ${disabled ? "bg-gray-100 text-gray-500 cursor-not-allowed" : ""}`}
+                              className={`w-full px-4 py-3 border border-[#d4d5d9] rounded-xl text-[14px] text-[#282c3f] focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all ${disabled ? "bg-gray-100 text-gray-500 cursor-not-allowed" : ""}`}
                               placeholder={label as string}
                               disabled={disabled}
                             />
@@ -305,7 +305,7 @@ export default function CheckoutPage() {
 
                   <button
                     onClick={() => { if (isShippingValid()) setStep("payment"); else toast.error("Please fill all required fields."); }}
-                    className="mt-6 w-full h-12 bg-[#ff3f6c] text-white rounded-xl font-bold text-[14px] uppercase tracking-wider hover:bg-[#ed315d] transition-colors"
+                    className="mt-6 w-full h-12 bg-primary text-white rounded-xl font-bold text-[14px] uppercase tracking-wider hover:opacity-90 transition-colors"
                   >
                     Continue to Payment
                   </button>
@@ -325,7 +325,7 @@ export default function CheckoutPage() {
             <section className="bg-white rounded-2xl overflow-hidden shadow-sm border border-[#eaeaec]">
               <div className="w-full flex items-center justify-between px-6 py-4 border-b border-[#eaeaec]">
                 <h2 className="text-[15px] font-bold text-[#282c3f] uppercase tracking-wide flex items-center gap-2">
-                  <CreditCard size={18} className="text-[#ff3f6c]" /> Payment
+                  <CreditCard size={18} className="text-primary" /> Payment
                 </h2>
               </div>
 
@@ -339,8 +339,8 @@ export default function CheckoutPage() {
                         onClick={() => setPayMethod(m)}
                         className={`flex-1 py-3 px-4 rounded-xl border-2 text-[13px] font-bold uppercase tracking-wide transition-all ${
                           payMethod === m
-                            ? "border-[#ff3f6c] bg-[#fff5f7] text-[#ff3f6c]"
-                            : "border-[#d4d5d9] text-[#535766] hover:border-[#ff3f6c]"
+                            ? "border-primary bg-[#fff5f7] text-primary"
+                            : "border-[#d4d5d9] text-[#535766] hover:border-primary"
                         }`}
                       >
                         {m === "card" ? "💳 Card" : "💵 Cash on Delivery"}
@@ -361,7 +361,7 @@ export default function CheckoutPage() {
                             const v = e.target.value.replace(/\D/g,"").slice(0,16);
                             setCard((p) => ({ ...p, number: v.replace(/(.{4})/g,"$1 ").trim() }));
                           }}
-                          className="w-full px-4 py-3 border border-[#d4d5d9] rounded-xl text-[14px] focus:outline-none focus:border-[#ff3f6c] focus:ring-2 focus:ring-[#ff3f6c]/10 transition-all font-mono tracking-widest"
+                          className="w-full px-4 py-3 border border-[#d4d5d9] rounded-xl text-[14px] focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all font-mono tracking-widest"
                         />
                       </div>
                       <div>
@@ -371,7 +371,7 @@ export default function CheckoutPage() {
                           placeholder="John Doe"
                           value={card.name}
                           onChange={(e) => setCard((p) => ({ ...p, name: e.target.value }))}
-                          className="w-full px-4 py-3 border border-[#d4d5d9] rounded-xl text-[14px] focus:outline-none focus:border-[#ff3f6c] focus:ring-2 focus:ring-[#ff3f6c]/10 transition-all"
+                          className="w-full px-4 py-3 border border-[#d4d5d9] rounded-xl text-[14px] focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
                         />
                       </div>
                       <div className="grid grid-cols-2 gap-4">
@@ -387,7 +387,7 @@ export default function CheckoutPage() {
                               if (v.length > 2) v = v.slice(0,2) + " / " + v.slice(2);
                               setCard((p) => ({ ...p, expiry: v }));
                             }}
-                            className="w-full px-4 py-3 border border-[#d4d5d9] rounded-xl text-[14px] focus:outline-none focus:border-[#ff3f6c] focus:ring-2 focus:ring-[#ff3f6c]/10 transition-all font-mono"
+                            className="w-full px-4 py-3 border border-[#d4d5d9] rounded-xl text-[14px] focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all font-mono"
                           />
                         </div>
                         <div>
@@ -398,7 +398,7 @@ export default function CheckoutPage() {
                             maxLength={3}
                             value={card.cvv}
                             onChange={(e) => setCard((p) => ({ ...p, cvv: e.target.value.replace(/\D/g,"").slice(0,3) }))}
-                            className="w-full px-4 py-3 border border-[#d4d5d9] rounded-xl text-[14px] focus:outline-none focus:border-[#ff3f6c] focus:ring-2 focus:ring-[#ff3f6c]/10 transition-all font-mono"
+                            className="w-full px-4 py-3 border border-[#d4d5d9] rounded-xl text-[14px] focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all font-mono"
                           />
                         </div>
                       </div>
@@ -423,7 +423,7 @@ export default function CheckoutPage() {
 
                   <button
                     onClick={handlePlaceOrder}
-                    className="mt-6 w-full h-14 bg-gradient-to-r from-[#ff3f6c] to-[#d63060] text-white rounded-xl font-bold text-[16px] uppercase tracking-wider hover:opacity-90 transition-opacity shadow-lg shadow-[#ff3f6c]/30 flex items-center justify-center gap-2"
+                    className="mt-6 w-full h-14 bg-gradient-to-r from-primary to-primary/80 text-white rounded-xl font-bold text-[16px] uppercase tracking-wider hover:opacity-90 transition-opacity shadow-lg shadow-primary/30 flex items-center justify-center gap-2"
                   >
                     <BadgeCheck size={20} />
                     Place Order · LKR {total.toLocaleString("en-LK")}

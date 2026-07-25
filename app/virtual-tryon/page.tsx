@@ -632,10 +632,9 @@ function SareeCard({
             </p>
             <button
               onClick={(e) => { e.stopPropagation(); onChooseFromCollection(); }}
-              className="px-6 py-3 rounded-full text-xs font-semibold text-white transition-all hover:opacity-90 active:scale-95 shadow-md flex items-center gap-2"
+              className="px-6 py-3 rounded-full text-xs font-semibold text-white transition-all hover:opacity-90 active:scale-95 shadow-md flex items-center justify-center"
               style={{ backgroundColor: accentColor }}
             >
-              <Sparkles size={14} />
               Choose from Collection
             </button>
           </div>
